@@ -1,0 +1,15 @@
+# ===== FRONTEND =====
+node_modules/
+dist/
+build/
+
+# ===== BACKEND =====
+target/
+*.class
+*.log
+.mvn/wrapper/maven-wrapper.jar
+
+# ===== GLOBAL =====
+./vscode
+.env
+.vscode/
