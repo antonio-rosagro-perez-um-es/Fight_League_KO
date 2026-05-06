@@ -1,0 +1,171 @@
+package characters.model;
+
+public class Character {
+
+    @Id
+    private String id;
+    private String name;
+    private String description;
+    private String region;
+    private String archetype;
+    private String title;
+    private String likes;
+    private String dislike;
+    private int health;
+    private int range;
+    private int power;
+    private int vitality;
+    private int mobility;
+    private int easyOfUse;
+    
+
+    public Character () { } // POJO
+
+    
+
+    public String getId() {
+        return id;
+    }
+
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+
+    public String getName() {
+        return name;
+    }
+
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+
+    public String getDescription() {
+        return description;
+    }
+
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+
+    public String getRegion() {
+        return region;
+    }
+
+
+    public void setRegion(String region) {
+        this.region = region;
+    }
+
+
+    public String getArchetype() {
+        return archetype;
+    }
+
+
+    public void setArchetype(String archetype) {
+        this.archetype = archetype;
+    }
+
+
+    public String getTitle() {
+        return title;
+    }
+
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+
+    public String getLikes() {
+        return likes;
+    }
+
+
+    public void setLikes(String likes) {
+        this.likes = likes;
+    }
+
+
+    public String getDislike() {
+        return dislike;
+    }
+
+
+    public void setDislike(String dislike) {
+        this.dislike = dislike;
+    }
+
+
+    public int getHealth() {
+        return health;
+    }
+
+
+    public void setHealth(int health) {
+        this.health = health;
+    }
+
+
+    public int getRange() {
+        return range;
+    }
+
+
+    public void setRange(int range) {
+        this.range = range;
+    }
+
+
+    public int getPower() {
+        return power;
+    }
+
+
+    public void setPower(int power) {
+        this.power = power;
+    }
+
+
+    public int getVitality() {
+        return vitality;
+    }
+
+
+    public void setVitality(int vitality) {
+        this.vitality = vitality;
+    }
+
+
+    public int getMobility() {
+        return mobility;
+    }
+
+
+    public void setMobility(int mobility) {
+        this.mobility = mobility;
+    }
+
+
+    public int getEasyOfUse() {
+        return easyOfUse;
+    }
+
+
+    public void setEasyOfUse(int easyOfUse) {
+        this.easyOfUse = easyOfUse;
+    }
+
+
+
+
+
+
+
+}
