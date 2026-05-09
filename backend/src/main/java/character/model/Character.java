@@ -28,11 +28,12 @@ public class Character {
     @Column(nullable = false, length = 100)
     private String title;
     @Column(nullable = false, length = 200)
-    private String likes;
+    private String itLikes;
     @Column(nullable = false, length = 200)
-    private String dislike;
+    private String itDislike;
     @Column(nullable = false, length = 80)
     private String slug;
+    private boolean deleted;
 
     private int health;
     private int range;
@@ -92,20 +93,20 @@ public class Character {
         this.title = title;
     }
 
-    public String getLikes() {
-        return likes;
+    public String getItLikes() {
+        return itLikes;
     }
 
-    public void setLikes(String likes) {
-        this.likes = likes;
+    public void setItLikes(String likes) {
+        this.itLikes = likes;
     }
 
-    public String getDislike() {
-        return dislike;
+    public String getItDislike() {
+        return itDislike;
     }
 
-    public void setDislike(String dislike) {
-        this.dislike = dislike;
+    public void setItDislike(String dislike) {
+        this.itDislike = dislike;
     }
 
     public String getSlug() {
@@ -114,6 +115,14 @@ public class Character {
 
     public void setSlug(String slug) {
         this.slug = slug;
+    }
+
+       public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 
     public int getHealth() {
