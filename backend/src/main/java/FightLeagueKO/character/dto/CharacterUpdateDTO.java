@@ -1,4 +1,4 @@
-package character.dto;
+package FightLeagueKO.character.dto;
 
 public record CharacterUpdateDTO(
         String name,

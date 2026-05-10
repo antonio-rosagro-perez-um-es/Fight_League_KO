@@ -1,11 +1,13 @@
-package character.model;
+package FightLeagueKO.character.model;
 
 import java.util.UUID;
 
-import org.springframework.data.annotation.Id;
+import org.hibernate.annotations.UuidGenerator;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 
@@ -14,8 +16,9 @@ import jakarta.persistence.Table;
 public class Character {
 
     @Id
+    @GeneratedValue
+    @UuidGenerator
     private UUID id;
-
     @Column(nullable = false, length = 80)
     private String name;
     @Lob
@@ -43,7 +46,7 @@ public class Character {
     private int easyOfUse;
 
     public Character() {
-    } // POJO
+    }
 
     public UUID getId() {
         return id;
@@ -117,7 +120,7 @@ public class Character {
         this.slug = slug;
     }
 
-       public boolean isDeleted() {
+    public boolean isDeleted() {
         return deleted;
     }
 

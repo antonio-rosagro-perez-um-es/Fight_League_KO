@@ -1,4 +1,4 @@
-package character.controller;
+package FightLeagueKO.character.controller;
 
 import java.util.List;
 import java.util.UUID;
@@ -16,11 +16,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import character.dto.CharacterBannerDTO;
-import character.dto.CharacterUpdateDTO;
-import character.dto.NewCharacterDTO;
-import character.model.Character;
-import character.services.ICharacterService;
+import FightLeagueKO.character.dto.CharacterBannerDTO;
+import FightLeagueKO.character.dto.CharacterUpdateDTO;
+import FightLeagueKO.character.dto.NewCharacterDTO;
+import FightLeagueKO.character.model.Character;
+import FightLeagueKO.character.services.ICharacterService;
 
 @RestController
 @RequestMapping("/characters")
@@ -43,13 +43,14 @@ public class CharacterController {
         return ResponseEntity.ok(charactersService.getAllCharactersBanner());
     }
 
-    @PostMapping(value = "/newCharacter")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void createCharacter(@RequestBody NewCharacterDTO characterDTO)
-    {
-        charactersService.createCharacter(characterDTO);
-    }
+    @PostMapping
+    public ResponseEntity<Character> createCharacter(
+            @RequestBody @Validated NewCharacterDTO characterDTO) {
 
+        Character created = charactersService.createCharacter(characterDTO);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    }
 
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -61,10 +62,19 @@ public class CharacterController {
 
     @PatchMapping("/{id}/deactivate")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteCharacter(
-            @PathVariable UUID id,
-            @Validated @RequestBody CharacterUpdateDTO dto) {
-        charactersService.deleteCharacter(id);
+    public void softDeleteCharacter(@PathVariable UUID id) {
+        charactersService.softDeleteCharacter(id);
+    }
+
+    @PatchMapping("/{id}/restore")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void restoreCharacter(@PathVariable UUID id) {
+        charactersService.restoreCharacter(id);
+    }
+
+    @GetMapping(value = "/health")
+    public ResponseEntity<Void> getHealth() {
+        return ResponseEntity.ok().build();
     }
 
 }

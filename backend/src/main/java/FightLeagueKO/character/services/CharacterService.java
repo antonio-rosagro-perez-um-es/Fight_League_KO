@@ -1,4 +1,4 @@
-package character.services;
+package FightLeagueKO.character.services;
 
 import java.util.List;
 import java.util.Objects;
@@ -8,11 +8,11 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import character.dto.CharacterBannerDTO;
-import character.dto.CharacterUpdateDTO;
-import character.dto.NewCharacterDTO;
-import character.model.Character;
-import character.repository.CharacterRepository;
+import FightLeagueKO.character.dto.CharacterBannerDTO;
+import FightLeagueKO.character.dto.CharacterUpdateDTO;
+import FightLeagueKO.character.dto.NewCharacterDTO;
+import FightLeagueKO.character.model.Character;
+import FightLeagueKO.character.repository.CharacterRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 
@@ -167,7 +167,7 @@ public class CharacterService implements ICharacterService {
 
         Optional.ofNullable(characterDTO.vitality())
                 .ifPresent(character::setVitality);
-        
+
         Optional.ofNullable(characterDTO.mobility())
                 .ifPresent(character::setMobility);
 
@@ -178,12 +178,22 @@ public class CharacterService implements ICharacterService {
     }
 
     @Override
-    public void deleteCharacter(UUID id) {
-        
+    public void softDeleteCharacter(UUID id) {
+
         Character character = characterRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Character not found with id: " + id));
-        
+
         character.setDeleted(true);
+
+        characterRepository.save(character);
+    }
+
+    @Override
+    public void restoreCharacter(UUID id) {
+        Character character = characterRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Character not found with id: " + id));
+
+        character.setDeleted(false);
 
         characterRepository.save(character);
     }
