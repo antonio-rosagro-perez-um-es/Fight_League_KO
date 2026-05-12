@@ -19,34 +19,48 @@ public class Character {
     @GeneratedValue
     @UuidGenerator
     private UUID id;
+
     @Column(nullable = false, length = 80)
     private String name;
+
     @Lob
     @Column(nullable = false)
     private String description;
+
     @Column(nullable = false, length = 80)
     private String region;
+
     @Column(nullable = false, length = 80)
     private String archetype;
+
     @Column(nullable = false, length = 100)
     private String title;
+
     @Column(nullable = false, length = 200)
     private String itLikes;
+
     @Column(nullable = false, length = 200)
     private String itDislike;
+
     @Column(nullable = false, length = 80)
     private String slug;
+
     private boolean deleted;
 
     private int health;
+
     private int range;
+
     private int power;
+
     private int vitality;
+
     private int mobility;
+
     private int easyOfUse;
 
     public Character() {
-    }
+    } // POJO
 
     public UUID getId() {
         return id;
