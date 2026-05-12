@@ -1,7 +1,9 @@
 package FightLeagueKO.combo.repository;
 
+import org.springframework.stereotype.Repository;
 
-public interface ComboRepositoryPostgre extends ComboRespository{
+@Repository
+public interface ComboRepositoryPostgre extends ComboRespository {
 
-        
+    
 }

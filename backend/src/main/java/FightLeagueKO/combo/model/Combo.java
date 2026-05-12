@@ -1,6 +1,7 @@
 package FightLeagueKO.combo.model;
 
-import java.sql.Date;
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.UUID;
 
 import org.hibernate.annotations.UuidGenerator;
@@ -27,10 +28,10 @@ public class Combo {
     private boolean oficial;
 
     @Column(nullable = false)
-    private Character pointCharacter;
+    private UUID pointCharacterId;
 
     @Column(nullable = true)
-    private Character secondCharacter;
+    private UUID secondCharacterId;
 
     @Column(nullable = false)
     private String textNotation;
@@ -42,15 +43,15 @@ public class Combo {
     private FuseType fuse;
 
     @Column(nullable = false)
-    private String imageUrl;
+    private String mediaUrl;
 
     @Lob
     @Column(nullable = false)
     private String description;
 
-    private Date createdAt;
+    private LocalDate createdAt;
 
-    private Date upDateAt;
+    private LocalDate upDateAt;
 
     private int meterCost;
 
@@ -67,20 +68,20 @@ public class Combo {
         this.oficial = oficial;
     }
 
-    public Character getPointCharacter() {
-        return pointCharacter;
+    public UUID getPointCharacterId() {
+        return pointCharacterId;
     }
 
-    public void setPointCharacter(Character pointCharacter) {
-        this.pointCharacter = pointCharacter;
+    public void setPointCharacterId(UUID pointCharacter) {
+        this.pointCharacterId = pointCharacter;
     }
 
-    public Character getsecondCharacter() {
-        return secondCharacter;
+    public UUID getsecondCharacter() {
+        return secondCharacterId;
     }
 
-    public void setSecondCharacter(Character secondCharacter) {
-        this.secondCharacter = secondCharacter;
+    public void setSecondCharacterId(UUID secondCharacter) {
+        this.secondCharacterId = secondCharacter;
     }
 
     public String getTextNotation() {
@@ -107,27 +108,35 @@ public class Combo {
         this.fuse = fuse;
     }
 
-    public String getImageUrl() {
-        return imageUrl;
+    public String getMediaUrl() {
+        return mediaUrl;
     }
 
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
+    public void setMediaUrl(String imageUrl) {
+        this.mediaUrl = imageUrl;
     }
 
-    public Date getCreatedAt() {
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public LocalDate getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Date createdAt) {
+    public void setCreatedAt(LocalDate createdAt) {
         this.createdAt = createdAt;
     }
 
-    public Date getUpDateAt() {
+    public LocalDate getUpDateAt() {
         return upDateAt;
     }
 
-    public void setUpDateAt(Date upDateAt) {
+    public void setUpDateAt(LocalDate upDateAt) {
         this.upDateAt = upDateAt;
     }
 
