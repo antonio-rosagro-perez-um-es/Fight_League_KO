@@ -57,6 +57,121 @@ public class ComboService implements IComboService {
         return comboRepository.findAll(buildFilters(filters), sort);
     }
 
+    @Override
+    public Combo createCombo(ComboCreateDTO comboDTO) {
+
+        Objects.requireNonNull(comboDTO, "Parameters could not be null");
+
+        Combo combo = new Combo();
+
+        if (comboDTO.title() == null || comboDTO.title().isEmpty()) {
+            throw new IllegalArgumentException("Title cant be null");
+        }
+
+        if (comboDTO.pointCharacter() == null) {
+            throw new IllegalArgumentException("Point character cant be null");
+        }
+
+        if (comboDTO.textNotation() == null || comboDTO.textNotation().trim().isEmpty()) {
+            throw new IllegalArgumentException("Text notation cant be null or empty");
+        }
+
+        if (comboDTO.comboDificulty() == null) {
+            throw new IllegalArgumentException("Combo difficulty cant be null");
+        }
+
+        if (comboDTO.fuse() == null) {
+            throw new IllegalArgumentException("Fuse cant be null");
+        }
+
+        if (comboDTO.mediaUrl() == null || comboDTO.mediaUrl().isEmpty()) {
+            throw new IllegalArgumentException("Media URL cant be null or empty");
+        }
+
+        if (comboDTO.description() == null || comboDTO.description().trim().isEmpty()) {
+            throw new IllegalArgumentException("Description cant be null or empty");
+        }
+
+        combo.setTitle(comboDTO.title());
+        combo.setDeleted(false);
+        combo.setPointCharacterId(comboDTO.pointCharacter());
+        combo.setSecondCharacterId(comboDTO.secondCharacter());
+        combo.setTextNotation(comboDTO.textNotation());
+        combo.setComboDificulty(comboDTO.comboDificulty());
+        combo.setFuse(comboDTO.fuse());
+        combo.setMediaUrl(comboDTO.mediaUrl());
+        combo.setDescription(comboDTO.description());
+        combo.setMeterCost(comboDTO.metercost() != null ? comboDTO.metercost() : 0);
+        combo.setDamage(comboDTO.damage() != null ? comboDTO.damage() : 0);
+        combo.setCreatedAt(LocalDate.now());
+        combo.setUpDateAt(LocalDate.now());
+        // TODO: el combo sera marcado como oficial o no en funcion del usuario que lo
+        // crea
+
+        return comboRepository.save(combo);
+    }
+
+    @Override
+    public void updateCombo(UUID id, ComboUpdateDTO comboDTO) {
+
+        Combo combo = comboRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Combo not found exception with id: " + id));
+
+         Optional.ofNullable(comboDTO.title())
+                .ifPresent(combo::setTitle);
+
+        Optional.ofNullable(comboDTO.pointCharacter())
+                .ifPresent(combo::setPointCharacterId);
+
+        Optional.ofNullable(comboDTO.secondCharacter())
+                .ifPresent(combo::setSecondCharacterId);
+
+        Optional.ofNullable(comboDTO.textNotation())
+                .ifPresent(combo::setTextNotation);
+
+        Optional.ofNullable(comboDTO.comboDificulty())
+                .ifPresent(combo::setComboDificulty);
+
+        Optional.ofNullable(comboDTO.fuse())
+                .ifPresent(combo::setFuse);
+
+        Optional.ofNullable(comboDTO.mediaUrl())
+                .ifPresent(combo::setMediaUrl);
+
+        Optional.ofNullable(comboDTO.description())
+                .ifPresent(combo::setDescription);
+
+        Optional.ofNullable(comboDTO.metercost())
+                .ifPresent(combo::setMeterCost);
+
+        Optional.ofNullable(comboDTO.damage())
+                .ifPresent(combo::setDamage);
+
+        combo.setUpDateAt(LocalDate.now());
+
+        comboRepository.save(combo);
+    }
+
+    @Override
+    public void softDeleteCombo(UUID id) {
+        Combo combo = comboRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Combo not found exception with id: " + id));
+
+        combo.setDeleted(true);
+
+        comboRepository.save(combo);
+    }
+
+    @Override
+    public void restoreCombo(UUID id) {
+        Combo combo = comboRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Combo not found exception with id: " + id));
+
+        combo.setDeleted(false);
+
+        comboRepository.save(combo);
+    }
+
     private Specification<Combo> buildFilters(ComboFiltersDTO filters) {
 
         return (root, query, criteriaBuilder) -> {
@@ -94,56 +209,5 @@ public class ComboService implements IComboService {
         return value != null && !value.trim().isEmpty();
     }
 
-    @Override
-    public void updateCombo(UUID id, ComboUpdateDTO comboDTO) {
-        
-        Combo combo = comboRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Combo not found exception with id: " + id));
-        
-        Optional.ofNullable(comboDTO.pointCharacter())
-                .ifPresent(combo::setPointCharacterId);
-
-        Optional.ofNullable(comboDTO.secondCharacter())
-                .ifPresent(combo::setSecondCharacterId);
-
-        Optional.ofNullable(comboDTO.textNotation())
-                .ifPresent(combo::setTextNotation);
-
-        Optional.ofNullable(comboDTO.comboDificulty())
-                .ifPresent(combo::setComboDificulty);
-
-        Optional.ofNullable(comboDTO.fuse())
-                .ifPresent(combo::setFuse);
-
-        Optional.ofNullable(comboDTO.mediaUrl())
-                .ifPresent(combo::setMediaUrl);
-
-        Optional.ofNullable(comboDTO.description())
-                .ifPresent(combo::setDescription);
-
-        Optional.ofNullable(comboDTO.metercost())
-                .ifPresent(combo::setMeterCost);
-
-        Optional.ofNullable(comboDTO.damage())
-                .ifPresent(combo::setDamage);
-
-        combo.setUpDateAt(LocalDate.now());
-
-        comboRepository.save(combo);
-    }
-
-    @Override
-    public Combo createCombo(ComboCreateDTO comboDTO) {
-        
-        Objects.requireNonNull(comboDTO, "Parameters could not be null");
-
-        Combo combo = new Combo();
-
-        if (comboDTO.pointCharacter() == null) {
-            throw new IllegalArgumentException("Combo point character could not empty");
-        }
-
-        return combo;
-    }
-
 }
+

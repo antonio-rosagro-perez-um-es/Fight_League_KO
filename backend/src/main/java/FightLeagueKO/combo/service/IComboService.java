@@ -17,4 +17,8 @@ public interface IComboService {
     public Combo createCombo(ComboCreateDTO comboDTO);
 
     public void updateCombo(UUID id, ComboUpdateDTO comboDTO);
+
+    public void softDeleteCombo(UUID id);
+
+    public void restoreCombo(UUID id);
 }

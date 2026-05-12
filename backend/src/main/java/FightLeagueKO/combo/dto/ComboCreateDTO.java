@@ -6,6 +6,7 @@ import FightLeagueKO.combo.enums.ComboDificulty;
 import FightLeagueKO.combo.enums.FuseType;
 
 public record ComboCreateDTO(
+    String title,
     UUID pointCharacter,
     UUID secondCharacter,
     String textNotation,

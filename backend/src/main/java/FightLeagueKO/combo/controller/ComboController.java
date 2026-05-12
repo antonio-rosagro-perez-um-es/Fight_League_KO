@@ -44,10 +44,9 @@ public class ComboController {
         return ResponseEntity.ok(comboService.searchCombos(filters));
     }
 
-    @PostMapping("/{id}")
-    @ResponseStatus(HttpStatus.CREATED)
+    @PostMapping
     public ResponseEntity<Combo> createCombo(@RequestBody ComboCreateDTO comboCreateDTO){
-        return ResponseEntity.ok(comboService.createCombo(comboCreateDTO));
+        return ResponseEntity.status(HttpStatus.CREATED).body(comboService.createCombo(comboCreateDTO));
     }
 
     @PatchMapping("/{id}")
@@ -59,5 +58,17 @@ public class ComboController {
     }
 
 
-    
+    @PatchMapping("/{id}/delete")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void softDeleteComb(@PathVariable UUID id)
+    {
+        comboService.softDeleteCombo(id);
+    }
+
+    @PatchMapping("/{id}/restore")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void restoreCombo(@PathVariable UUID id)
+    {
+        comboService.restoreCombo(id);
+    }
 }

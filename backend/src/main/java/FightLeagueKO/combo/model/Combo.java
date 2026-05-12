@@ -1,7 +1,6 @@
 package FightLeagueKO.combo.model;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.UUID;
 
 import org.hibernate.annotations.UuidGenerator;
@@ -23,6 +22,12 @@ public class Combo {
     @GeneratedValue
     @UuidGenerator
     private UUID id;
+
+    @Column(nullable = false, length = 100)
+    private String title;
+
+    @Column(nullable = false)
+    private boolean deleted;
 
     @Column(nullable = false)
     private boolean oficial;
@@ -58,7 +63,31 @@ public class Combo {
     private int damage;
 
     public Combo() {
-    } // POJO
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public String getTitle(){
+        return title;
+    }
+
+    public void setTitle(String title){
+        this.title = title;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
+    }
 
     public boolean isOficial() {
         return oficial;
@@ -72,16 +101,16 @@ public class Combo {
         return pointCharacterId;
     }
 
-    public void setPointCharacterId(UUID pointCharacter) {
-        this.pointCharacterId = pointCharacter;
+    public void setPointCharacterId(UUID pointCharacterId) {
+        this.pointCharacterId = pointCharacterId;
     }
 
-    public UUID getsecondCharacter() {
+    public UUID getSecondCharacterId() {
         return secondCharacterId;
     }
 
-    public void setSecondCharacterId(UUID secondCharacter) {
-        this.secondCharacterId = secondCharacter;
+    public void setSecondCharacterId(UUID secondCharacterId) {
+        this.secondCharacterId = secondCharacterId;
     }
 
     public String getTextNotation() {
@@ -112,8 +141,8 @@ public class Combo {
         return mediaUrl;
     }
 
-    public void setMediaUrl(String imageUrl) {
-        this.mediaUrl = imageUrl;
+    public void setMediaUrl(String mediaUrl) {
+        this.mediaUrl = mediaUrl;
     }
 
     public String getDescription() {
