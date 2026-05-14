@@ -12,6 +12,8 @@ public interface ITeamService {
 
     public List<Team> getAllTeams();
 
+    public List<Team> getAllActiveTeams();
+
     public Team createTeam(TeamDTO teamDTO);
 
     public void updateTeam(UUID id, TeamDTO teamDTO);

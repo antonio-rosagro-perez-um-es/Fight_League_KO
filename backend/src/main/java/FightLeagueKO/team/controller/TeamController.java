@@ -40,6 +40,11 @@ public class TeamController {
         return ResponseEntity.ok(teamService.getAllTeams());
     }
 
+    @GetMapping("all-teams")
+    public ResponseEntity<List<Team>> getAllActiveTeams() {
+        return ResponseEntity.ok(teamService.getAllTeams());
+    }
+
     @PostMapping
     public ResponseEntity<Team> createTeam(@RequestBody TeamDTO teamDTO){
         return ResponseEntity.status(HttpStatus.CREATED).body(teamService.createTeam(teamDTO));
@@ -51,13 +56,13 @@ public class TeamController {
         teamService.updateTeam(id, teamDTO);
     }
 
-    @PatchMapping
+    @PatchMapping("{id}/delete")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteTeam(@PathVariable UUID id){
         teamService.softDeleteTeam(id);
     }
 
-    @PatchMapping
+    @PatchMapping("{id}/restore")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void restoreTeam(@PathVariable UUID id){
         teamService.restoreTeam(id);

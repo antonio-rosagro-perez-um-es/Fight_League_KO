@@ -8,12 +8,16 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import FightLeagueKO.team.dto.TeamDTO;
 import FightLeagueKO.team.model.Team;
 import FightLeagueKO.team.repository.TeamRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 
+@Service
+@Transactional
 public class TeamService implements ITeamService {
 
     private TeamRepository teamRepository;
@@ -34,9 +38,14 @@ public class TeamService implements ITeamService {
 
     @Override
     public List<Team> getAllTeams() {
-
         return StreamSupport.stream(teamRepository.findAll().spliterator(), false)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Team> getAllActiveTeams() {
+
+        return teamRepository.getAllActiveTeams();
     }
 
     @Override
@@ -68,19 +77,18 @@ public class TeamService implements ITeamService {
 
     @Override
     public void updateTeam(UUID id, TeamDTO teamDTO) {
-        
+
         Objects.requireNonNull(teamDTO, "Parameter teamDTO could not be null");
 
         Team team = teamRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Team not found with id:" + id));
 
-
-       Optional.ofNullable(teamDTO.pointCharacterId())
+        Optional.ofNullable(teamDTO.pointCharacterId())
                 .ifPresent(team::setPointCharacterId);
 
         Optional.ofNullable(teamDTO.secondCharacterId())
                 .ifPresent(team::setSecondCharacterId);
-        
+
         Optional.ofNullable(teamDTO.fuse())
                 .ifPresent(team::setFuse);
 
@@ -89,7 +97,7 @@ public class TeamService implements ITeamService {
 
     @Override
     public void softDeleteTeam(UUID id) {
-         
+
         Team team = teamRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Team not found with id:" + id));
 
