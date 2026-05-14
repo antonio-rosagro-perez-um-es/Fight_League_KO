@@ -10,5 +10,8 @@ import FightLeagueKO.team.model.Team;
 
 @NoRepositoryBean
 public interface TeamRepository extends CrudRepository<Team, UUID> {
+    
     List<Team> getAllActiveTeams();
+
+    Long getAllTeamsPlayRate();
 }

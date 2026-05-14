@@ -10,4 +10,7 @@ public interface TeamRepositoryPostgre extends TeamRepository {
     @Query("SELECT t FROM Team t WHERE t.deleted = false")
     List<Team> getAllActiveTeams();
 
+    @Query("SELECT COALESCE(SUM(t.playCounter), 0) FROM Team t WHERE t.deleted = false")
+    Long getAllTeamsPlayRate();
+
 }

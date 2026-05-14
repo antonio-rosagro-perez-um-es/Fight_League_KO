@@ -42,7 +42,7 @@ public class TeamController {
 
     @GetMapping("all-teams")
     public ResponseEntity<List<Team>> getAllActiveTeams() {
-        return ResponseEntity.ok(teamService.getAllTeams());
+        return ResponseEntity.ok(teamService.getAllActiveTeams());
     }
 
     @PostMapping
@@ -50,7 +50,7 @@ public class TeamController {
         return ResponseEntity.status(HttpStatus.CREATED).body(teamService.createTeam(teamDTO));
     }
 
-    @PatchMapping
+    @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateTeam(@PathVariable UUID id, @RequestBody TeamDTO teamDTO){
         teamService.updateTeam(id, teamDTO);
@@ -68,10 +68,20 @@ public class TeamController {
         teamService.restoreTeam(id);
     }
 
-    @PatchMapping("/{id}/{result}")
+    @PatchMapping("/{id}/stats/{result}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updatTeameStats(@PathVariable UUID id, @ PathVariable boolean result){
+    public void updatTeamStats(@PathVariable UUID id, @PathVariable boolean result){
         teamService.updateTeamStats(id, result);
+    }
+
+    @GetMapping("/{id}/win-rate")
+    public ResponseEntity<Double> getTeamWinrate(@PathVariable UUID id){
+        return ResponseEntity.ok(teamService.getTeamWinRate(id));
+    }
+
+    @GetMapping("/{id}/play-rate")
+    public ResponseEntity<Double> getTeamPlayRate(@PathVariable UUID id){
+        return ResponseEntity.ok(teamService.getTeamPlayRate(id));
     }
 
 }

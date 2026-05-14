@@ -30,10 +30,10 @@ public class Team {
     private FuseType fuse;
 
     @Column(nullable = false)
-    private float playRate;
+    private int playCounter;
 
     @Column(nullable = false)
-    private float winRate;
+    private int winCounter;
 
     @Column(nullable = false)
     private boolean deleted;
@@ -74,20 +74,20 @@ public class Team {
         this.fuse = fuse;
     }
 
-    public float getPlayRate() {
-        return playRate;
+    public int getPlayCounter() {
+        return playCounter;
     }
 
-    public void setPlayRate(float playRate) {
-        this.playRate = playRate;
+    public void setPlayCounter(int playCounter) {
+        this.playCounter = playCounter;
     }
 
-    public float getWinRate() {
-        return winRate;
+    public int getWinCounter() {
+        return winCounter;
     }
 
-    public void setWinRate(float winRate) {
-        this.winRate = winRate;
+    public void setWinCounter(int winCounter) {
+        this.winCounter = winCounter;
     }
 
     public boolean isDeleted() {
@@ -98,17 +98,21 @@ public class Team {
         this.deleted = deleted;
     }
 
-    // Methot
-    public void updateTeamStats(boolean result){
-        
-        playRate++;
-
-        if(result == true){
-            winRate = (winRate + 1)/playRate;
-        }
-
-        if(result == false){
-            winRate = (winRate)/playRate;
-        }
+    public void addWin(){
+        this.winCounter++;
     }
+
+    public void addPlayTeam(){
+        this.playCounter++;
+    }
+
+    public double getWinRate(){
+
+        if (playCounter == 0) {
+            return 0;
+        }
+        
+        return (double) winCounter/playCounter;
+    }
+
 }

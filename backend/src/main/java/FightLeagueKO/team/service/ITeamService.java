@@ -24,4 +24,8 @@ public interface ITeamService {
 
     public void updateTeamStats(UUID id, boolean result);
 
+    public Double getTeamWinRate(UUID id);
+
+    public Double getTeamPlayRate(UUID id);
+
 }

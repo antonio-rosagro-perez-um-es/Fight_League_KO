@@ -71,6 +71,8 @@ public class TeamService implements ITeamService {
         team.setSecondCharacterId(teamDTO.secondCharacterId());
         team.setFuse(teamDTO.fuse());
         team.setDeleted(false);
+        team.setPlayCounter(0);
+        team.setWinCounter(0);
 
         return teamRepository.save(team);
     }
@@ -123,9 +125,31 @@ public class TeamService implements ITeamService {
         Team team = teamRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Team not found with id:" + id));
 
-        team.updateTeamStats(result);
+        team.addPlayTeam();                
+        if (result == true)
+            team.addWin();
 
         teamRepository.save(team);
+    }
+
+    @Override
+    public Double getTeamWinRate(UUID id){
+        Team team = teamRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Team not found with id:" + id));
+
+        return team.getWinRate()*100;
+        
+    }
+
+    @Override
+    public Double getTeamPlayRate(UUID id){
+
+         Team team = teamRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Team not found with id:" + id));
+
+        double playRate = team.getPlayCounter() * 1.0 / teamRepository.getAllTeamsPlayRate();
+
+        return playRate*100;    
     }
 
 }
