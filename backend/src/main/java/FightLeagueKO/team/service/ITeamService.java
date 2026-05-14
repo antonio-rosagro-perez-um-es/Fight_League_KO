@@ -22,4 +22,6 @@ public interface ITeamService {
 
     public void restoreTeam(UUID id);
 
+    public void updateTeamStats(UUID id, boolean result);
+
 }

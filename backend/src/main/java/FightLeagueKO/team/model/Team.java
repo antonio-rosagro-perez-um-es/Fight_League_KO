@@ -30,9 +30,15 @@ public class Team {
     private FuseType fuse;
 
     @Column(nullable = false)
+    private float playRate;
+
+    @Column(nullable = false)
+    private float winRate;
+
+    @Column(nullable = false)
     private boolean deleted;
 
-    public Team () { //POJO
+    public Team() { // POJO
 
     }
 
@@ -68,6 +74,22 @@ public class Team {
         this.fuse = fuse;
     }
 
+    public float getPlayRate() {
+        return playRate;
+    }
+
+    public void setPlayRate(float playRate) {
+        this.playRate = playRate;
+    }
+
+    public float getWinRate() {
+        return winRate;
+    }
+
+    public void setWinRate(float winRate) {
+        this.winRate = winRate;
+    }
+
     public boolean isDeleted() {
         return deleted;
     }
@@ -75,5 +97,18 @@ public class Team {
     public void setDeleted(boolean deleted) {
         this.deleted = deleted;
     }
-    
+
+    // Methot
+    public void updateTeamStats(boolean result){
+        
+        playRate++;
+
+        if(result == true){
+            winRate = (winRate + 1)/playRate;
+        }
+
+        if(result == false){
+            winRate = (winRate)/playRate;
+        }
+    }
 }

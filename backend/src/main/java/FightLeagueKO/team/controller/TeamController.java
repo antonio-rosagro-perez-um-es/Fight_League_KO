@@ -68,6 +68,10 @@ public class TeamController {
         teamService.restoreTeam(id);
     }
 
-    
+    @PatchMapping("/{id}/{result}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void updatTeameStats(@PathVariable UUID id, @ PathVariable boolean result){
+        teamService.updateTeamStats(id, result);
+    }
 
 }

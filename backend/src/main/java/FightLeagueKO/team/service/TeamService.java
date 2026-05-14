@@ -118,4 +118,14 @@ public class TeamService implements ITeamService {
 
     }
 
+    @Override
+    public void updateTeamStats(UUID id, boolean result){
+        Team team = teamRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Team not found with id:" + id));
+
+        team.updateTeamStats(result);
+
+        teamRepository.save(team);
+    }
+
 }
