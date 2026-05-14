@@ -20,7 +20,7 @@ import FightLeagueKO.character.dto.CharacterBannerDTO;
 import FightLeagueKO.character.dto.CharacterUpdateDTO;
 import FightLeagueKO.character.dto.NewCharacterDTO;
 import FightLeagueKO.character.model.Character;
-import FightLeagueKO.character.services.ICharacterService;
+import FightLeagueKO.character.service.ICharacterService;
 
 @RestController
 @RequestMapping("/characters")
