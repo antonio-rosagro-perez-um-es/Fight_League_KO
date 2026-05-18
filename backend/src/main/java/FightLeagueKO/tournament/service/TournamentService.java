@@ -190,4 +190,20 @@ public class TournamentService implements ITournamentService {
         tournament.setManualClose(true);
     }
 
+    @Override
+    public void generateMatchups(UUID tournamentId) {
+
+        Tournament tournament = tournamentRepository.findById(tournamentId)
+                .orElseThrow(() -> new IllegalArgumentException("Tournament not found with id" + tournamentId));
+
+        List<User> playUsers = tournament.getPlayersList();
+        int numPlayers = playUsers.size();
+
+        if (numPlayers < 2)
+            throw new IllegalStateException("Need at least 2 players");
+
+        int numMatches = numPlayers / 2;
+
+    }
+
 }

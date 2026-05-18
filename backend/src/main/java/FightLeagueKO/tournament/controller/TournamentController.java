@@ -3,6 +3,7 @@ package FightLeagueKO.tournament.controller;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,6 +27,7 @@ public class TournamentController {
 
     private ITournamentService tournamentService;
 
+    @Autowired
     public TournamentController( ITournamentService tournamentService){
         this.tournamentService = tournamentService;
     }

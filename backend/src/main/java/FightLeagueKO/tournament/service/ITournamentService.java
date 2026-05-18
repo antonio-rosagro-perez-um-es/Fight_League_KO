@@ -28,4 +28,6 @@ public interface ITournamentService {
     public void exitTournament(UUID tournamentId ,UUID userId);
 
     public void closeRegistrations(UUID tournamentId);
+
+    public void generateMatchups(UUID tournamentId);
 }
