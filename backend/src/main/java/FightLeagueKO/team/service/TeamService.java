@@ -67,6 +67,15 @@ public class TeamService implements ITeamService {
             throw new IllegalArgumentException("Team fuse could not be null");
         }
 
+        Optional<Team> alreadyExist = teamRepository.existsByPointCharacterIdAndSecondCharacterIdAndFuseAndDeletedFalse(
+                teamDTO.pointCharacterId(),
+                teamDTO.secondCharacterId(),
+                teamDTO.fuse());
+        
+        if (alreadyExist.isPresent()) {
+            return alreadyExist.get();
+        }
+
         team.setPointCharacterId(teamDTO.pointCharacterId());
         team.setSecondCharacterId(teamDTO.secondCharacterId());
         team.setFuse(teamDTO.fuse());
@@ -121,11 +130,11 @@ public class TeamService implements ITeamService {
     }
 
     @Override
-    public void updateTeamStats(UUID id, boolean result){
+    public void updateTeamStats(UUID id, boolean result) {
         Team team = teamRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Team not found with id:" + id));
 
-        team.addPlayTeam();                
+        team.addPlayTeam();
         if (result == true)
             team.addWin();
 
@@ -133,23 +142,23 @@ public class TeamService implements ITeamService {
     }
 
     @Override
-    public Double getTeamWinRate(UUID id){
+    public Double getTeamWinRate(UUID id) {
         Team team = teamRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Team not found with id:" + id));
 
-        return team.getWinRate()*100;
-        
+        return team.getWinRate() * 100;
+
     }
 
     @Override
-    public Double getTeamPlayRate(UUID id){
+    public Double getTeamPlayRate(UUID id) {
 
-         Team team = teamRepository.findById(id)
+        Team team = teamRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Team not found with id:" + id));
 
         double playRate = team.getPlayCounter() * 1.0 / teamRepository.getAllTeamsPlayRate();
 
-        return playRate*100;    
+        return playRate * 100;
     }
 
 }
