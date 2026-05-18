@@ -12,6 +12,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -33,10 +34,12 @@ public class Combo {
     private boolean oficial;
 
     @Column(nullable = false)
-    private UUID pointCharacterId;
+    @ManyToOne
+    private FightLeagueKO.character.model.Character pointCharacterId;
 
     @Column(nullable = true)
-    private UUID secondCharacterId;
+    @ManyToOne
+    private FightLeagueKO.character.model.Character secondCharacterId;
 
     @Column(nullable = false)
     private String textNotation;
@@ -62,6 +65,8 @@ public class Combo {
 
     private int damage;
 
+    private boolean privateCombo;
+
     public Combo() {
     }
 
@@ -73,11 +78,11 @@ public class Combo {
         this.id = id;
     }
 
-    public String getTitle(){
+    public String getTitle() {
         return title;
     }
 
-    public void setTitle(String title){
+    public void setTitle(String title) {
         this.title = title;
     }
 
@@ -97,20 +102,20 @@ public class Combo {
         this.oficial = oficial;
     }
 
-    public UUID getPointCharacterId() {
+    public FightLeagueKO.character.model.Character getPointCharacterId() {
         return pointCharacterId;
     }
 
-    public void setPointCharacterId(UUID pointCharacterId) {
+    public void setPointCharacterId(FightLeagueKO.character.model.Character pointCharacterId) {
         this.pointCharacterId = pointCharacterId;
     }
 
-    public UUID getSecondCharacterId() {
+    public FightLeagueKO.character.model.Character getSecondCharacterId() {
         return secondCharacterId;
     }
 
-    public void setSecondCharacterId(UUID secondCharacterId) {
-        this.secondCharacterId = secondCharacterId;
+    public void setSecondCharacterId(FightLeagueKO.character.model.Character secondCharacter) {
+        this.secondCharacterId = secondCharacter;
     }
 
     public String getTextNotation() {
@@ -183,6 +188,14 @@ public class Combo {
 
     public void setDamage(int damage) {
         this.damage = damage;
+    }
+
+    public boolean isPrivateCombo() {
+        return privateCombo;
+    }
+
+    public void setPrivateCombo(boolean privateCombo) {
+        this.privateCombo = privateCombo;
     }
 
 }

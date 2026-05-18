@@ -12,6 +12,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import FightLeagueKO.combo.dto.ComboUpdateDTO;
+import FightLeagueKO.character.model.Character;
+import FightLeagueKO.character.service.CharacterService;
 import FightLeagueKO.combo.dto.ComboCreateDTO;
 import FightLeagueKO.combo.dto.ComboFiltersDTO;
 import FightLeagueKO.combo.enums.ComboDificulty;
@@ -27,19 +29,21 @@ import jakarta.transaction.Transactional;
 public class ComboService implements IComboService {
 
     private ComboRepositoryPostgre comboRepository;
+    private CharacterService characterService;
 
     @Autowired
-    public ComboService(ComboRepositoryPostgre comboRepository) {
+    public ComboService(ComboRepositoryPostgre comboRepository, CharacterService characterService) {
         this.comboRepository = comboRepository;
+        this.characterService = characterService;
     }
 
     @Override
-    public Combo getComboById(UUID id) {
+    public Combo getComboById(UUID comboId) {
 
-        Objects.requireNonNull(id, "Parameter id for combo could not be null");
+        Objects.requireNonNull(comboId, "Parameter comboId for combo could not be null");
 
-        return comboRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Combo not found with id: " + id));
+        return comboRepository.findById(comboId)
+                .orElseThrow(() -> new EntityNotFoundException("Combo not found with Id: " + comboId));
     }
 
     @Override
@@ -91,10 +95,16 @@ public class ComboService implements IComboService {
             throw new IllegalArgumentException("Description cant be null or empty");
         }
 
+        Character secondCharacter = new Character();
+        if (comboDTO.secondCharacter() != null)
+            secondCharacter = characterService.getCharacterById(comboDTO.secondCharacter());
+
+        Character pointCharacter = characterService.getCharacterById(comboDTO.pointCharacter());
+
         combo.setTitle(comboDTO.title());
         combo.setDeleted(false);
-        combo.setPointCharacterId(comboDTO.pointCharacter());
-        combo.setSecondCharacterId(comboDTO.secondCharacter());
+        combo.setPointCharacterId(pointCharacter);
+        combo.setSecondCharacterId(secondCharacter);
         combo.setTextNotation(comboDTO.textNotation());
         combo.setComboDificulty(comboDTO.comboDificulty());
         combo.setFuse(comboDTO.fuse());
@@ -104,25 +114,29 @@ public class ComboService implements IComboService {
         combo.setDamage(comboDTO.damage() != null ? comboDTO.damage() : 0);
         combo.setCreatedAt(LocalDate.now());
         combo.setUpDateAt(LocalDate.now());
+        combo.setPrivateCombo(true);
         // TODO: el combo sera marcado como oficial o no en funcion del usuario que lo
         // crea
+        
 
         return comboRepository.save(combo);
     }
 
     @Override
-    public void updateCombo(UUID id, ComboUpdateDTO comboDTO) {
+    public void updateCombo(UUID comboId, ComboUpdateDTO comboDTO) {
 
-        Combo combo = comboRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Combo not found exception with id: " + id));
+        Combo combo = comboRepository.findById(comboId)
+                .orElseThrow(() -> new EntityNotFoundException("Combo not found exception with Id: " + comboId));
 
-         Optional.ofNullable(comboDTO.title())
+        Optional.ofNullable(comboDTO.title())
                 .ifPresent(combo::setTitle);
 
         Optional.ofNullable(comboDTO.pointCharacter())
+                .map(characterService::getCharacterById)
                 .ifPresent(combo::setPointCharacterId);
 
         Optional.ofNullable(comboDTO.secondCharacter())
+                .map(characterService::getCharacterById)
                 .ifPresent(combo::setSecondCharacterId);
 
         Optional.ofNullable(comboDTO.textNotation())
@@ -152,9 +166,9 @@ public class ComboService implements IComboService {
     }
 
     @Override
-    public void softDeleteCombo(UUID id) {
-        Combo combo = comboRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Combo not found exception with id: " + id));
+    public void softDeleteCombo(UUID comboId) {
+        Combo combo = comboRepository.findById(comboId)
+                .orElseThrow(() -> new EntityNotFoundException("Combo not found exception with id: " + comboId));
 
         combo.setDeleted(true);
 
@@ -162,9 +176,9 @@ public class ComboService implements IComboService {
     }
 
     @Override
-    public void restoreCombo(UUID id) {
-        Combo combo = comboRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Combo not found exception with id: " + id));
+    public void restoreCombo(UUID comboId) {
+        Combo combo = comboRepository.findById(comboId)
+                .orElseThrow(() -> new EntityNotFoundException("Combo not found exception with id: " + comboId));
 
         combo.setDeleted(false);
 
@@ -208,5 +222,24 @@ public class ComboService implements IComboService {
         return value != null && !value.trim().isEmpty();
     }
 
-}
+    @Override
+    public void setComboPublic(UUID comboId) {
+         Combo combo = comboRepository.findById(comboId)
+                .orElseThrow(() -> new EntityNotFoundException("Combo not found exception with id: " + comboId));
 
+        combo.setPrivateCombo(false);
+
+        comboRepository.save(combo);
+    }
+
+    @Override
+    public void setComboPrivate(UUID comboId) {
+        Combo combo = comboRepository.findById(comboId)
+                .orElseThrow(() -> new EntityNotFoundException("Combo not found exception with id: " + comboId));
+
+        combo.setPrivateCombo(true);
+
+        comboRepository.save(combo);
+    }
+
+}
