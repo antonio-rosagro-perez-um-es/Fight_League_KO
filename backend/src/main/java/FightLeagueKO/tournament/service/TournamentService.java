@@ -2,6 +2,7 @@ package FightLeagueKO.tournament.service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -12,6 +13,7 @@ import java.util.stream.StreamSupport;
 import org.springframework.stereotype.Service;
 
 import FightLeagueKO.game.model.Game;
+import FightLeagueKO.game.repository.GameRepository;
 import FightLeagueKO.tournament.dto.CreateTournamentDTO;
 import FightLeagueKO.tournament.dto.UpdateTournamentDTO;
 import FightLeagueKO.tournament.enums.TournamentStates;
@@ -28,10 +30,12 @@ public class TournamentService implements ITournamentService {
 
     private TournamentRepository tournamentRepository;
     private UserService userService;
+    private GameRepository gameRepository;
 
-    public TournamentService(TournamentRepository tournamentRepository, UserService userService) {
+    public TournamentService(TournamentRepository tournamentRepository, UserService userService, GameRepository gameRepository) {
         this.tournamentRepository = tournamentRepository;
         this.userService = userService;
+        this.gameRepository = gameRepository;
     }
 
     public Tournament getTournamentById(UUID id) {
@@ -192,18 +196,79 @@ public class TournamentService implements ITournamentService {
 
     @Override
     public void generateMatchups(UUID tournamentId) {
+        Tournament tournament = getTournamentById(tournamentId);
 
-        Tournament tournament = tournamentRepository.findById(tournamentId)
-                .orElseThrow(() -> new IllegalArgumentException("Tournament not found with id" + tournamentId));
+        if (tournament.getTournamentState() != TournamentStates.IN_PROGRESS) {
+            throw new IllegalStateException("Tournament must be in progress");
+        }
 
-        List<User> playUsers = tournament.getPlayersList();
-        int numPlayers = playUsers.size();
+        List<Game> allGames = tournament.getGamesList();
+        if (allGames == null) {
+            allGames = new ArrayList<>();
+            tournament.setGamesList(allGames);
+        }
 
-        if (numPlayers < 2)
-            throw new IllegalStateException("Need at least 2 players");
+        // Check if any current round games are still pending (no winner)
+        long pendingCount = allGames.stream()
+                .filter(g -> g.getWinner() == null)
+                .count();
 
-        int numMatches = numPlayers / 2;
+        if (pendingCount > 0) {
+            throw new IllegalStateException("All current round games must have a winner before generating next round");
+        }
 
+        if (allGames.isEmpty()) {
+            // === FIRST ROUND: pair up all registered players ===
+            List<User> players = new ArrayList<>(tournament.getPlayersList());
+
+            if (players.size() < 2) {
+                throw new IllegalStateException("Need at least 2 players to generate matchups");
+            }
+
+            Collections.shuffle(players);
+
+            List<Game> newGames = new ArrayList<>();
+            for (int i = 0; i < players.size() - 1; i += 2) {
+                Game game = new Game();
+                game.setUser1(players.get(i));
+                game.setUser2(players.get(i + 1));
+                game.setGameDate(LocalDate.now());
+                game.setDelete(false);
+                newGames.add(gameRepository.save(game));
+            }
+
+            allGames.addAll(newGames);
+            tournament.setTournamentState(TournamentStates.IN_PROGRESS);
+
+        } else {
+            // === SUBSEQUENT ROUNDS: collect winners and pair them ===
+            List<User> winners = allGames.stream()
+                    .map(Game::getWinner)
+                    .collect(Collectors.toList());
+
+            if (winners.size() == 1) {
+                tournament.setWinner(winners.get(0));
+                tournament.setTournamentState(TournamentStates.FINISHED);
+                tournamentRepository.save(tournament);
+                return;
+            }
+
+            Collections.shuffle(winners);
+
+            List<Game> newGames = new ArrayList<>();
+            for (int i = 0; i < winners.size() - 1; i += 2) {
+                Game game = new Game();
+                game.setUser1(winners.get(i));
+                game.setUser2(winners.get(i + 1));
+                game.setGameDate(LocalDate.now());
+                game.setDelete(false);
+                newGames.add(gameRepository.save(game));
+            }
+
+            allGames.addAll(newGames);
+        }
+
+        tournamentRepository.save(tournament);
     }
 
 }
