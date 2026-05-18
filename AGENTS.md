@@ -22,10 +22,10 @@ docker-compose up -d
 
 ## Database
 
-- **Name**: `fight_league_ko`
-- **User/Pass**: `postgres` / `postgres`
+- **Name**: `fight_league_db`
+- **User/Pass**: `user` / `password`
 - **Port**: `5432`
-- Start PostgreSQL before running the app (JPA auto-creates schema if configured)
+- Start PostgreSQL before running the app (JPA auto-creates schema with `ddl-auto=update`)
 
 ## Tech Stack
 
