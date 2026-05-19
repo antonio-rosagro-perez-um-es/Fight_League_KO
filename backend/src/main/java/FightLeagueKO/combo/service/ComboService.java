@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
@@ -44,6 +47,12 @@ public class ComboService implements IComboService {
 
         return comboRepository.findById(comboId)
                 .orElseThrow(() -> new EntityNotFoundException("Combo not found with Id: " + comboId));
+    }
+
+    @Override
+    public List<Combo> getAllCombo(){
+         return StreamSupport.stream(comboRepository.findAll().spliterator(), false)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -191,16 +200,16 @@ public class ComboService implements IComboService {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
+            predicates.add(criteriaBuilder.equal(root.get("oficial"), false));
+            predicates.add(criteriaBuilder.equal(root.get("deleted"), false));
+            predicates.add(criteriaBuilder.equal(root.get("privateCombo"), false));
+
             if (filters.characterPointId() != null) {
                 predicates.add(criteriaBuilder.equal(root.get("pointCharacterId"), filters.characterPointId()));
             }
 
             if (filters.characterSecondId() != null) {
                 predicates.add(criteriaBuilder.equal(root.get("secondCharacterId"), filters.characterSecondId()));
-            }
-
-            if (filters.oficial() != null) {
-                predicates.add(criteriaBuilder.equal(root.get("oficial"), filters.oficial()));
             }
 
             if (hasText(filters.comboDificulty())) {

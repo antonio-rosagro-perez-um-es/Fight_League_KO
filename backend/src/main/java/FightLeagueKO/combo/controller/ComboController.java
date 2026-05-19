@@ -7,7 +7,6 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -37,6 +36,11 @@ public class ComboController {
     @GetMapping(value = "{id}")
     public ResponseEntity<Combo> getComboById(@PathVariable UUID comboId){
         return ResponseEntity.ok(comboService.getComboById(comboId));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Combo>> getAllCombos(){
+        return ResponseEntity.ok(comboService.getAllCombo());
     }
 
     @PostMapping(value = "/search")

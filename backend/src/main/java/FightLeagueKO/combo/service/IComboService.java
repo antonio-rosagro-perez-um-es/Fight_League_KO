@@ -13,6 +13,8 @@ public interface IComboService {
 
     public Combo getComboById(UUID comboId);
 
+    public List<Combo> getAllCombo();
+
     public List<Combo> searchCombos(ComboFiltersDTO filters);
 
     public Combo createCombo(ComboCreateDTO comboDTO);
