@@ -5,20 +5,23 @@ import java.util.UUID;
 import FightLeagueKO.character.model.Character;
 
 import FightLeagueKO.character.dto.CharacterBannerDTO;
+import FightLeagueKO.character.dto.CharacterDetailDTO;
 import FightLeagueKO.character.dto.CharacterUpdateDTO;
-import FightLeagueKO.character.dto.NewCharacterDTO;
+import FightLeagueKO.character.dto.CreateCharacterDTO;
 
 public interface ICharacterService {
 
     List<CharacterBannerDTO> getAllCharactersBanner();
 
-    Character getCharacterById(UUID id);
+    Character getCharacterById(UUID CharacterId);
 
-    Character createCharacter(NewCharacterDTO characterDTO);
+    CharacterDetailDTO getCharacterWithOfficialCombos(UUID CharacterId);
 
-    void updateCharacter (UUID id, CharacterUpdateDTO characterDTO);
+    Character createCharacter(CreateCharacterDTO characterDTO);
 
-    void softDeleteCharacter (UUID id);
+    void updateCharacter (UUID CharacterId, CharacterUpdateDTO characterDTO);
 
-    void restoreCharacter (UUID id);
+    void softDeleteCharacter (UUID CharacterId);
+
+    void restoreCharacter (UUID CharacterId);
 }

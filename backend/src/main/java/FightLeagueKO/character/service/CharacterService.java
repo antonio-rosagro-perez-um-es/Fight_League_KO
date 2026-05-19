@@ -9,10 +9,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import FightLeagueKO.character.dto.CharacterBannerDTO;
+import FightLeagueKO.character.dto.CharacterDetailDTO;
 import FightLeagueKO.character.dto.CharacterUpdateDTO;
-import FightLeagueKO.character.dto.NewCharacterDTO;
+import FightLeagueKO.character.dto.CreateCharacterDTO;
 import FightLeagueKO.character.model.Character;
 import FightLeagueKO.character.repository.CharacterRepository;
+import FightLeagueKO.combo.dto.ComboDTO;
+import FightLeagueKO.combo.mapper.ComboMapper;
+import FightLeagueKO.combo.model.Combo;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 
@@ -21,10 +25,12 @@ import jakarta.transaction.Transactional;
 public class CharacterService implements ICharacterService {
 
     private CharacterRepository characterRepository;
+    private ComboMapper comboMapper;
 
     @Autowired
-    public CharacterService(CharacterRepository characterRepository) {
+    public CharacterService(CharacterRepository characterRepository, ComboMapper comboMapper) {
         this.characterRepository = characterRepository;
+        this.comboMapper = comboMapper;
     }
 
     @Override
@@ -34,18 +40,49 @@ public class CharacterService implements ICharacterService {
     }
 
     @Override
-    public Character getCharacterById(UUID id) {
+    public Character getCharacterById(UUID characterId) {
 
         Objects.requireNonNull(
-                id,
+                characterId,
                 "Parameter id could not be null");
 
-        return characterRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Character not found with id: " + id));
+        return characterRepository.findById(characterId)
+                .orElseThrow(() -> new EntityNotFoundException("Character not found with id: " + characterId));
+    }
+
+@Override
+    public CharacterDetailDTO getCharacterWithOfficialCombos(UUID characterId) {
+        Objects.requireNonNull(characterId, "Parameter id could not be null");
+
+        Character character = characterRepository.findById(characterId)
+                .orElseThrow(() -> new EntityNotFoundException("Character not found with id: " + characterId));
+
+        List<ComboDTO> comboDTOs = character.getOfficialCombos().stream()
+                .map(comboMapper::toDTO)
+                .toList();
+
+        return new CharacterDetailDTO(
+                character.getId(),
+                character.getName(),
+                character.getDescription(),
+                character.getRegion(),
+                character.getArchetype(),
+                character.getTitle(),
+                character.getItLikes(),
+                character.getItDislike(),
+                character.getSlug(),
+                character.getHealth(),
+                character.getRange(),
+                character.getPower(),
+                character.getVitality(),
+                character.getMobility(),
+                character.getEasyOfUse(),
+                comboDTOs
+        );
     }
 
     @Override
-    public Character createCharacter(NewCharacterDTO characterDTO) {
+    public Character createCharacter(CreateCharacterDTO characterDTO) {
 
         Objects.requireNonNull(characterDTO, "Parameter characterDTO could not be null");
 
@@ -127,10 +164,10 @@ public class CharacterService implements ICharacterService {
     }
 
     @Override
-    public void updateCharacter(UUID id, CharacterUpdateDTO characterDTO) {
+    public void updateCharacter(UUID characterId, CharacterUpdateDTO characterDTO) {
 
-        Character character = characterRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Character not found with id:" + id));
+        Character character = characterRepository.findById(characterId)
+                .orElseThrow(() -> new EntityNotFoundException("Character not found with id:" + characterId));
 
         Optional.ofNullable(characterDTO.name())
                 .ifPresent(character::setName);
@@ -178,10 +215,10 @@ public class CharacterService implements ICharacterService {
     }
 
     @Override
-    public void softDeleteCharacter(UUID id) {
+    public void softDeleteCharacter(UUID characterId) {
 
-        Character character = characterRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Character not found with id: " + id));
+        Character character = characterRepository.findById(characterId)
+                .orElseThrow(() -> new EntityNotFoundException("Character not found with id: " + characterId));
 
         character.setDeleted(true);
 
@@ -189,9 +226,9 @@ public class CharacterService implements ICharacterService {
     }
 
     @Override
-    public void restoreCharacter(UUID id) {
-        Character character = characterRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Character not found with id: " + id));
+    public void restoreCharacter(UUID characterId) {
+        Character character = characterRepository.findById(characterId)
+                .orElseThrow(() -> new EntityNotFoundException("Character not found with id: " + characterId));
 
         character.setDeleted(false);
 

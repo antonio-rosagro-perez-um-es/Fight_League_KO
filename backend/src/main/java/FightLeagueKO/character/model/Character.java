@@ -1,14 +1,18 @@
 package FightLeagueKO.character.model;
 
+import java.util.Set;
 import java.util.UUID;
 
 import org.hibernate.annotations.UuidGenerator;
 
+import FightLeagueKO.combo.model.Combo;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -58,6 +62,9 @@ public class Character {
     private int mobility;
 
     private int easyOfUse;
+
+    @OneToMany(mappedBy = "pointCharacterId", fetch = FetchType.LAZY)
+    private Set<Combo> officialCombos;
 
     public Character() {
     } // POJO
@@ -188,6 +195,14 @@ public class Character {
 
     public void setEasyOfUse(int easyOfUse) {
         this.easyOfUse = easyOfUse;
+    }
+
+    public Set<Combo> getOfficialCombos() {
+        return officialCombos;
+    }
+
+    public void setOfficialCombos(Set<Combo> officialCombos) {
+        this.officialCombos = officialCombos;
     }
 
 }

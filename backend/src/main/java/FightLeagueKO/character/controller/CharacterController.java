@@ -17,8 +17,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import FightLeagueKO.character.dto.CharacterBannerDTO;
+import FightLeagueKO.character.dto.CharacterDetailDTO;
 import FightLeagueKO.character.dto.CharacterUpdateDTO;
-import FightLeagueKO.character.dto.NewCharacterDTO;
+import FightLeagueKO.character.dto.CreateCharacterDTO;
 import FightLeagueKO.character.model.Character;
 import FightLeagueKO.character.service.ICharacterService;
 
@@ -34,8 +35,13 @@ public class CharacterController {
     }
 
     @GetMapping(value = "/{id}")
-    public ResponseEntity<Character> getCharacterById(@PathVariable UUID id) {
-        return ResponseEntity.ok(charactersService.getCharacterById(id));
+    public ResponseEntity<Character> getCharacterById(@PathVariable UUID characterId) {
+        return ResponseEntity.ok(charactersService.getCharacterById(characterId));
+    }
+
+    @GetMapping(value = "/{id}/official-combos")
+    public ResponseEntity<CharacterDetailDTO> getCharacterWithOfficialCombos(@PathVariable UUID characterId) {
+        return ResponseEntity.ok(charactersService.getCharacterWithOfficialCombos(characterId));
     }
 
     @GetMapping(value = "/all")
@@ -45,7 +51,7 @@ public class CharacterController {
 
     @PostMapping
     public ResponseEntity<Character> createCharacter(
-            @RequestBody @Validated NewCharacterDTO characterDTO) {
+            @RequestBody @Validated CreateCharacterDTO characterDTO) {
 
         Character created = charactersService.createCharacter(characterDTO);
 
@@ -55,21 +61,21 @@ public class CharacterController {
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateCharacter(
-            @PathVariable UUID id,
-            @Validated @RequestBody CharacterUpdateDTO dto) {
-        charactersService.updateCharacter(id, dto);
+            @PathVariable UUID characterId,
+            @Validated @RequestBody CharacterUpdateDTO characterDTO) {
+        charactersService.updateCharacter(characterId, characterDTO);
     }
 
     @PatchMapping("/{id}/deactivate")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void softDeleteCharacter(@PathVariable UUID id) {
-        charactersService.softDeleteCharacter(id);
+    public void softDeleteCharacter(@PathVariable UUID characterId) {
+        charactersService.softDeleteCharacter(characterId);
     }
 
     @PatchMapping("/{id}/restore")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void restoreCharacter(@PathVariable UUID id) {
-        charactersService.restoreCharacter(id);
+    public void restoreCharacter(@PathVariable UUID characterId) {
+        charactersService.restoreCharacter(characterId);
     }
 
     @GetMapping(value = "/health")

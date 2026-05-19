@@ -1,6 +1,6 @@
 package FightLeagueKO.character.dto;
 
-public record NewCharacterDTO(
+public record CreateCharacterDTO(
         String name,
         String description,
         String region,
