@@ -1,11 +1,11 @@
-package FightLeagueKO.character.dto;
+package FightLeagueKO.fighter.dto;
 
 import java.util.List;
 import java.util.UUID;
 
 import FightLeagueKO.combo.dto.ComboDTO;
 
-public record CharacterDetailDTO(
+public record FighterDetailDTO(
     UUID id,
     String name,
     String description,

@@ -10,7 +10,8 @@ import java.util.stream.StreamSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import FightLeagueKO.character.service.CharacterService;
+import FightLeagueKO.fighter.model.Fighter;
+import FightLeagueKO.fighter.service.FighterService;
 import FightLeagueKO.team.dto.TeamDTO;
 import FightLeagueKO.team.model.Team;
 import FightLeagueKO.team.repository.TeamRepository;
@@ -22,12 +23,12 @@ import jakarta.transaction.Transactional;
 public class TeamService implements ITeamService {
 
     private TeamRepository teamRepository;
-    private CharacterService characterService;
+    private FighterService fighterService;
 
     @Autowired
-    public TeamService(TeamRepository teamRepository, CharacterService characterService) {
+    public TeamService(TeamRepository teamRepository, FighterService fighterService) {
         this.teamRepository = teamRepository;
-        this.characterService = characterService;
+        this.fighterService = fighterService;
     }
 
     @Override
@@ -58,29 +59,32 @@ public class TeamService implements ITeamService {
 
         Team team = new Team();
 
-        if (teamDTO.pointCharacterId() == null) {
-            throw new IllegalArgumentException("Team point character could not be null");
+        if (teamDTO.pointFighterId() == null) {
+            throw new IllegalArgumentException("Team point fighter could not be null");
         }
 
-        if (teamDTO.secondCharacterId() == null) {
-            throw new IllegalArgumentException("Team second character could not be null");
+        if (teamDTO.secondFighterId() == null) {
+            throw new IllegalArgumentException("Team second fighter could not be null");
         }
 
-        if (teamDTO.secondCharacterId() == null) {
+        if (teamDTO.fuse() == null) {
             throw new IllegalArgumentException("Team fuse could not be null");
         }
 
-        Optional<Team> alreadyExist = teamRepository.existsByPointCharacterIdAndSecondCharacterIdAndFuseAndDeletedFalse(
-                teamDTO.pointCharacterId(),
-                teamDTO.secondCharacterId(),
+        Optional<Team> alreadyExist = teamRepository.existsByPointFighterIdAndSecondFighterIdAndFuseAndDeletedFalse(
+                teamDTO.pointFighterId(),
+                teamDTO.secondFighterId(),
                 teamDTO.fuse());
 
         if (alreadyExist.isPresent()) {
             return alreadyExist.get();
         }
 
-        team.setPointCharacterId(teamDTO.pointCharacterId());
-        team.setSecondCharacterId(teamDTO.secondCharacterId());
+        Fighter pointFighter = fighterService.getFighterById(teamDTO.pointFighterId());
+        Fighter seconFighter = fighterService.getFighterById(teamDTO.secondFighterId());
+
+        team.setPointFighter(pointFighter);
+        team.setSecondFighter(seconFighter);
         team.setFuse(teamDTO.fuse());
         team.setDeleted(false);
         team.setPlayCounter(0);
@@ -97,11 +101,13 @@ public class TeamService implements ITeamService {
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new EntityNotFoundException("Team not found with id:" + teamId));
 
-        Optional.ofNullable(teamDTO.pointCharacterId())
-                .ifPresent(team::setPointCharacterId);
+        Optional.ofNullable(teamDTO.pointFighterId())
+                .map(fighterService::getFighterById)
+                .ifPresent(team::setPointFighter);
 
-        Optional.ofNullable(teamDTO.secondCharacterId())
-                .ifPresent(team::setSecondCharacterId);
+        Optional.ofNullable(teamDTO.secondFighterId())
+                .map(fighterService::getFighterById)
+                .ifPresent(team::setSecondFighter);
 
         Optional.ofNullable(teamDTO.fuse())
                 .ifPresent(team::setFuse);
@@ -144,8 +150,12 @@ public class TeamService implements ITeamService {
             team.addWinCounter();
         }
 
-        characterService.updateCharacterStats(team.getPointCharacterId(), isWinner);
-        characterService.updateCharacterStats(team.getSecondCharacterId(), isWinner);
+        
+
+        team.getPointFighter().getId();
+
+        fighterService.updateFighterStats(team.getPointFighter().getId(), isWinner);
+        fighterService.updateFighterStats(team.getSecondFighter().getId(), isWinner);
 
         teamRepository.save(team);
     }

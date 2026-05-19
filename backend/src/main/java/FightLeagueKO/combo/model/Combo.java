@@ -7,6 +7,7 @@ import org.hibernate.annotations.UuidGenerator;
 
 import FightLeagueKO.combo.enums.ComboDificulty;
 import FightLeagueKO.combo.enums.FuseType;
+import FightLeagueKO.fighter.model.Fighter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -35,11 +36,11 @@ public class Combo {
 
     @Column(nullable = false)
     @ManyToOne
-    private FightLeagueKO.character.model.Character pointCharacterId; //Necesary full package route, conflict with character type
+    private Fighter pointFighter;
 
     @Column(nullable = true)
     @ManyToOne
-    private FightLeagueKO.character.model.Character secondCharacterId; //Necesary full package route, conflict with character type
+    private Fighter secondFighter;
 
     @Column(nullable = false)
     private String textNotation;
@@ -106,20 +107,20 @@ public class Combo {
         this.oficial = oficial;
     }
 
-    public FightLeagueKO.character.model.Character getPointCharacterId() {
-        return pointCharacterId;
+    public Fighter getPointFighter() {
+        return pointFighter;
     }
 
-    public void setPointCharacterId(FightLeagueKO.character.model.Character pointCharacterId) {
-        this.pointCharacterId = pointCharacterId;
+    public void setPointFighter(Fighter pointFighter) {
+        this.pointFighter = pointFighter;
     }
 
-    public FightLeagueKO.character.model.Character getSecondCharacterId() {
-        return secondCharacterId;
+    public Fighter getSecondFighter() {
+        return secondFighter;
     }
 
-    public void setSecondCharacterId(FightLeagueKO.character.model.Character secondCharacter) {
-        this.secondCharacterId = secondCharacter;
+    public void setSecondFighter(Fighter secondFighter) {
+        this.secondFighter = secondFighter;
     }
 
     public String getTextNotation() {

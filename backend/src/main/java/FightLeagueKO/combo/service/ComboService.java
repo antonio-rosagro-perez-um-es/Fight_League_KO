@@ -15,8 +15,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import FightLeagueKO.combo.dto.ComboUpdateDTO;
-import FightLeagueKO.character.model.Character;
-import FightLeagueKO.character.service.CharacterService;
+import FightLeagueKO.fighter.model.Fighter;
+import FightLeagueKO.fighter.service.FighterService;
 import FightLeagueKO.combo.dto.ComboCreateDTO;
 import FightLeagueKO.combo.dto.ComboFiltersDTO;
 import FightLeagueKO.combo.enums.ComboDificulty;
@@ -32,12 +32,12 @@ import jakarta.transaction.Transactional;
 public class ComboService implements IComboService {
 
     private ComboRepository comboRepository;
-    private CharacterService characterService;
+    private FighterService fighterService;
 
     @Autowired
-    public ComboService(ComboRepository comboRepository, CharacterService characterService) {
+    public ComboService(ComboRepository comboRepository, FighterService fighterService) {
         this.comboRepository = comboRepository;
-        this.characterService = characterService;
+        this.fighterService = fighterService;
     }
 
     @Override
@@ -80,8 +80,8 @@ public class ComboService implements IComboService {
             throw new IllegalArgumentException("Title cant be null");
         }
 
-        if (comboDTO.pointCharacter() == null) {
-            throw new IllegalArgumentException("Point character cant be null");
+        if (comboDTO.pointFighter() == null) {
+            throw new IllegalArgumentException("Point fighter cant be null");
         }
 
         if (comboDTO.textNotation() == null || comboDTO.textNotation().trim().isEmpty()) {
@@ -104,16 +104,16 @@ public class ComboService implements IComboService {
             throw new IllegalArgumentException("Description cant be null or empty");
         }
 
-        Character secondCharacter = new Character();
-        if (comboDTO.secondCharacter() != null)
-            secondCharacter = characterService.getCharacterById(comboDTO.secondCharacter());
+        Fighter secondFighter = new Fighter();
+        if (comboDTO.secondFighter() != null)
+            secondFighter = fighterService.getFighterById(comboDTO.secondFighter());
 
-        Character pointCharacter = characterService.getCharacterById(comboDTO.pointCharacter());
+        Fighter pointFighter = fighterService.getFighterById(comboDTO.pointFighter());
 
         combo.setTitle(comboDTO.title());
         combo.setDeleted(false);
-        combo.setPointCharacterId(pointCharacter);
-        combo.setSecondCharacterId(secondCharacter);
+        combo.setPointFighter(pointFighter);
+        combo.setSecondFighter(secondFighter);
         combo.setTextNotation(comboDTO.textNotation());
         combo.setComboDificulty(comboDTO.comboDificulty());
         combo.setFuse(comboDTO.fuse());
@@ -141,13 +141,13 @@ public class ComboService implements IComboService {
         Optional.ofNullable(comboDTO.title())
                 .ifPresent(combo::setTitle);
 
-        Optional.ofNullable(comboDTO.pointCharacter())
-                .map(characterService::getCharacterById)
-                .ifPresent(combo::setPointCharacterId);
+        Optional.ofNullable(comboDTO.pointFighter())
+                .map(fighterService::getFighterById)
+                .ifPresent(combo::setPointFighter);
 
-        Optional.ofNullable(comboDTO.secondCharacter())
-                .map(characterService::getCharacterById)
-                .ifPresent(combo::setSecondCharacterId);
+        Optional.ofNullable(comboDTO.secondFighter())
+                .map(fighterService::getFighterById)
+                .ifPresent(combo::setSecondFighter);
 
         Optional.ofNullable(comboDTO.textNotation())
                 .ifPresent(combo::setTextNotation);
@@ -204,12 +204,12 @@ public class ComboService implements IComboService {
             predicates.add(criteriaBuilder.equal(root.get("deleted"), false));
             predicates.add(criteriaBuilder.equal(root.get("privateCombo"), false));
 
-            if (filters.characterPointId() != null) {
-                predicates.add(criteriaBuilder.equal(root.get("pointCharacterId"), filters.characterPointId()));
+            if (filters.pointFighterId() != null) {
+                predicates.add(criteriaBuilder.equal(root.get("pointFighterId"), filters.pointFighterId()));
             }
 
-            if (filters.characterSecondId() != null) {
-                predicates.add(criteriaBuilder.equal(root.get("secondCharacterId"), filters.characterSecondId()));
+            if (filters.secondFighterId() != null) {
+                predicates.add(criteriaBuilder.equal(root.get("secondFighterId"), filters.secondFighterId()));
             }
 
             if (hasText(filters.comboDificulty())) {

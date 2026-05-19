@@ -18,9 +18,9 @@ public interface TeamRepository extends CrudRepository<Team, UUID> {
 
     Long getAllTeamsPlayRate();
 
-    Optional<Team> existsByPointCharacterIdAndSecondCharacterIdAndFuseAndDeletedFalse(
-            @Param("pointId") UUID pointCharacterId,
-            @Param("secondId") UUID secondCharacterId,
+    Optional<Team> existsByPointFighterIdAndSecondFighterIdAndFuseAndDeletedFalse(
+            @Param("pointId") UUID pointFighterId,
+            @Param("secondId") UUID secondFighterId,
             @Param("fuse") FuseType fuse);
 
 }

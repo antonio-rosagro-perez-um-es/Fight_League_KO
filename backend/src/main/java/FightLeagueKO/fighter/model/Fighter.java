@@ -1,4 +1,4 @@
-package FightLeagueKO.character.model;
+package FightLeagueKO.fighter.model;
 
 import java.util.Set;
 import java.util.UUID;
@@ -16,8 +16,8 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "characters")
-public class Character {
+@Table(name = "fighters")
+public class Fighter {
 
     @Id
     @GeneratedValue
@@ -67,11 +67,11 @@ public class Character {
 
     private int playCounter;
 
-    @OneToMany(mappedBy = "pointCharacterId", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "pointFighter", fetch = FetchType.LAZY)
     private Set<Combo> officialCombos;
 
-    public Character() {
-    } // POJO
+    public Fighter() {
+    }
 
     public UUID getId() {
         return id;

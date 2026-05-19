@@ -1,8 +1,8 @@
-package FightLeagueKO.character.dto;
+package FightLeagueKO.fighter.dto;
 
 import java.util.UUID;
 
-public record CharacterBannerDTO(
+public record FighterBannerDTO(
         UUID id,
         String name,
         String slug) {
