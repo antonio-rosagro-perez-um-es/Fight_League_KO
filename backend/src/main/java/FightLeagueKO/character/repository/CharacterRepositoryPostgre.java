@@ -16,4 +16,7 @@ public interface CharacterRepositoryPostgre extends CharacterRepository {
             WHERE c.delete = false
             """)
     List<CharacterBannerDTO> findAllBannerCharacters();
+
+    @Query("SELECT COALESCE(SUM(c.playCounter), 0) FROM Character c WHERE c.deleted = false")
+    Long getAllCharactersPlayRate();
 }

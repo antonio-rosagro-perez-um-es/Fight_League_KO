@@ -68,12 +68,6 @@ public class TeamController {
         teamService.restoreTeam(id);
     }
 
-    @PatchMapping("/{id}/stats/{result}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updatTeamStats(@PathVariable UUID id, @PathVariable boolean result){
-        teamService.updateTeamStats(id, result);
-    }
-
     @GetMapping("/{id}/win-rate")
     public ResponseEntity<Double> getTeamWinrate(@PathVariable UUID id){
         return ResponseEntity.ok(teamService.getTeamWinRate(id));

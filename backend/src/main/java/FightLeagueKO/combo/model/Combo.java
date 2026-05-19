@@ -35,11 +35,11 @@ public class Combo {
 
     @Column(nullable = false)
     @ManyToOne
-    private FightLeagueKO.character.model.Character pointCharacterId;
+    private FightLeagueKO.character.model.Character pointCharacterId; //Necesary full package route, conflict with character type
 
     @Column(nullable = true)
     @ManyToOne
-    private FightLeagueKO.character.model.Character secondCharacterId;
+    private FightLeagueKO.character.model.Character secondCharacterId; //Necesary full package route, conflict with character type
 
     @Column(nullable = false)
     private String textNotation;

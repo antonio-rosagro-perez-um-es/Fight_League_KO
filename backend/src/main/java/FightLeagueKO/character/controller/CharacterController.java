@@ -82,4 +82,14 @@ public class CharacterController {
         charactersService.restoreCharacter(characterId);
     }
 
+    @GetMapping("/{id}/win-rate")
+    public ResponseEntity<Double> getCharacterWinrate(@PathVariable UUID characterId) {
+        return ResponseEntity.ok(charactersService.getCharacterWinRate(characterId));
+    }
+
+    @GetMapping("/{id}/play-rate")
+    public ResponseEntity<Double> getCharacterPlayRate(@PathVariable UUID characterId) {
+        return ResponseEntity.ok(charactersService.getCharacterPlayRate(characterId));
+    }
+
 }

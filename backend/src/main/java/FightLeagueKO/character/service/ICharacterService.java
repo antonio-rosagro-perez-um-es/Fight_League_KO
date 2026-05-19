@@ -26,4 +26,10 @@ public interface ICharacterService {
     void softDeleteCharacter (UUID CharacterId);
 
     void restoreCharacter (UUID CharacterId);
+
+    void updateCharacterStats(UUID characterId, boolean isWinner);
+
+    Double getCharacterWinRate(UUID characterId);
+
+    Double getCharacterPlayRate(UUID characterId);
 }

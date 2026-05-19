@@ -63,6 +63,10 @@ public class Character {
 
     private int easyOfUse;
 
+    private int winCounter;
+
+    private int playCounter;
+
     @OneToMany(mappedBy = "pointCharacterId", fetch = FetchType.LAZY)
     private Set<Combo> officialCombos;
 
@@ -203,6 +207,39 @@ public class Character {
 
     public void setOfficialCombos(Set<Combo> officialCombos) {
         this.officialCombos = officialCombos;
+    }
+
+    public int getWinCounter() {
+        return winCounter;
+    }
+
+    public void setWinCounter(int winCounter) {
+        this.winCounter = winCounter;
+    }
+
+    public int getPlayCounter() {
+        return playCounter;
+    }
+
+    public void setPlayCounter(int playCounter) {
+        this.playCounter = playCounter;
+    }
+
+    public void addPlayCounter() {
+        this.playCounter++;
+    }
+
+    public void addWinCounter() {
+        this.winCounter++;
+    }
+
+    public double getWinRate() {
+
+        if (playCounter == 0) {
+            return 0;
+        }
+
+        return (double) winCounter / playCounter;
     }
 
 }

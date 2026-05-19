@@ -13,4 +13,6 @@ import FightLeagueKO.character.model.Character;
 public interface CharacterRepository extends CrudRepository<Character, UUID> {
 
     List<CharacterBannerDTO> findAllBannerCharacters();
+
+    Long getAllCharactersPlayRate();
 }

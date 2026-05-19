@@ -242,4 +242,37 @@ public class CharacterService implements ICharacterService {
         characterRepository.save(character);
     }
 
+    @Override
+    public void updateCharacterStats(UUID characterId, boolean isWinner) {
+
+        Character character = characterRepository.findById(characterId)
+                .orElseThrow(() -> new EntityNotFoundException("Character not found with id:" + characterId));
+
+        character.addPlayCounter();
+
+        if (isWinner == true)
+            character.addWinCounter();
+
+        characterRepository.save(character);
+    }
+
+    @Override
+    public Double getCharacterWinRate(UUID characterId) {
+        Character character = characterRepository.findById(characterId)
+                .orElseThrow(() -> new EntityNotFoundException("Character not found with id:" + characterId));
+
+        return character.getWinRate() * 100;
+    }
+
+    @Override
+    public Double getCharacterPlayRate(UUID characterId) {
+
+        Character character = characterRepository.findById(characterId)
+                .orElseThrow(() -> new EntityNotFoundException("Character not found with id:" + characterId));
+
+        double playRate = character.getPlayCounter() * 1.0 / characterRepository.getAllCharactersPlayRate();
+
+        return playRate * 100;
+    }
+
 }

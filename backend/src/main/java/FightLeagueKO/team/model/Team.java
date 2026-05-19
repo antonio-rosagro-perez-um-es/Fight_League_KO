@@ -98,21 +98,21 @@ public class Team {
         this.deleted = deleted;
     }
 
-    public void addWin(){
+    public void addWinCounter() {
         this.winCounter++;
     }
 
-    public void addPlayTeam(){
+    public void addPlayTeamCounter() {
         this.playCounter++;
     }
 
-    public double getWinRate(){
+    public double getWinRate() {
 
         if (playCounter == 0) {
             return 0;
         }
-        
-        return (double) winCounter/playCounter;
+
+        return (double) winCounter / playCounter;
     }
 
 }
