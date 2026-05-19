@@ -16,7 +16,6 @@ import FightLeagueKO.character.model.Character;
 import FightLeagueKO.character.repository.CharacterRepository;
 import FightLeagueKO.combo.dto.ComboDTO;
 import FightLeagueKO.combo.mapper.ComboMapper;
-import FightLeagueKO.combo.model.Combo;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 

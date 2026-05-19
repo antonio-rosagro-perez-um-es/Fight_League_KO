@@ -53,7 +53,7 @@ public class ComboController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateCombo(
         @PathVariable UUID id, 
-        @Validated @RequestBody  ComboUpdateDTO comboUpdateDTO){
+        @RequestBody  ComboUpdateDTO comboUpdateDTO){
         comboService.updateCombo(id, comboUpdateDTO);
     }
 

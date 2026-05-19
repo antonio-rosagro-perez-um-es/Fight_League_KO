@@ -51,7 +51,7 @@ public class CharacterController {
 
     @PostMapping
     public ResponseEntity<Character> createCharacter(
-            @RequestBody @Validated CreateCharacterDTO characterDTO) {
+            @RequestBody CreateCharacterDTO characterDTO) {
 
         Character created = charactersService.createCharacter(characterDTO);
 
@@ -62,7 +62,7 @@ public class CharacterController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateCharacter(
             @PathVariable UUID characterId,
-            @Validated @RequestBody CharacterUpdateDTO characterDTO) {
+            @RequestBody CharacterUpdateDTO characterDTO) {
         charactersService.updateCharacter(characterId, characterDTO);
     }
 
