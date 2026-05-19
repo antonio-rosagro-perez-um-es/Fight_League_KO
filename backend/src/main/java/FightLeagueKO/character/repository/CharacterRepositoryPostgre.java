@@ -13,6 +13,7 @@ public interface CharacterRepositoryPostgre extends CharacterRepository {
                 c.slug
             )
             FROM Character c
+            WHERE c.delete = false
             """)
     List<CharacterBannerDTO> findAllBannerCharacters();
 }

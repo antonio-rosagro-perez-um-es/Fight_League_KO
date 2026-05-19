@@ -49,7 +49,7 @@ public class CharacterService implements ICharacterService {
                 .orElseThrow(() -> new EntityNotFoundException("Character not found with id: " + characterId));
     }
 
-@Override
+    @Override
     public CharacterDetailDTO getCharacterWithOfficialCombos(UUID characterId) {
         Objects.requireNonNull(characterId, "Parameter id could not be null");
 
@@ -76,8 +76,7 @@ public class CharacterService implements ICharacterService {
                 character.getVitality(),
                 character.getMobility(),
                 character.getEasyOfUse(),
-                comboDTOs
-        );
+                comboDTOs);
     }
 
     @Override

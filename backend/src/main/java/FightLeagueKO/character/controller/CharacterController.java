@@ -6,7 +6,6 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -44,8 +43,8 @@ public class CharacterController {
         return ResponseEntity.ok(charactersService.getCharacterWithOfficialCombos(characterId));
     }
 
-    @GetMapping(value = "/all")
-    public ResponseEntity<List<CharacterBannerDTO>> getAllCharacterById() {
+    @GetMapping(value = "/all-banners")
+    public ResponseEntity<List<CharacterBannerDTO>> getAllCharacters() {
         return ResponseEntity.ok(charactersService.getAllCharactersBanner());
     }
 
@@ -76,11 +75,6 @@ public class CharacterController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void restoreCharacter(@PathVariable UUID characterId) {
         charactersService.restoreCharacter(characterId);
-    }
-
-    @GetMapping(value = "/health")
-    public ResponseEntity<Void> getHealth() {
-        return ResponseEntity.ok().build();
     }
 
 }
