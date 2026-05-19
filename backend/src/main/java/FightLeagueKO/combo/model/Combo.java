@@ -65,6 +65,10 @@ public class Combo {
 
     private int damage;
 
+    private int likeCounter;
+
+    private int dislikeCounter;
+
     private boolean privateCombo;
 
     public Combo() {
@@ -190,6 +194,22 @@ public class Combo {
         this.damage = damage;
     }
 
+    public int getLikeCounter() {
+        return likeCounter;
+    }
+
+    public void setLikeCounter(int likeCounter) {
+        this.likeCounter = likeCounter;
+    }
+
+    public int getDislikeCounter() {
+        return dislikeCounter;
+    }
+
+    public void setDislikeCounter(int dislikeCounter) {
+        this.dislikeCounter = dislikeCounter;
+    }
+
     public boolean isPrivateCombo() {
         return privateCombo;
     }
@@ -197,5 +217,22 @@ public class Combo {
     public void setPrivateCombo(boolean privateCombo) {
         this.privateCombo = privateCombo;
     }
+
+    public void addLikeCombo(){
+        this.likeCounter++;
+    }
+
+    public void removeLikeCombo(){
+        this.likeCounter--;
+    }
+
+    public void addDislikeCombo(){
+        this.dislikeCounter++;
+    }
+
+    public void removeDislikeCombo(){
+        this.dislikeCounter--;
+    }
+
 
 }

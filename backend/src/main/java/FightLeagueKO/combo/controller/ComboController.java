@@ -84,4 +84,28 @@ public class ComboController {
         comboService.setComboPrivate(comboId);
     }
 
+    @PatchMapping("{id}/add-like")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void addLikeCombo(@PathVariable UUID comboId){
+        comboService.addLikeCombo(comboId);
+    }
+
+    @PatchMapping("{id}/add-dislike")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void addDislikeCombo(@PathVariable UUID comboId){
+        comboService.addDislikeCombo(comboId);
+    }
+
+    @PatchMapping("{id}/remove-like")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void removeLikeCombo(@PathVariable UUID comboId){
+        comboService.removeLikeCombo(comboId);
+    }
+
+    @PatchMapping("{id}/remove-dislike")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void removeDislikeCombo(@PathVariable UUID comboId){
+        comboService.removeDislikeCombo(comboId);
+    }
+
 }

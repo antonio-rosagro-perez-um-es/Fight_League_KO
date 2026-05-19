@@ -19,7 +19,7 @@ import FightLeagueKO.combo.dto.ComboFiltersDTO;
 import FightLeagueKO.combo.enums.ComboDificulty;
 import FightLeagueKO.combo.enums.FuseType;
 import FightLeagueKO.combo.model.Combo;
-import FightLeagueKO.combo.repository.ComboRepositoryPostgre;
+import FightLeagueKO.combo.repository.ComboRepository;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -28,11 +28,11 @@ import jakarta.transaction.Transactional;
 @Transactional
 public class ComboService implements IComboService {
 
-    private ComboRepositoryPostgre comboRepository;
+    private ComboRepository comboRepository;
     private CharacterService characterService;
 
     @Autowired
-    public ComboService(ComboRepositoryPostgre comboRepository, CharacterService characterService) {
+    public ComboService(ComboRepository comboRepository, CharacterService characterService) {
         this.comboRepository = comboRepository;
         this.characterService = characterService;
     }
@@ -116,7 +116,8 @@ public class ComboService implements IComboService {
         combo.setUpDateAt(LocalDate.now());
         combo.setPrivateCombo(true);
         // TODO: el combo sera marcado como oficial o no en funcion del usuario que lo
-        // crea
+        combo.setLikeCounter(0);
+        combo.setDislikeCounter(0);
         
 
         return comboRepository.save(combo);
@@ -238,6 +239,46 @@ public class ComboService implements IComboService {
                 .orElseThrow(() -> new EntityNotFoundException("Combo not found exception with id: " + comboId));
 
         combo.setPrivateCombo(true);
+
+        comboRepository.save(combo);
+    }
+
+    @Override
+    public void addLikeCombo(UUID comboId) {
+       Combo combo = comboRepository.findById(comboId)
+                .orElseThrow(() -> new EntityNotFoundException("Combo not found exception with id: " + comboId));
+
+        combo.addLikeCombo();
+
+        comboRepository.save(combo);
+    }
+
+    @Override
+    public void addDislikeCombo(UUID comboId) {
+        Combo combo = comboRepository.findById(comboId)
+                .orElseThrow(() -> new EntityNotFoundException("Combo not found exception with id: " + comboId));
+
+        combo.addDislikeCombo();
+
+        comboRepository.save(combo);
+    }
+
+    @Override
+    public void removeLikeCombo(UUID comboId) {
+       Combo combo = comboRepository.findById(comboId)
+                .orElseThrow(() -> new EntityNotFoundException("Combo not found exception with id: " + comboId));
+
+        combo.removeLikeCombo();
+
+        comboRepository.save(combo);
+    }
+
+    @Override
+    public void removeDislikeCombo(UUID comboId) {
+        Combo combo = comboRepository.findById(comboId)
+                .orElseThrow(() -> new EntityNotFoundException("Combo not found exception with id: " + comboId));
+
+        combo.removeDislikeCombo();
 
         comboRepository.save(combo);
     }

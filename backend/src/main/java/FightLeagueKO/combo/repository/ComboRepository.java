@@ -9,6 +9,6 @@ import org.springframework.data.repository.NoRepositoryBean;
 import FightLeagueKO.combo.model.Combo;
 
 @NoRepositoryBean
-public interface ComboRespository extends JpaRepository<Combo, UUID>, JpaSpecificationExecutor<Combo>{
+public interface ComboRepository extends JpaRepository<Combo, UUID>, JpaSpecificationExecutor<Combo>{
 
 }

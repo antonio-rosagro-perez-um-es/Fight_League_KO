@@ -7,6 +7,7 @@ import FightLeagueKO.combo.dto.ComboUpdateDTO;
 import FightLeagueKO.combo.dto.ComboCreateDTO;
 import FightLeagueKO.combo.dto.ComboFiltersDTO;
 import FightLeagueKO.combo.model.Combo;
+import FightLeagueKO.user.model.User;
 
 public interface IComboService {
 
@@ -25,4 +26,12 @@ public interface IComboService {
     public void setComboPublic(UUID comboId);
 
     public void setComboPrivate(UUID comboId);
+
+    public void addLikeCombo(UUID comboId);
+
+    public void addDislikeCombo(UUID comboId);
+
+    public void removeLikeCombo(UUID comboId);
+
+    public void removeDislikeCombo(UUID comboId);
 }
