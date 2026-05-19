@@ -43,8 +43,13 @@ public class CharacterController {
         return ResponseEntity.ok(charactersService.getCharacterWithOfficialCombos(characterId));
     }
 
+    @GetMapping
+    public ResponseEntity<List<Character>> getAllCharacters() {
+        return ResponseEntity.ok(charactersService.getAllCharacters());
+    }
+
     @GetMapping(value = "/all-banners")
-    public ResponseEntity<List<CharacterBannerDTO>> getAllCharacters() {
+    public ResponseEntity<List<CharacterBannerDTO>> getAllActiveCharacters() {
         return ResponseEntity.ok(charactersService.getAllCharactersBanner());
     }
 

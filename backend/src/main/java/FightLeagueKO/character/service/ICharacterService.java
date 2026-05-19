@@ -11,6 +11,8 @@ import FightLeagueKO.character.dto.CreateCharacterDTO;
 
 public interface ICharacterService {
 
+    List<Character> getAllCharacters();
+
     List<CharacterBannerDTO> getAllCharactersBanner();
 
     Character getCharacterById(UUID CharacterId);

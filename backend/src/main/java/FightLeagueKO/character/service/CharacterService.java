@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,6 +32,13 @@ public class CharacterService implements ICharacterService {
     public CharacterService(CharacterRepository characterRepository, ComboMapper comboMapper) {
         this.characterRepository = characterRepository;
         this.comboMapper = comboMapper;
+    }
+
+    @Override
+    public List<Character> getAllCharacters() {
+
+        return StreamSupport.stream(characterRepository.findAll().spliterator(), false)
+                .collect(Collectors.toList());
     }
 
     @Override
