@@ -4,7 +4,7 @@ import java.util.UUID;
 
 import FightLeagueKO.combo.enums.FuseType;
 
-public record CreateTeamDTO(
+public record UpdateTeamDTO(
         UUID pointFighterId,
         UUID secondFighterId,
         FuseType fuse) {

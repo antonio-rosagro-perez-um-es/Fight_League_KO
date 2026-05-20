@@ -15,6 +15,8 @@ public class FighterMapper {
     public FighterStatsDTO toFighterStatsDTO(Fighter fighter, double playRate) {
 
         return new FighterStatsDTO(
+                fighter.getId(),
+                fighter.getName(),
                 fighter.getWinRate(),
                 playRate,
                 fighter.getPlayCounter(),

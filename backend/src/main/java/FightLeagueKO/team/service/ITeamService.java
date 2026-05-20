@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import FightLeagueKO.team.dto.CreateTeamDTO;
 import FightLeagueKO.team.dto.TeamStatsDTO;
+import FightLeagueKO.team.dto.UpdateTeamDTO;
 import FightLeagueKO.team.model.Team;
 
 public interface ITeamService {
@@ -17,7 +18,7 @@ public interface ITeamService {
 
     Team createTeam(CreateTeamDTO teamDTO);
 
-    void updateTeam(UUID teamId, CreateTeamDTO teamDTO);
+    void updateTeam(UUID teamId, UpdateTeamDTO teamDTO);
 
     void softDeleteTeam(UUID teamId);
 
@@ -26,5 +27,7 @@ public interface ITeamService {
     void updateTeamStats(UUID teamId, boolean result);
 
     TeamStatsDTO getTeamStats(UUID teamId);
+
+    List<TeamStatsDTO> getRankingTeams();
 
 }

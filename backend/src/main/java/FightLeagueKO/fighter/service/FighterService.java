@@ -246,20 +246,35 @@ public class FighterService implements IFighterService {
         fighterRepository.save(fighter);
     }
 
-
     @Override
-    public FighterStatsDTO getFighterStats(UUID fighterId){
+    public FighterStatsDTO getFighterStats(UUID fighterId) {
 
         Fighter fighter = fighterRepository.findById(fighterId)
                 .orElseThrow(() -> new EntityNotFoundException("Fighter not found with id:" + fighterId));
 
-         long allFightersPlayRate = fighterRepository.getAllFightersPlayRate();
+        long allFightersPlayRate = fighterRepository.getAllFightersPlayRate();
 
         double playRate = allFightersPlayRate > 0
                 ? fighter.getPlayCounter() * 100.0 / allFightersPlayRate
                 : 0.0;
 
         return fighterMapper.toFighterStatsDTO(fighter, playRate);
+    }
+
+    @Override
+    public List<FighterStatsDTO> getFightersRanking() {
+        List<Fighter> fighters = fighterRepository.getAllActiveFightersWithPlays();
+        long allFightersPlayRate = fighterRepository.getAllFightersPlayRate();
+        return fighters.stream()
+                .sorted((a, b) -> Double.compare(b.getWinRate(), a.getWinRate()))
+                .limit(10)
+                .map(fighter -> {
+                    double playRate = allFightersPlayRate > 0
+                            ? fighter.getPlayCounter() * 100.0 / allFightersPlayRate
+                            : 0.0;
+                    return fighterMapper.toFighterStatsDTO(fighter, playRate);
+                })
+                .collect(Collectors.toList());
     }
 
 }

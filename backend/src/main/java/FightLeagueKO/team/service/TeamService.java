@@ -10,11 +10,11 @@ import java.util.stream.StreamSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import FightLeagueKO.combo.mapper.ComboMapper;
 import FightLeagueKO.fighter.model.Fighter;
 import FightLeagueKO.fighter.service.FighterService;
 import FightLeagueKO.team.dto.CreateTeamDTO;
 import FightLeagueKO.team.dto.TeamStatsDTO;
+import FightLeagueKO.team.dto.UpdateTeamDTO;
 import FightLeagueKO.team.mapper.TeamMapper;
 import FightLeagueKO.team.model.Team;
 import FightLeagueKO.team.repository.TeamRepository;
@@ -99,7 +99,7 @@ public class TeamService implements ITeamService {
     }
 
     @Override
-    public void updateTeam(UUID teamId, CreateTeamDTO teamDTO) {
+    public void updateTeam(UUID teamId, UpdateTeamDTO teamDTO) {
 
         Objects.requireNonNull(teamDTO, "Parameter teamDTO could not be null");
 
@@ -177,6 +177,24 @@ public class TeamService implements ITeamService {
                 : 0.0;
 
         return teamMapper.toTeamStatsDTO(team, playRate);
+    }
+
+    @Override
+    public List<TeamStatsDTO> getRankingTeams() {
+        List<Team> teams = teamRepository.getAllActiveTeamsWithPlays();
+
+        long allTeamsPlayRate = teamRepository.getAllTeamsPlayRate();
+
+        return teams.stream()
+                .sorted((a, b) -> Double.compare(b.getWinRate(), a.getWinRate()))
+                .limit(10)
+                .map(team -> {
+                    double playRate = allTeamsPlayRate > 0
+                            ? team.getPlayCounter() * 100.0 / allTeamsPlayRate
+                            : 0.0;
+                    return teamMapper.toTeamStatsDTO(team, playRate);
+                })
+                .collect(Collectors.toList());
     }
 
 }

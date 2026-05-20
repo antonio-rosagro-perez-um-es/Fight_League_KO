@@ -1,9 +1,12 @@
 package FightLeagueKO.fighter.dto;
 
-public record FighterStatsDTO(
+import java.util.UUID;
 
+public record FighterStatsDTO(
+    UUID fighterId,
+    String fighterName,
     double winRate,
-    double pickRate,
+    double playRate,
     int pickCounter,
     int winsCounter,
     int losesCounter

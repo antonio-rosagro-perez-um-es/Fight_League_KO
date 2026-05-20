@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import FightLeagueKO.team.dto.CreateTeamDTO;
 import FightLeagueKO.team.dto.TeamStatsDTO;
+import FightLeagueKO.team.dto.UpdateTeamDTO;
 import FightLeagueKO.team.model.Team;
 import FightLeagueKO.team.service.ITeamService;
 
@@ -53,7 +54,7 @@ public class TeamController {
 
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updateTeam(@PathVariable UUID id, @RequestBody CreateTeamDTO teamDTO){
+    public void updateTeam(@PathVariable UUID id, @RequestBody UpdateTeamDTO teamDTO){
         teamService.updateTeam(id, teamDTO);
     }
 
@@ -70,8 +71,14 @@ public class TeamController {
     }
 
     @GetMapping("/{id}/stats")
-    public ResponseEntity<TeamStatsDTO> getTeamPlayRate(@PathVariable UUID teamId){
+    public ResponseEntity<TeamStatsDTO> getTeamStats(@PathVariable UUID teamId){
         return ResponseEntity.ok(teamService.getTeamStats(teamId));
     }
+
+    @GetMapping("/ranking")
+    public ResponseEntity<List<TeamStatsDTO>> getRankingTeams(){
+        return ResponseEntity.ok(teamService.getRankingTeams());
+    }
+
 
 }

@@ -88,4 +88,9 @@ public class FighterController {
         return ResponseEntity.ok(fightersService.getFighterStats(fighterId));
     }
 
+    @GetMapping("/ranking")
+    public ResponseEntity<List<FighterStatsDTO>> getFightersRanking(){
+        return ResponseEntity.ok(fightersService.getFightersRanking());
+    }
+
 }

@@ -31,4 +31,6 @@ public interface IFighterService {
     void updateFighterStats(UUID fighterId, boolean isWinner);
 
     FighterStatsDTO getFighterStats(UUID fighterId);
+
+    List<FighterStatsDTO> getFightersRanking();
 }

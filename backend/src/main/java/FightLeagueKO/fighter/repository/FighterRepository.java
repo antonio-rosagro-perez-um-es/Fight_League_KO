@@ -15,4 +15,6 @@ public interface FighterRepository extends CrudRepository<Fighter, UUID> {
     List<FighterBannerDTO> findAllBannerFighters();
 
     Long getAllFightersPlayRate();
+
+    List<Fighter> getAllActiveFightersWithPlays();
 }

@@ -11,17 +11,20 @@ import FightLeagueKO.combo.enums.FuseType;
 import FightLeagueKO.team.model.Team;
 
 public interface TeamRepositoryPostgre extends TeamRepository {
-   @Query("SELECT t FROM Team t WHERE t.deleted = false")
-   List<Team> getAllActiveTeams();
+      @Query("SELECT t FROM Team t WHERE t.deleted = false")
+      List<Team> getAllActiveTeams();
 
-   @Query("SELECT COALESCE(SUM(t.playCounter), 0) FROM Team t WHERE t.deleted = false")
-   Long getAllTeamsPlayRate();
+      @Query("SELECT COALESCE(SUM(t.playCounter), 0) FROM Team t WHERE t.deleted = false")
+      Long getAllTeamsPlayRate();
 
-   @Query("SELECT e FROM Equipo e WHERE e.pointFighterId = :pointId " +
-         "AND e.secondFighterId = :secondId AND e.fuse = :fuse AND e.deleted = false")
-   Optional<Team> existsByPointFighterIdAndSecondFighterIdAndFuseAndDeletedFalse(
-         @Param("pointId") UUID pointFighterId,
-         @Param("secondId") UUID secondFighterId,
-         @Param("fuse") FuseType fuse);
+      @Query("SELECT e FROM Equipo e WHERE e.pointFighterId = :pointId " +
+                  "AND e.secondFighterId = :secondId AND e.fuse = :fuse AND e.deleted = false")
+      Optional<Team> existsByPointFighterIdAndSecondFighterIdAndFuseAndDeletedFalse(
+                  @Param("pointId") UUID pointFighterId,
+                  @Param("secondId") UUID secondFighterId,
+                  @Param("fuse") FuseType fuse);
+
+      @Query("SELECT t FROM Team t WHERE t.deleted = false AND t.playCounter > 0")
+      List<Team> getAllActiveTeamsWithPlays();
 
 }
