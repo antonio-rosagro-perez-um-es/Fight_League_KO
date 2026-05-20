@@ -12,6 +12,11 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -22,7 +27,8 @@ public class Tournament {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "owner_id", nullable = false)
     private User userOwner;
 
     @Column(nullable = false)
@@ -34,8 +40,15 @@ public class Tournament {
     @Column(nullable = false)
     private int maxPlayers;
 
+    @ManyToMany
+    @JoinTable(
+        name = "tournament_players",
+        joinColumns = @JoinColumn(name = "tournament_id"),
+        inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
     private List<User> playersList;
 
+    @OneToMany(mappedBy = "tournament")
     private List<Game> gamesList;
 
     private LocalDate startDate;
@@ -44,6 +57,8 @@ public class Tournament {
 
     private boolean manualClose;
 
+    @ManyToOne
+    @JoinColumn(name = "winner_id")
     private User winner;
 
     private boolean deleted;
