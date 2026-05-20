@@ -24,72 +24,69 @@ import FightLeagueKO.tournament.service.ITournamentService;
 @RequestMapping("/tournaments")
 public class TournamentController {
 
-
     private ITournamentService tournamentService;
 
     @Autowired
-    public TournamentController( ITournamentService tournamentService){
+    public TournamentController(ITournamentService tournamentService) {
         this.tournamentService = tournamentService;
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Tournament> getTournamentById(UUID id){
+    public ResponseEntity<Tournament> getTournamentById(UUID tournamentId) {
 
-        return ResponseEntity.ok(tournamentService.getTournamentById(id));
+        return ResponseEntity.ok(tournamentService.getTournamentById(tournamentId));
     }
 
     @GetMapping
-public ResponseEntity<List<Tournament>> getAllTournaments(){
+    public ResponseEntity<List<Tournament>> getAllTournaments() {
         return ResponseEntity.ok(tournamentService.getAllTournament());
     }
 
     @GetMapping("/all-tournaments")
-    public ResponseEntity<List<Tournament>> getAllActiveTournaments(){
+    public ResponseEntity<List<Tournament>> getAllActiveTournaments() {
         return ResponseEntity.ok(tournamentService.getAllActiveTournament());
     }
 
     @PostMapping
-    public ResponseEntity<Tournament> createTournament(@RequestBody CreateTournamentDTO tournamentDTO){
+    public ResponseEntity<Tournament> createTournament(@RequestBody CreateTournamentDTO tournamentDTO) {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(tournamentService.createTournament(tournamentDTO));
     }
 
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updateTournament(@PathVariable UUID id, @RequestBody UpdateTournamentDTO tournamentDTO){
-        tournamentService.updateTournament(id, tournamentDTO);
+    public void updateTournament(@PathVariable UUID tournamentId, @RequestBody UpdateTournamentDTO tournamentDTO) {
+        tournamentService.updateTournament(tournamentId, tournamentDTO);
     }
 
     @PatchMapping("/{id}/delete")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteTournament(@PathVariable UUID id){
-        tournamentService.softDeleteTournament(id);
+    public void deleteTournament(@PathVariable UUID tournamentId) {
+        tournamentService.softDeleteTournament(tournamentId);
     }
 
     @PatchMapping("/{id}/restore")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void restoreTournament(@PathVariable UUID id){
-        tournamentService.restoreTournament(id);
+    public void restoreTournament(@PathVariable UUID tournamentId) {
+        tournamentService.restoreTournament(tournamentId);
     }
 
     @PatchMapping("{tournamentId}/join/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void joinTournament(@PathVariable UUID tournamentId, @PathVariable UUID userId){
+    public void joinTournament(@PathVariable UUID tournamentId, @PathVariable UUID userId) {
         tournamentService.joinTournament(tournamentId, userId);
     }
 
     @PatchMapping("{tournamentId}/exit/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void exitTournament(@PathVariable UUID tournamentId, @PathVariable UUID userId){
+    public void exitTournament(@PathVariable UUID tournamentId, @PathVariable UUID userId) {
         tournamentService.exitTournament(tournamentId, userId);
     }
 
     @PatchMapping("/{id}/close")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void closeRegistrations(@PathVariable UUID id){
-        tournamentService.closeRegistrations(id);
+    public void closeRegistrations(@PathVariable UUID tournamentId) {
+        tournamentService.closeRegistrations(tournamentId);
     }
-
-
 
 }

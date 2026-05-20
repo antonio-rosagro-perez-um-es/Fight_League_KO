@@ -6,18 +6,23 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import FightLeagueKO.combo.dto.ComboUpdateDTO;
+import FightLeagueKO.fighter.model.Fighter;
+import FightLeagueKO.fighter.service.FighterService;
 import FightLeagueKO.combo.dto.ComboCreateDTO;
 import FightLeagueKO.combo.dto.ComboFiltersDTO;
 import FightLeagueKO.combo.enums.ComboDificulty;
 import FightLeagueKO.combo.enums.FuseType;
 import FightLeagueKO.combo.model.Combo;
-import FightLeagueKO.combo.repository.ComboRepositoryPostgre;
+import FightLeagueKO.combo.repository.ComboRepository;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -26,20 +31,28 @@ import jakarta.transaction.Transactional;
 @Transactional
 public class ComboService implements IComboService {
 
-    private ComboRepositoryPostgre comboRepository;
+    private ComboRepository comboRepository;
+    private FighterService fighterService;
 
     @Autowired
-    public ComboService(ComboRepositoryPostgre comboRepository) {
+    public ComboService(ComboRepository comboRepository, FighterService fighterService) {
         this.comboRepository = comboRepository;
+        this.fighterService = fighterService;
     }
 
     @Override
-    public Combo getComboById(UUID id) {
+    public Combo getComboById(UUID comboId) {
 
-        Objects.requireNonNull(id, "Parameter id for combo could not be null");
+        Objects.requireNonNull(comboId, "Parameter comboId for combo could not be null");
 
-        return comboRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Combo not found with id: " + id));
+        return comboRepository.findById(comboId)
+                .orElseThrow(() -> new EntityNotFoundException("Combo not found with Id: " + comboId));
+    }
+
+    @Override
+    public List<Combo> getAllCombo(){
+         return StreamSupport.stream(comboRepository.findAll().spliterator(), false)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -67,8 +80,8 @@ public class ComboService implements IComboService {
             throw new IllegalArgumentException("Title cant be null");
         }
 
-        if (comboDTO.pointCharacter() == null) {
-            throw new IllegalArgumentException("Point character cant be null");
+        if (comboDTO.pointFighter() == null) {
+            throw new IllegalArgumentException("Point fighter cant be null");
         }
 
         if (comboDTO.textNotation() == null || comboDTO.textNotation().trim().isEmpty()) {
@@ -91,10 +104,16 @@ public class ComboService implements IComboService {
             throw new IllegalArgumentException("Description cant be null or empty");
         }
 
+        Fighter secondFighter = new Fighter();
+        if (comboDTO.secondFighter() != null)
+            secondFighter = fighterService.getFighterById(comboDTO.secondFighter());
+
+        Fighter pointFighter = fighterService.getFighterById(comboDTO.pointFighter());
+
         combo.setTitle(comboDTO.title());
         combo.setDeleted(false);
-        combo.setPointCharacterId(comboDTO.pointCharacter());
-        combo.setSecondCharacterId(comboDTO.secondCharacter());
+        combo.setPointFighter(pointFighter);
+        combo.setSecondFighter(secondFighter);
         combo.setTextNotation(comboDTO.textNotation());
         combo.setComboDificulty(comboDTO.comboDificulty());
         combo.setFuse(comboDTO.fuse());
@@ -104,26 +123,31 @@ public class ComboService implements IComboService {
         combo.setDamage(comboDTO.damage() != null ? comboDTO.damage() : 0);
         combo.setCreatedAt(LocalDate.now());
         combo.setUpDateAt(LocalDate.now());
+        combo.setPrivateCombo(true);
         // TODO: el combo sera marcado como oficial o no en funcion del usuario que lo
-        // crea
+        combo.setLikeCounter(0);
+        combo.setDislikeCounter(0);
+        
 
         return comboRepository.save(combo);
     }
 
     @Override
-    public void updateCombo(UUID id, ComboUpdateDTO comboDTO) {
+    public void updateCombo(UUID comboId, ComboUpdateDTO comboDTO) {
 
-        Combo combo = comboRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Combo not found exception with id: " + id));
+        Combo combo = comboRepository.findById(comboId)
+                .orElseThrow(() -> new EntityNotFoundException("Combo not found exception with Id: " + comboId));
 
-         Optional.ofNullable(comboDTO.title())
+        Optional.ofNullable(comboDTO.title())
                 .ifPresent(combo::setTitle);
 
-        Optional.ofNullable(comboDTO.pointCharacter())
-                .ifPresent(combo::setPointCharacterId);
+        Optional.ofNullable(comboDTO.pointFighter())
+                .map(fighterService::getFighterById)
+                .ifPresent(combo::setPointFighter);
 
-        Optional.ofNullable(comboDTO.secondCharacter())
-                .ifPresent(combo::setSecondCharacterId);
+        Optional.ofNullable(comboDTO.secondFighter())
+                .map(fighterService::getFighterById)
+                .ifPresent(combo::setSecondFighter);
 
         Optional.ofNullable(comboDTO.textNotation())
                 .ifPresent(combo::setTextNotation);
@@ -152,9 +176,9 @@ public class ComboService implements IComboService {
     }
 
     @Override
-    public void softDeleteCombo(UUID id) {
-        Combo combo = comboRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Combo not found exception with id: " + id));
+    public void softDeleteCombo(UUID comboId) {
+        Combo combo = comboRepository.findById(comboId)
+                .orElseThrow(() -> new EntityNotFoundException("Combo not found exception with id: " + comboId));
 
         combo.setDeleted(true);
 
@@ -162,9 +186,9 @@ public class ComboService implements IComboService {
     }
 
     @Override
-    public void restoreCombo(UUID id) {
-        Combo combo = comboRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Combo not found exception with id: " + id));
+    public void restoreCombo(UUID comboId) {
+        Combo combo = comboRepository.findById(comboId)
+                .orElseThrow(() -> new EntityNotFoundException("Combo not found exception with id: " + comboId));
 
         combo.setDeleted(false);
 
@@ -176,16 +200,16 @@ public class ComboService implements IComboService {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            if (filters.characterPointId() != null) {
-                predicates.add(criteriaBuilder.equal(root.get("pointCharacterId"), filters.characterPointId()));
+            predicates.add(criteriaBuilder.equal(root.get("oficial"), false));
+            predicates.add(criteriaBuilder.equal(root.get("deleted"), false));
+            predicates.add(criteriaBuilder.equal(root.get("privateCombo"), false));
+
+            if (filters.pointFighterId() != null) {
+                predicates.add(criteriaBuilder.equal(root.get("pointFighterId"), filters.pointFighterId()));
             }
 
-            if (filters.characterSecondId() != null) {
-                predicates.add(criteriaBuilder.equal(root.get("secondCharacterId"), filters.characterSecondId()));
-            }
-
-            if (filters.oficial() != null) {
-                predicates.add(criteriaBuilder.equal(root.get("oficial"), filters.oficial()));
+            if (filters.secondFighterId() != null) {
+                predicates.add(criteriaBuilder.equal(root.get("secondFighterId"), filters.secondFighterId()));
             }
 
             if (hasText(filters.comboDificulty())) {
@@ -208,5 +232,64 @@ public class ComboService implements IComboService {
         return value != null && !value.trim().isEmpty();
     }
 
-}
+    @Override
+    public void setComboPublic(UUID comboId) {
+         Combo combo = comboRepository.findById(comboId)
+                .orElseThrow(() -> new EntityNotFoundException("Combo not found exception with id: " + comboId));
 
+        combo.setPrivateCombo(false);
+
+        comboRepository.save(combo);
+    }
+
+    @Override
+    public void setComboPrivate(UUID comboId) {
+        Combo combo = comboRepository.findById(comboId)
+                .orElseThrow(() -> new EntityNotFoundException("Combo not found exception with id: " + comboId));
+
+        combo.setPrivateCombo(true);
+
+        comboRepository.save(combo);
+    }
+
+    @Override
+    public void addLikeCombo(UUID comboId) {
+       Combo combo = comboRepository.findById(comboId)
+                .orElseThrow(() -> new EntityNotFoundException("Combo not found exception with id: " + comboId));
+
+        combo.addLikeCombo();
+
+        comboRepository.save(combo);
+    }
+
+    @Override
+    public void addDislikeCombo(UUID comboId) {
+        Combo combo = comboRepository.findById(comboId)
+                .orElseThrow(() -> new EntityNotFoundException("Combo not found exception with id: " + comboId));
+
+        combo.addDislikeCombo();
+
+        comboRepository.save(combo);
+    }
+
+    @Override
+    public void removeLikeCombo(UUID comboId) {
+       Combo combo = comboRepository.findById(comboId)
+                .orElseThrow(() -> new EntityNotFoundException("Combo not found exception with id: " + comboId));
+
+        combo.removeLikeCombo();
+
+        comboRepository.save(combo);
+    }
+
+    @Override
+    public void removeDislikeCombo(UUID comboId) {
+        Combo combo = comboRepository.findById(comboId)
+                .orElseThrow(() -> new EntityNotFoundException("Combo not found exception with id: " + comboId));
+
+        combo.removeDislikeCombo();
+
+        comboRepository.save(combo);
+    }
+
+}

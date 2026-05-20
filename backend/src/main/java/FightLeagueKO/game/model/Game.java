@@ -6,12 +6,15 @@ import java.util.UUID;
 
 
 import FightLeagueKO.team.model.Team;
+import FightLeagueKO.tournament.model.Tournament;
 import FightLeagueKO.user.model.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -21,6 +24,10 @@ public class Game {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+
+    @ManyToOne
+    @JoinColumn(name = "tournament_id")
+    private Tournament tournament;
 
     @Column(nullable = false)
     private User user1;
@@ -44,6 +51,14 @@ public class Game {
 
     public Game() {
     } // POJO
+
+    public Tournament getTournament() {
+        return tournament;
+    }
+
+    public void setTournament(Tournament tournament) {
+        this.tournament = tournament;
+    }
 
     public User getUser1() {
         return user1;

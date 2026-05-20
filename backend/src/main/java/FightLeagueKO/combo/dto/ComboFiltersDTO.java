@@ -3,8 +3,8 @@ package FightLeagueKO.combo.dto;
 import java.util.UUID;
 
 public record ComboFiltersDTO(
-    UUID characterPointId,
-    UUID characterSecondId,
+    UUID pointFighterId,
+    UUID secondFighterId,
     Boolean oficial,
     String comboDificulty,
     String fuse,

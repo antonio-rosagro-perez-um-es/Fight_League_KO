@@ -1,19 +1,23 @@
-package FightLeagueKO.character.model;
+package FightLeagueKO.fighter.model;
 
+import java.util.Set;
 import java.util.UUID;
 
 import org.hibernate.annotations.UuidGenerator;
 
+import FightLeagueKO.combo.model.Combo;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "characters")
-public class Character {
+@Table(name = "fighters")
+public class Fighter {
 
     @Id
     @GeneratedValue
@@ -59,8 +63,15 @@ public class Character {
 
     private int easyOfUse;
 
-    public Character() {
-    } // POJO
+    private int winCounter;
+
+    private int playCounter;
+
+    @OneToMany(mappedBy = "pointFighter", fetch = FetchType.LAZY)
+    private Set<Combo> officialCombos;
+
+    public Fighter() {
+    }
 
     public UUID getId() {
         return id;
@@ -188,6 +199,47 @@ public class Character {
 
     public void setEasyOfUse(int easyOfUse) {
         this.easyOfUse = easyOfUse;
+    }
+
+    public Set<Combo> getOfficialCombos() {
+        return officialCombos;
+    }
+
+    public void setOfficialCombos(Set<Combo> officialCombos) {
+        this.officialCombos = officialCombos;
+    }
+
+    public int getWinCounter() {
+        return winCounter;
+    }
+
+    public void setWinCounter(int winCounter) {
+        this.winCounter = winCounter;
+    }
+
+    public int getPlayCounter() {
+        return playCounter;
+    }
+
+    public void setPlayCounter(int playCounter) {
+        this.playCounter = playCounter;
+    }
+
+    public void addPlayCounter() {
+        this.playCounter++;
+    }
+
+    public void addWinCounter() {
+        this.winCounter++;
+    }
+
+    public double getWinRate() {
+
+        if (playCounter == 0) {
+            return 0;
+        }
+
+        return (double) winCounter / playCounter;
     }
 
 }

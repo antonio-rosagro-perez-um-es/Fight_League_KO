@@ -7,8 +7,8 @@ import FightLeagueKO.combo.enums.FuseType;
 
 public record ComboCreateDTO(
     String title,
-    UUID pointCharacter,
-    UUID secondCharacter,
+    UUID pointFighter,
+    UUID secondFighter,
     String textNotation,
     ComboDificulty comboDificulty,
     FuseType fuse,

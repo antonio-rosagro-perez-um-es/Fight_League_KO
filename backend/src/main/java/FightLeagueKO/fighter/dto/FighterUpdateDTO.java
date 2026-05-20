@@ -1,6 +1,6 @@
-package FightLeagueKO.character.dto;
+package FightLeagueKO.fighter.dto;
 
-public record NewCharacterDTO(
+public record FighterUpdateDTO(
         String name,
         String description,
         String region,

@@ -7,7 +7,6 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,8 +34,13 @@ public class ComboController {
     }
 
     @GetMapping(value = "{id}")
-    public ResponseEntity<Combo> getComboById(@PathVariable UUID id){
-        return ResponseEntity.ok(comboService.getComboById(id));
+    public ResponseEntity<Combo> getComboById(@PathVariable UUID comboId){
+        return ResponseEntity.ok(comboService.getComboById(comboId));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Combo>> getAllCombos(){
+        return ResponseEntity.ok(comboService.getAllCombo());
     }
 
     @PostMapping(value = "/search")
@@ -53,22 +57,59 @@ public class ComboController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateCombo(
         @PathVariable UUID id, 
-        @Validated @RequestBody  ComboUpdateDTO comboUpdateDTO){
+        @RequestBody  ComboUpdateDTO comboUpdateDTO){
         comboService.updateCombo(id, comboUpdateDTO);
     }
 
 
     @PatchMapping("/{id}/delete")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void softDeleteComb(@PathVariable UUID id)
+    public void softDeleteComb(@PathVariable UUID comboId)
     {
-        comboService.softDeleteCombo(id);
+        comboService.softDeleteCombo(comboId);
     }
 
     @PatchMapping("/{id}/restore")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void restoreCombo(@PathVariable UUID id)
+    public void restoreCombo(@PathVariable UUID comboId)
     {
-        comboService.restoreCombo(id);
+        comboService.restoreCombo(comboId);
     }
+
+    @PatchMapping("{id}/public")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void setComboPublic(@PathVariable UUID comboId){
+        comboService.setComboPublic(comboId);
+    }
+
+    @PatchMapping("{id}/private")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void setComboPrivate(@PathVariable UUID comboId){
+        comboService.setComboPrivate(comboId);
+    }
+
+    @PatchMapping("{id}/add-like")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void addLikeCombo(@PathVariable UUID comboId){
+        comboService.addLikeCombo(comboId);
+    }
+
+    @PatchMapping("{id}/add-dislike")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void addDislikeCombo(@PathVariable UUID comboId){
+        comboService.addDislikeCombo(comboId);
+    }
+
+    @PatchMapping("{id}/remove-like")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void removeLikeCombo(@PathVariable UUID comboId){
+        comboService.removeLikeCombo(comboId);
+    }
+
+    @PatchMapping("{id}/remove-dislike")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void removeDislikeCombo(@PathVariable UUID comboId){
+        comboService.removeDislikeCombo(comboId);
+    }
+
 }

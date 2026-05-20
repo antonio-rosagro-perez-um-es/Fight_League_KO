@@ -153,9 +153,19 @@ public class GameService implements IGameService {
         Game game = gameRepository.findById(gameId)
                 .orElseThrow(() -> new IllegalArgumentException("Game not found with id " + gameId));
 
-        User user = userService.getUserById(userId);
+        User winnerUser = userService.getUserById(userId);
 
-        game.setWinner(user);
+        if (winnerUser.getId() == game.getUser1().getId()) {
+            teamService.updateTeamStats(game.getTeamUser1().getId(), true);
+            teamService.updateTeamStats(game.getTeamUser2().getId(), false);
+        }
+
+        if (winnerUser.getId() == game.getUser2().getId()) {
+            teamService.updateTeamStats(game.getTeamUser1().getId(), false);
+            teamService.updateTeamStats(game.getTeamUser2().getId(), true);
+        }
+
+        game.setWinner(winnerUser);
 
         gameRepository.save(game);
     }

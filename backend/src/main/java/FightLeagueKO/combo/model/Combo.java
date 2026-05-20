@@ -7,11 +7,13 @@ import org.hibernate.annotations.UuidGenerator;
 
 import FightLeagueKO.combo.enums.ComboDificulty;
 import FightLeagueKO.combo.enums.FuseType;
+import FightLeagueKO.fighter.model.Fighter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -33,10 +35,12 @@ public class Combo {
     private boolean oficial;
 
     @Column(nullable = false)
-    private UUID pointCharacterId;
+    @ManyToOne
+    private Fighter pointFighter;
 
     @Column(nullable = true)
-    private UUID secondCharacterId;
+    @ManyToOne
+    private Fighter secondFighter;
 
     @Column(nullable = false)
     private String textNotation;
@@ -62,6 +66,12 @@ public class Combo {
 
     private int damage;
 
+    private int likeCounter;
+
+    private int dislikeCounter;
+
+    private boolean privateCombo;
+
     public Combo() {
     }
 
@@ -73,11 +83,11 @@ public class Combo {
         this.id = id;
     }
 
-    public String getTitle(){
+    public String getTitle() {
         return title;
     }
 
-    public void setTitle(String title){
+    public void setTitle(String title) {
         this.title = title;
     }
 
@@ -97,20 +107,20 @@ public class Combo {
         this.oficial = oficial;
     }
 
-    public UUID getPointCharacterId() {
-        return pointCharacterId;
+    public Fighter getPointFighter() {
+        return pointFighter;
     }
 
-    public void setPointCharacterId(UUID pointCharacterId) {
-        this.pointCharacterId = pointCharacterId;
+    public void setPointFighter(Fighter pointFighter) {
+        this.pointFighter = pointFighter;
     }
 
-    public UUID getSecondCharacterId() {
-        return secondCharacterId;
+    public Fighter getSecondFighter() {
+        return secondFighter;
     }
 
-    public void setSecondCharacterId(UUID secondCharacterId) {
-        this.secondCharacterId = secondCharacterId;
+    public void setSecondFighter(Fighter secondFighter) {
+        this.secondFighter = secondFighter;
     }
 
     public String getTextNotation() {
@@ -184,5 +194,46 @@ public class Combo {
     public void setDamage(int damage) {
         this.damage = damage;
     }
+
+    public int getLikeCounter() {
+        return likeCounter;
+    }
+
+    public void setLikeCounter(int likeCounter) {
+        this.likeCounter = likeCounter;
+    }
+
+    public int getDislikeCounter() {
+        return dislikeCounter;
+    }
+
+    public void setDislikeCounter(int dislikeCounter) {
+        this.dislikeCounter = dislikeCounter;
+    }
+
+    public boolean isPrivateCombo() {
+        return privateCombo;
+    }
+
+    public void setPrivateCombo(boolean privateCombo) {
+        this.privateCombo = privateCombo;
+    }
+
+    public void addLikeCombo(){
+        this.likeCounter++;
+    }
+
+    public void removeLikeCombo(){
+        this.likeCounter--;
+    }
+
+    public void addDislikeCombo(){
+        this.dislikeCounter++;
+    }
+
+    public void removeDislikeCombo(){
+        this.dislikeCounter--;
+    }
+
 
 }

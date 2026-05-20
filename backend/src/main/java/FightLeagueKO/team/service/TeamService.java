@@ -10,6 +10,8 @@ import java.util.stream.StreamSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import FightLeagueKO.fighter.model.Fighter;
+import FightLeagueKO.fighter.service.FighterService;
 import FightLeagueKO.team.dto.TeamDTO;
 import FightLeagueKO.team.model.Team;
 import FightLeagueKO.team.repository.TeamRepository;
@@ -21,19 +23,21 @@ import jakarta.transaction.Transactional;
 public class TeamService implements ITeamService {
 
     private TeamRepository teamRepository;
+    private FighterService fighterService;
 
     @Autowired
-    public TeamService(TeamRepository teamRepository) {
+    public TeamService(TeamRepository teamRepository, FighterService fighterService) {
         this.teamRepository = teamRepository;
+        this.fighterService = fighterService;
     }
 
     @Override
-    public Team getTeamById(UUID id) {
+    public Team getTeamById(UUID teamId) {
 
-        Objects.requireNonNull(id, "Parameter id for team could not be null");
+        Objects.requireNonNull(teamId, "Parameter id for team could not be null");
 
-        return teamRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Team not found with id: " + id));
+        return teamRepository.findById(teamId)
+                .orElseThrow(() -> new EntityNotFoundException("Team not found with id: " + teamId));
     }
 
     @Override
@@ -55,29 +59,32 @@ public class TeamService implements ITeamService {
 
         Team team = new Team();
 
-        if (teamDTO.pointCharacterId() == null) {
-            throw new IllegalArgumentException("Team point character could not be null");
+        if (teamDTO.pointFighterId() == null) {
+            throw new IllegalArgumentException("Team point fighter could not be null");
         }
 
-        if (teamDTO.secondCharacterId() == null) {
-            throw new IllegalArgumentException("Team second character could not be null");
+        if (teamDTO.secondFighterId() == null) {
+            throw new IllegalArgumentException("Team second fighter could not be null");
         }
 
-        if (teamDTO.secondCharacterId() == null) {
+        if (teamDTO.fuse() == null) {
             throw new IllegalArgumentException("Team fuse could not be null");
         }
 
-        Optional<Team> alreadyExist = teamRepository.existsByPointCharacterIdAndSecondCharacterIdAndFuseAndDeletedFalse(
-                teamDTO.pointCharacterId(),
-                teamDTO.secondCharacterId(),
+        Optional<Team> alreadyExist = teamRepository.existsByPointFighterIdAndSecondFighterIdAndFuseAndDeletedFalse(
+                teamDTO.pointFighterId(),
+                teamDTO.secondFighterId(),
                 teamDTO.fuse());
-        
+
         if (alreadyExist.isPresent()) {
             return alreadyExist.get();
         }
 
-        team.setPointCharacterId(teamDTO.pointCharacterId());
-        team.setSecondCharacterId(teamDTO.secondCharacterId());
+        Fighter pointFighter = fighterService.getFighterById(teamDTO.pointFighterId());
+        Fighter seconFighter = fighterService.getFighterById(teamDTO.secondFighterId());
+
+        team.setPointFighter(pointFighter);
+        team.setSecondFighter(seconFighter);
         team.setFuse(teamDTO.fuse());
         team.setDeleted(false);
         team.setPlayCounter(0);
@@ -87,18 +94,20 @@ public class TeamService implements ITeamService {
     }
 
     @Override
-    public void updateTeam(UUID id, TeamDTO teamDTO) {
+    public void updateTeam(UUID teamId, TeamDTO teamDTO) {
 
         Objects.requireNonNull(teamDTO, "Parameter teamDTO could not be null");
 
-        Team team = teamRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Team not found with id:" + id));
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new EntityNotFoundException("Team not found with id:" + teamId));
 
-        Optional.ofNullable(teamDTO.pointCharacterId())
-                .ifPresent(team::setPointCharacterId);
+        Optional.ofNullable(teamDTO.pointFighterId())
+                .map(fighterService::getFighterById)
+                .ifPresent(team::setPointFighter);
 
-        Optional.ofNullable(teamDTO.secondCharacterId())
-                .ifPresent(team::setSecondCharacterId);
+        Optional.ofNullable(teamDTO.secondFighterId())
+                .map(fighterService::getFighterById)
+                .ifPresent(team::setSecondFighter);
 
         Optional.ofNullable(teamDTO.fuse())
                 .ifPresent(team::setFuse);
@@ -107,10 +116,10 @@ public class TeamService implements ITeamService {
     }
 
     @Override
-    public void softDeleteTeam(UUID id) {
+    public void softDeleteTeam(UUID teamId) {
 
-        Team team = teamRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Team not found with id:" + id));
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new EntityNotFoundException("Team not found with id:" + teamId));
 
         team.setDeleted(true);
 
@@ -119,9 +128,9 @@ public class TeamService implements ITeamService {
     }
 
     @Override
-    public void restoreTeam(UUID id) {
-        Team team = teamRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Team not found with id:" + id));
+    public void restoreTeam(UUID teamId) {
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new EntityNotFoundException("Team not found with id:" + teamId));
 
         team.setDeleted(false);
 
@@ -130,31 +139,41 @@ public class TeamService implements ITeamService {
     }
 
     @Override
-    public void updateTeamStats(UUID id, boolean result) {
-        Team team = teamRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Team not found with id:" + id));
+    public void updateTeamStats(UUID teamId, boolean isWinner) {
 
-        team.addPlayTeam();
-        if (result == true)
-            team.addWin();
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new EntityNotFoundException("Team not found with id:" + teamId));
+
+        team.addPlayTeamCounter();
+
+        if (isWinner == true) {
+            team.addWinCounter();
+        }
+
+        
+
+        team.getPointFighter().getId();
+
+        fighterService.updateFighterStats(team.getPointFighter().getId(), isWinner);
+        fighterService.updateFighterStats(team.getSecondFighter().getId(), isWinner);
 
         teamRepository.save(team);
     }
 
     @Override
-    public Double getTeamWinRate(UUID id) {
-        Team team = teamRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Team not found with id:" + id));
+    public Double getTeamWinRate(UUID teamId) {
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new EntityNotFoundException("Team not found with id:" + teamId));
 
         return team.getWinRate() * 100;
 
     }
 
     @Override
-    public Double getTeamPlayRate(UUID id) {
+    public Double getTeamPlayRate(UUID teamId) {
 
-        Team team = teamRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Team not found with id:" + id));
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new EntityNotFoundException("Team not found with id:" + teamId));
 
         double playRate = team.getPlayCounter() * 1.0 / teamRepository.getAllTeamsPlayRate();
 
