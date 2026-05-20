@@ -6,6 +6,7 @@ import FightLeagueKO.fighter.model.Fighter;
 
 import FightLeagueKO.fighter.dto.FighterBannerDTO;
 import FightLeagueKO.fighter.dto.FighterDetailDTO;
+import FightLeagueKO.fighter.dto.FighterStatsDTO;
 import FightLeagueKO.fighter.dto.FighterUpdateDTO;
 import FightLeagueKO.fighter.dto.CreateFighterDTO;
 
@@ -29,7 +30,7 @@ public interface IFighterService {
 
     void updateFighterStats(UUID fighterId, boolean isWinner);
 
-    Double getFighterWinRate(UUID fighterId);
+    FighterStatsDTO getFighterStats(UUID fighterId);
 
-    Double getFighterPlayRate(UUID fighterId);
+    List<FighterStatsDTO> getFightersRanking();
 }

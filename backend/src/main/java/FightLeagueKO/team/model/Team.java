@@ -41,6 +41,9 @@ public class Team {
     private int winCounter;
 
     @Column(nullable = false)
+    private int loseCounter;
+
+    @Column(nullable = false)
     private boolean deleted;
 
     public Team() { // POJO
@@ -95,6 +98,14 @@ public class Team {
         this.winCounter = winCounter;
     }
 
+    public int getLoseCounter() {
+        return loseCounter;
+    }
+
+    public void setLoseCounter(int loseCounter) {
+        this.loseCounter = loseCounter;
+    }
+
     public boolean isDeleted() {
         return deleted;
     }
@@ -107,17 +118,21 @@ public class Team {
         this.winCounter++;
     }
 
+    public void addLoseCounter(){
+        this.loseCounter++;
+    }
+
     public void addPlayTeamCounter() {
         this.playCounter++;
     }
-
+    
     public double getWinRate() {
 
         if (playCounter == 0) {
             return 0;
         }
 
-        return (double) winCounter / playCounter;
+        return (winCounter / playCounter) * 100.0;
     }
 
 }

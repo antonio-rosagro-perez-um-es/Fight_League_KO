@@ -12,7 +12,10 @@ import org.springframework.stereotype.Service;
 
 import FightLeagueKO.fighter.model.Fighter;
 import FightLeagueKO.fighter.service.FighterService;
-import FightLeagueKO.team.dto.TeamDTO;
+import FightLeagueKO.team.dto.CreateTeamDTO;
+import FightLeagueKO.team.dto.TeamStatsDTO;
+import FightLeagueKO.team.dto.UpdateTeamDTO;
+import FightLeagueKO.team.mapper.TeamMapper;
 import FightLeagueKO.team.model.Team;
 import FightLeagueKO.team.repository.TeamRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -24,11 +27,13 @@ public class TeamService implements ITeamService {
 
     private TeamRepository teamRepository;
     private FighterService fighterService;
+    private TeamMapper teamMapper;
 
     @Autowired
-    public TeamService(TeamRepository teamRepository, FighterService fighterService) {
+    public TeamService(TeamRepository teamRepository, FighterService fighterService, TeamMapper teamMapper) {
         this.teamRepository = teamRepository;
         this.fighterService = fighterService;
+        this.teamMapper = teamMapper;
     }
 
     @Override
@@ -53,7 +58,7 @@ public class TeamService implements ITeamService {
     }
 
     @Override
-    public Team createTeam(TeamDTO teamDTO) {
+    public Team createTeam(CreateTeamDTO teamDTO) {
 
         Objects.requireNonNull(teamDTO, "Parameter teamDTO could not be null");
 
@@ -94,7 +99,7 @@ public class TeamService implements ITeamService {
     }
 
     @Override
-    public void updateTeam(UUID teamId, TeamDTO teamDTO) {
+    public void updateTeam(UUID teamId, UpdateTeamDTO teamDTO) {
 
         Objects.requireNonNull(teamDTO, "Parameter teamDTO could not be null");
 
@@ -146,11 +151,10 @@ public class TeamService implements ITeamService {
 
         team.addPlayTeamCounter();
 
-        if (isWinner == true) {
+        if (isWinner == true)
             team.addWinCounter();
-        }
-
-        
+        else
+            team.addLoseCounter();
 
         team.getPointFighter().getId();
 
@@ -161,23 +165,36 @@ public class TeamService implements ITeamService {
     }
 
     @Override
-    public Double getTeamWinRate(UUID teamId) {
+    public TeamStatsDTO getTeamStats(UUID teamId) {
+
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new EntityNotFoundException("Team not found with id:" + teamId));
 
-        return team.getWinRate() * 100;
+        long allTeamsPlayRate = teamRepository.getAllTeamsPlayRate();
 
+        double playRate = allTeamsPlayRate > 0
+                ? team.getPlayCounter() * 100.0 / allTeamsPlayRate
+                : 0.0;
+
+        return teamMapper.toTeamStatsDTO(team, playRate);
     }
 
     @Override
-    public Double getTeamPlayRate(UUID teamId) {
+    public List<TeamStatsDTO> getRankingTeams() {
+        List<Team> teams = teamRepository.getAllActiveTeamsWithPlays();
 
-        Team team = teamRepository.findById(teamId)
-                .orElseThrow(() -> new EntityNotFoundException("Team not found with id:" + teamId));
+        long allTeamsPlayRate = teamRepository.getAllTeamsPlayRate();
 
-        double playRate = team.getPlayCounter() * 1.0 / teamRepository.getAllTeamsPlayRate();
-
-        return playRate * 100;
+        return teams.stream()
+                .sorted((a, b) -> Double.compare(b.getWinRate(), a.getWinRate()))
+                .limit(10)
+                .map(team -> {
+                    double playRate = allTeamsPlayRate > 0
+                            ? team.getPlayCounter() * 100.0 / allTeamsPlayRate
+                            : 0.0;
+                    return teamMapper.toTeamStatsDTO(team, playRate);
+                })
+                .collect(Collectors.toList());
     }
 
 }

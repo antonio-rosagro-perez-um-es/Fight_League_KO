@@ -1,8 +1,8 @@
 package FightLeagueKO.game.dto;
 
-import FightLeagueKO.team.dto.TeamDTO;
+import FightLeagueKO.team.dto.CreateTeamDTO;
 
 public record SetTeamsDTO(
-    TeamDTO team1,
-    TeamDTO team2
+    CreateTeamDTO team1,
+    CreateTeamDTO team2
 ){}

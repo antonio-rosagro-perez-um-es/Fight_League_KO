@@ -3,29 +3,31 @@ package FightLeagueKO.team.service;
 import java.util.List;
 import java.util.UUID;
 
-import FightLeagueKO.team.dto.TeamDTO;
+import FightLeagueKO.team.dto.CreateTeamDTO;
+import FightLeagueKO.team.dto.TeamStatsDTO;
+import FightLeagueKO.team.dto.UpdateTeamDTO;
 import FightLeagueKO.team.model.Team;
 
 public interface ITeamService {
 
-    public Team getTeamById (UUID id);
+    Team getTeamById(UUID teamId);
 
-    public List<Team> getAllTeams();
+    List<Team> getAllTeams();
 
-    public List<Team> getAllActiveTeams();
+    List<Team> getAllActiveTeams();
 
-    public Team createTeam(TeamDTO teamDTO);
+    Team createTeam(CreateTeamDTO teamDTO);
 
-    public void updateTeam(UUID id, TeamDTO teamDTO);
-    
-    public void softDeleteTeam(UUID id);
+    void updateTeam(UUID teamId, UpdateTeamDTO teamDTO);
 
-    public void restoreTeam(UUID id);
+    void softDeleteTeam(UUID teamId);
 
-    public void updateTeamStats(UUID id, boolean result);
+    void restoreTeam(UUID teamId);
 
-    public Double getTeamWinRate(UUID id);
+    void updateTeamStats(UUID teamId, boolean result);
 
-    public Double getTeamPlayRate(UUID id);
+    TeamStatsDTO getTeamStats(UUID teamId);
+
+    List<TeamStatsDTO> getRankingTeams();
 
 }

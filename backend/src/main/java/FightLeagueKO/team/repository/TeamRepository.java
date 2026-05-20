@@ -6,8 +6,6 @@ import java.util.UUID;
 
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.NoRepositoryBean;
-import org.springframework.data.repository.query.Param;
-
 import FightLeagueKO.combo.enums.FuseType;
 import FightLeagueKO.team.model.Team;
 
@@ -19,8 +17,11 @@ public interface TeamRepository extends CrudRepository<Team, UUID> {
     Long getAllTeamsPlayRate();
 
     Optional<Team> existsByPointFighterIdAndSecondFighterIdAndFuseAndDeletedFalse(
-            @Param("pointId") UUID pointFighterId,
-            @Param("secondId") UUID secondFighterId,
-            @Param("fuse") FuseType fuse);
-
+            UUID pointFighterId,
+            UUID secondFighterId,
+            FuseType fuse);
+    
+    
+    List<Team> getAllActiveTeamsWithPlays();
+    
 }

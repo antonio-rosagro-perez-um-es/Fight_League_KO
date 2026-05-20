@@ -65,6 +65,8 @@ public class Fighter {
 
     private int winCounter;
 
+    private int loseCounter;
+
     private int playCounter;
 
     @OneToMany(mappedBy = "pointFighter", fetch = FetchType.LAZY)
@@ -217,6 +219,14 @@ public class Fighter {
         this.winCounter = winCounter;
     }
 
+    public int getLoseCounter() {
+        return loseCounter;
+    }
+
+    public void setLoseCounter(int loseCounter) {
+        this.loseCounter = loseCounter;
+    }
+
     public int getPlayCounter() {
         return playCounter;
     }
@@ -233,13 +243,17 @@ public class Fighter {
         this.winCounter++;
     }
 
+    public void addLoseCounter(){
+        this.loseCounter++;
+    }
+
     public double getWinRate() {
 
         if (playCounter == 0) {
             return 0;
         }
 
-        return (double) winCounter / playCounter;
+        return (winCounter / playCounter) * 100.0 ;
     }
 
 }

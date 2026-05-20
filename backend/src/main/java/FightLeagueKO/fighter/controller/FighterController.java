@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import FightLeagueKO.fighter.dto.FighterBannerDTO;
 import FightLeagueKO.fighter.dto.FighterDetailDTO;
+import FightLeagueKO.fighter.dto.FighterStatsDTO;
 import FightLeagueKO.fighter.dto.FighterUpdateDTO;
 import FightLeagueKO.fighter.dto.CreateFighterDTO;
 import FightLeagueKO.fighter.model.Fighter;
@@ -82,14 +83,14 @@ public class FighterController {
         fightersService.restoreFighter(fighterId);
     }
 
-    @GetMapping("/{id}/win-rate")
-    public ResponseEntity<Double> getFighterWinrate(@PathVariable UUID fighterId) {
-        return ResponseEntity.ok(fightersService.getFighterWinRate(fighterId));
+    @GetMapping("/{id}/stats")
+    public ResponseEntity<FighterStatsDTO> getFighterStats(@PathVariable UUID fighterId) {
+        return ResponseEntity.ok(fightersService.getFighterStats(fighterId));
     }
 
-    @GetMapping("/{id}/play-rate")
-    public ResponseEntity<Double> getFighterPlayRate(@PathVariable UUID fighterId) {
-        return ResponseEntity.ok(fightersService.getFighterPlayRate(fighterId));
+    @GetMapping("/ranking")
+    public ResponseEntity<List<FighterStatsDTO>> getFightersRanking(){
+        return ResponseEntity.ok(fightersService.getFightersRanking());
     }
 
 }
