@@ -12,7 +12,9 @@ import org.springframework.stereotype.Service;
 
 import FightLeagueKO.fighter.dto.FighterBannerDTO;
 import FightLeagueKO.fighter.dto.FighterDetailDTO;
+import FightLeagueKO.fighter.dto.FighterStatsDTO;
 import FightLeagueKO.fighter.dto.FighterUpdateDTO;
+import FightLeagueKO.fighter.mapper.FighterMapper;
 import FightLeagueKO.fighter.dto.CreateFighterDTO;
 import FightLeagueKO.fighter.model.Fighter;
 import FightLeagueKO.fighter.repository.FighterRepository;
@@ -27,11 +29,13 @@ public class FighterService implements IFighterService {
 
     private FighterRepository fighterRepository;
     private ComboMapper comboMapper;
+    private FighterMapper fighterMapper;
 
     @Autowired
-    public FighterService(FighterRepository fighterRepository, ComboMapper comboMapper) {
+    public FighterService(FighterRepository fighterRepository, ComboMapper comboMapper, FighterMapper fighterMapper) {
         this.fighterRepository = fighterRepository;
         this.comboMapper = comboMapper;
+        this.fighterMapper = fighterMapper;
     }
 
     @Override
@@ -69,23 +73,7 @@ public class FighterService implements IFighterService {
                 .map(comboMapper::toDTO)
                 .toList();
 
-        return new FighterDetailDTO(
-                fighter.getId(),
-                fighter.getName(),
-                fighter.getDescription(),
-                fighter.getRegion(),
-                fighter.getArchetype(),
-                fighter.getTitle(),
-                fighter.getItLikes(),
-                fighter.getItDislike(),
-                fighter.getSlug(),
-                fighter.getHealth(),
-                fighter.getRange(),
-                fighter.getPower(),
-                fighter.getVitality(),
-                fighter.getMobility(),
-                fighter.getEasyOfUse(),
-                comboDTOs);
+        return fighterMapper.toFighterDetailDTO(fighter, comboDTOs);
     }
 
     @Override
@@ -252,27 +240,26 @@ public class FighterService implements IFighterService {
 
         if (isWinner == true)
             fighter.addWinCounter();
+        else
+            fighter.addLoseCounter();
 
         fighterRepository.save(fighter);
     }
 
-    @Override
-    public Double getFighterWinRate(UUID fighterId) {
-        Fighter fighter = fighterRepository.findById(fighterId)
-                .orElseThrow(() -> new EntityNotFoundException("Fighter not found with id:" + fighterId));
-
-        return fighter.getWinRate() * 100;
-    }
 
     @Override
-    public Double getFighterPlayRate(UUID fighterId) {
+    public FighterStatsDTO getFighterStats(UUID fighterId){
 
         Fighter fighter = fighterRepository.findById(fighterId)
                 .orElseThrow(() -> new EntityNotFoundException("Fighter not found with id:" + fighterId));
 
-        double playRate = fighter.getPlayCounter() * 1.0 / fighterRepository.getAllFightersPlayRate();
+         long allFightersPlayRate = fighterRepository.getAllFightersPlayRate();
 
-        return playRate * 100;
+        double playRate = allFightersPlayRate > 0
+                ? fighter.getPlayCounter() * 100.0 / allFightersPlayRate
+                : 0.0;
+
+        return fighterMapper.toFighterStatsDTO(fighter, playRate);
     }
 
 }

@@ -15,7 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import FightLeagueKO.team.dto.TeamDTO;
+import FightLeagueKO.team.dto.CreateTeamDTO;
+import FightLeagueKO.team.dto.TeamStatsDTO;
 import FightLeagueKO.team.model.Team;
 import FightLeagueKO.team.service.ITeamService;
 
@@ -31,8 +32,8 @@ public class TeamController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Team> getTeamById(@PathVariable UUID id) {
-        return ResponseEntity.ok(teamService.getTeamById(id));
+    public ResponseEntity<Team> getTeamById(@PathVariable UUID teamId) {
+        return ResponseEntity.ok(teamService.getTeamById(teamId));
     }
 
     @GetMapping
@@ -46,13 +47,13 @@ public class TeamController {
     }
 
     @PostMapping
-    public ResponseEntity<Team> createTeam(@RequestBody TeamDTO teamDTO){
+    public ResponseEntity<Team> createTeam(@RequestBody CreateTeamDTO teamDTO){
         return ResponseEntity.status(HttpStatus.CREATED).body(teamService.createTeam(teamDTO));
     }
 
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updateTeam(@PathVariable UUID id, @RequestBody TeamDTO teamDTO){
+    public void updateTeam(@PathVariable UUID id, @RequestBody CreateTeamDTO teamDTO){
         teamService.updateTeam(id, teamDTO);
     }
 
@@ -64,18 +65,13 @@ public class TeamController {
 
     @PatchMapping("{id}/restore")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void restoreTeam(@PathVariable UUID id){
-        teamService.restoreTeam(id);
+    public void restoreTeam(@PathVariable UUID teamId){
+        teamService.restoreTeam(teamId);
     }
 
-    @GetMapping("/{id}/win-rate")
-    public ResponseEntity<Double> getTeamWinrate(@PathVariable UUID id){
-        return ResponseEntity.ok(teamService.getTeamWinRate(id));
-    }
-
-    @GetMapping("/{id}/play-rate")
-    public ResponseEntity<Double> getTeamPlayRate(@PathVariable UUID id){
-        return ResponseEntity.ok(teamService.getTeamPlayRate(id));
+    @GetMapping("/{id}/stats")
+    public ResponseEntity<TeamStatsDTO> getTeamPlayRate(@PathVariable UUID teamId){
+        return ResponseEntity.ok(teamService.getTeamStats(teamId));
     }
 
 }

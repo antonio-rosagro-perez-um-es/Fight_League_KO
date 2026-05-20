@@ -15,7 +15,7 @@ import FightLeagueKO.game.dto.CreateGameDTO;
 import FightLeagueKO.game.dto.UpdateGameDTO;
 import FightLeagueKO.game.model.Game;
 import FightLeagueKO.game.repository.GameRepository;
-import FightLeagueKO.team.dto.TeamDTO;
+import FightLeagueKO.team.dto.CreateTeamDTO;
 import FightLeagueKO.team.model.Team;
 import FightLeagueKO.team.service.TeamService;
 import FightLeagueKO.user.model.User;
@@ -134,7 +134,7 @@ public class GameService implements IGameService {
     }
 
     @Override
-    public void setTeams(UUID gameId, TeamDTO teamUser1, TeamDTO teamUser2) {
+    public void setTeams(UUID gameId, CreateTeamDTO teamUser1, CreateTeamDTO teamUser2) {
 
         Game game = gameRepository.findById(gameId)
                 .orElseThrow(() -> new IllegalArgumentException("Game not found with id " + gameId));
