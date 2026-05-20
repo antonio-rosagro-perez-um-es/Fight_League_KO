@@ -51,7 +51,7 @@ public class Game {
     private LocalDate gameDate;
 
     @Column(nullable = false)
-    private boolean delete;
+    private boolean deleted;
 
     public Game() {
     } // POJO
@@ -113,10 +113,10 @@ public class Game {
     }
 
     public boolean isDelete() {
-        return delete;
+        return deleted;
     }
 
-    public void setDelete(boolean delete) {
-        this.delete = delete;
+    public void setDelete(boolean deleted) {
+        this.deleted = deleted;
     }
 }

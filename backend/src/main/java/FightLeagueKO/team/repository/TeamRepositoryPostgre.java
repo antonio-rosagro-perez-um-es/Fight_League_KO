@@ -17,8 +17,8 @@ public interface TeamRepositoryPostgre extends TeamRepository {
       @Query("SELECT COALESCE(SUM(t.playCounter), 0) FROM Team t WHERE t.deleted = false")
       Long getAllTeamsPlayRate();
 
-      @Query("SELECT e FROM Equipo e WHERE e.pointFighterId = :pointId " +
-                  "AND e.secondFighterId = :secondId AND e.fuse = :fuse AND e.deleted = false")
+      @Query("SELECT t FROM Team t WHERE t.pointFighter.id = :pointId " +
+                  "AND t.secondFighter.id = :secondId AND t.fuse = :fuse AND t.deleted = false")
       Optional<Team> existsByPointFighterIdAndSecondFighterIdAndFuseAndDeletedFalse(
                   @Param("pointId") UUID pointFighterId,
                   @Param("secondId") UUID secondFighterId,

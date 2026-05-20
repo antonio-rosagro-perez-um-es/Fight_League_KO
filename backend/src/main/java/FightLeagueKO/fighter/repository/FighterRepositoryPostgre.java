@@ -14,7 +14,7 @@ public interface FighterRepositoryPostgre extends FighterRepository {
                 c.slug
             )
             FROM Fighter c
-            WHERE c.delete = false
+            WHERE c.deleted = false
             """)
     List<FighterBannerDTO> findAllBannerFighters();
 

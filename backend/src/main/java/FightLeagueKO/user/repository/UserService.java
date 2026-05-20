@@ -2,8 +2,12 @@ package FightLeagueKO.user.repository;
 
 import java.util.UUID;
 
-import FightLeagueKO.user.model.User;
+import org.springframework.stereotype.Service;
 
+import FightLeagueKO.user.model.User;
+import jakarta.transaction.Transactional;
+@Service
+@Transactional
 public class UserService implements IUserService{
 
     @Override

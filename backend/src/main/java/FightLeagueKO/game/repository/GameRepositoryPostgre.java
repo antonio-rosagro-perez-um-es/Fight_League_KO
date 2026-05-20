@@ -8,6 +8,6 @@ import FightLeagueKO.game.model.Game;
 
 public interface GameRepositoryPostgre extends GameRepository{
     
-    @Query("SELEC g FROM Game g WHERE g.deleted = false")
+    @Query("SELECT g FROM Game g WHERE g.deleted = false")
     public List<Game> getAllActiveGames();
 }
