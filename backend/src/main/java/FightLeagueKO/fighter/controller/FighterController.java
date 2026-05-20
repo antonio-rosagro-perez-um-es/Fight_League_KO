@@ -35,13 +35,13 @@ public class FighterController {
     }
 
     @GetMapping(value = "/{id}")
-    public ResponseEntity<Fighter> getFighterById(@PathVariable UUID fighterId) {
-        return ResponseEntity.ok(fightersService.getFighterById(fighterId));
+    public ResponseEntity<Fighter> getFighterById(@PathVariable UUID id) {
+        return ResponseEntity.ok(fightersService.getFighterById(id));
     }
 
     @GetMapping(value = "/{id}/official-combos")
-    public ResponseEntity<FighterDetailDTO> getFighterWithOfficialCombos(@PathVariable UUID fighterId) {
-        return ResponseEntity.ok(fightersService.getFighterWithOfficialCombos(fighterId));
+    public ResponseEntity<FighterDetailDTO> getFighterWithOfficialCombos(@PathVariable UUID id) {
+        return ResponseEntity.ok(fightersService.getFighterWithOfficialCombos(id));
     }
 
     @GetMapping
@@ -66,26 +66,26 @@ public class FighterController {
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateFighter(
-            @PathVariable UUID fighterId,
+            @PathVariable UUID id,
             @RequestBody FighterUpdateDTO fighterDTO) {
-        fightersService.updateFighter(fighterId, fighterDTO);
+        fightersService.updateFighter(id, fighterDTO);
     }
 
     @PatchMapping("/{id}/deactivate")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void softDeleteFighter(@PathVariable UUID fighterId) {
-        fightersService.softDeleteFighter(fighterId);
+    public void softDeleteFighter(@PathVariable UUID id) {
+        fightersService.softDeleteFighter(id);
     }
 
     @PatchMapping("/{id}/restore")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void restoreFighter(@PathVariable UUID fighterId) {
-        fightersService.restoreFighter(fighterId);
+    public void restoreFighter(@PathVariable UUID id) {
+        fightersService.restoreFighter(id);
     }
 
     @GetMapping("/{id}/stats")
-    public ResponseEntity<FighterStatsDTO> getFighterStats(@PathVariable UUID fighterId) {
-        return ResponseEntity.ok(fightersService.getFighterStats(fighterId));
+    public ResponseEntity<FighterStatsDTO> getFighterStats(@PathVariable UUID id) {
+        return ResponseEntity.ok(fightersService.getFighterStats(id));
     }
 
     @GetMapping("/ranking")
