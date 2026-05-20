@@ -12,6 +12,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -34,12 +35,11 @@ public class Combo {
     @Column(nullable = false)
     private boolean oficial;
 
-    @Column(nullable = false)
     @ManyToOne
+    @JoinColumn(name = "point_fighter_id", nullable = false)
     private Fighter pointFighter;
-
-    @Column(nullable = true)
     @ManyToOne
+    @JoinColumn(name = "second_fighter_id", nullable = true)
     private Fighter secondFighter;
 
     @Column(nullable = false)
@@ -219,21 +219,20 @@ public class Combo {
         this.privateCombo = privateCombo;
     }
 
-    public void addLikeCombo(){
+    public void addLikeCombo() {
         this.likeCounter++;
     }
 
-    public void removeLikeCombo(){
+    public void removeLikeCombo() {
         this.likeCounter--;
     }
 
-    public void addDislikeCombo(){
+    public void addDislikeCombo() {
         this.dislikeCounter++;
     }
 
-    public void removeDislikeCombo(){
+    public void removeDislikeCombo() {
         this.dislikeCounter--;
     }
-
 
 }
