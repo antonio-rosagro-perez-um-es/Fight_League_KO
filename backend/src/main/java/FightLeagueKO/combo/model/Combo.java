@@ -10,6 +10,8 @@ import FightLeagueKO.combo.enums.FuseType;
 import FightLeagueKO.fighter.model.Fighter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -45,6 +47,7 @@ public class Combo {
     @Column(nullable = false)
     private String textNotation;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ComboDificulty comboDificulty;
 

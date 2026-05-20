@@ -8,6 +8,8 @@ import FightLeagueKO.combo.enums.FuseType;
 import FightLeagueKO.fighter.model.Fighter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -31,6 +33,7 @@ public class Team {
     @JoinColumn(name = "second_fighter_id", nullable = false)
     private Fighter secondFighter;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private FuseType fuse;
 
@@ -118,14 +121,14 @@ public class Team {
         this.winCounter++;
     }
 
-    public void addLoseCounter(){
+    public void addLoseCounter() {
         this.loseCounter++;
     }
 
     public void addPlayTeamCounter() {
         this.playCounter++;
     }
-    
+
     public double getWinRate() {
 
         if (playCounter == 0) {

@@ -3,8 +3,6 @@ package FightLeagueKO.game.model;
 import java.time.LocalDate;
 import java.util.UUID;
 
-
-
 import FightLeagueKO.team.model.Team;
 import FightLeagueKO.tournament.model.Tournament;
 import FightLeagueKO.user.model.User;
@@ -29,18 +27,24 @@ public class Game {
     @JoinColumn(name = "tournament_id")
     private Tournament tournament;
 
-    @Column(nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "user1_id", nullable = false)
     private User user1;
 
-    @Column(nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "user2_id", nullable = false)
     private User user2;
 
-    @Column(nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "team_user1_id", nullable = false)
     private Team teamUser1;
 
-    @Column(nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "team_user2_id", nullable = false)
     private Team teamUser2;
 
+    @ManyToOne
+    @JoinColumn(name = "winner_id")
     private User winner;
 
     @Column(nullable = false)
