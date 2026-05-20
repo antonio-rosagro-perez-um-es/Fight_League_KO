@@ -8,26 +8,26 @@ import FightLeagueKO.tournament.dto.UpdateTournamentDTO;
 import FightLeagueKO.tournament.model.Tournament;
 
 public interface ITournamentService {
-    
-    public Tournament getTournamentById(UUID tournamentId);
 
-    public List<Tournament> getAllTournament();
+    Tournament getTournamentById(UUID tournamentId);
 
-    public List<Tournament> getAllActiveTournament();
+    List<Tournament> getAllTournament();
 
-    public Tournament createTournament(CreateTournamentDTO tournamentDTO);
+    List<Tournament> getAllActiveTournament();
 
-    public void updateTournament(UUID tournamentId, UpdateTournamentDTO tournamentDTO);
+    Tournament createTournament(CreateTournamentDTO tournamentDTO);
 
-    public void softDeleteTournament(UUID tournamentId);
+    void updateTournament(UUID tournamentId, UpdateTournamentDTO tournamentDTO);
 
-    public void restoreTournament(UUID tournamentId);
+    void softDeleteTournament(UUID tournamentId);
 
-    public void joinTournament(UUID tournamentId, UUID userId);
+    void restoreTournament(UUID tournamentId);
 
-    public void exitTournament(UUID tournamentId ,UUID userId);
+    void joinTournament(UUID tournamentId, UUID userId);
 
-    public void closeRegistrations(UUID tournamentId);
+    void exitTournament(UUID tournamentId, UUID userId);
 
-    public void generateMatchups(UUID tournamentId);
+    void closeRegistrations(UUID tournamentId);
+
+    void generateMatchups(UUID tournamentId);
 }
