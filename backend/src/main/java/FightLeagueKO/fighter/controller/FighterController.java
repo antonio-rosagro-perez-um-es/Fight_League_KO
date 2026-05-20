@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import FightLeagueKO.fighter.dto.FighterBannerDTO;
-import FightLeagueKO.fighter.dto.FighterDetailDTO;
 import FightLeagueKO.fighter.dto.FighterStatsDTO;
 import FightLeagueKO.fighter.dto.FighterUpdateDTO;
 import FightLeagueKO.fighter.dto.CreateFighterDTO;
@@ -37,11 +36,6 @@ public class FighterController {
     @GetMapping(value = "/{id}")
     public ResponseEntity<Fighter> getFighterById(@PathVariable UUID id) {
         return ResponseEntity.ok(fightersService.getFighterById(id));
-    }
-
-    @GetMapping(value = "/{id}/official-combos")
-    public ResponseEntity<FighterDetailDTO> getFighterWithOfficialCombos(@PathVariable UUID id) {
-        return ResponseEntity.ok(fightersService.getFighterWithOfficialCombos(id));
     }
 
     @GetMapping

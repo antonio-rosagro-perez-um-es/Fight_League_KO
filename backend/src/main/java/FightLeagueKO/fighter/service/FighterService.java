@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import FightLeagueKO.fighter.dto.FighterBannerDTO;
-import FightLeagueKO.fighter.dto.FighterDetailDTO;
 import FightLeagueKO.fighter.dto.FighterStatsDTO;
 import FightLeagueKO.fighter.dto.FighterUpdateDTO;
 import FightLeagueKO.fighter.mapper.FighterMapper;
@@ -28,13 +27,11 @@ import jakarta.transaction.Transactional;
 public class FighterService implements IFighterService {
 
     private FighterRepository fighterRepository;
-    private ComboMapper comboMapper;
     private FighterMapper fighterMapper;
 
     @Autowired
     public FighterService(FighterRepository fighterRepository, ComboMapper comboMapper, FighterMapper fighterMapper) {
         this.fighterRepository = fighterRepository;
-        this.comboMapper = comboMapper;
         this.fighterMapper = fighterMapper;
     }
 
@@ -54,26 +51,10 @@ public class FighterService implements IFighterService {
     @Override
     public Fighter getFighterById(UUID fighterId) {
 
-        Objects.requireNonNull(
-                fighterId,
-                "Parameter id could not be null");
+        Objects.requireNonNull(fighterId, "Parameter id could not be null");
 
         return fighterRepository.findById(fighterId)
                 .orElseThrow(() -> new EntityNotFoundException("Fighter not found with id: " + fighterId));
-    }
-
-    @Override
-    public FighterDetailDTO getFighterWithOfficialCombos(UUID fighterId) {
-        Objects.requireNonNull(fighterId, "Parameter id could not be null");
-
-        Fighter fighter = fighterRepository.findById(fighterId)
-                .orElseThrow(() -> new EntityNotFoundException("Fighter not found with id: " + fighterId));
-
-        List<ComboDTO> comboDTOs = fighter.getOfficialCombos().stream()
-                .map(comboMapper::toDTO)
-                .toList();
-
-        return fighterMapper.toFighterDetailDTO(fighter, comboDTOs);
     }
 
     @Override
