@@ -124,7 +124,7 @@ public class ComboService implements IComboService {
         combo.setDeleted(false);
         combo.setPointFighterId(comboDTO.pointFighter());
 
-        if (comboDTO.secondFighter() != null && comboDTO.pointFighter() != comboDTO.secondFighter())
+        if (comboDTO.secondFighter() != null && !comboDTO.pointFighter().equals(comboDTO.secondFighter()) )
             combo.setSecondFighterId(comboDTO.secondFighter());
 
         combo.setTextNotation(comboDTO.textNotation());
