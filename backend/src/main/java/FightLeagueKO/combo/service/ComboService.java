@@ -124,8 +124,9 @@ public class ComboService implements IComboService {
         combo.setDeleted(false);
         combo.setPointFighterId(comboDTO.pointFighter());
 
-        if (comboDTO.secondFighter() != null)
+        if (comboDTO.secondFighter() != null && comboDTO.pointFighter() != comboDTO.secondFighter())
             combo.setSecondFighterId(comboDTO.secondFighter());
+
         combo.setTextNotation(comboDTO.textNotation());
         combo.setComboDificulty(comboDTO.comboDificulty());
         combo.setFuse(comboDTO.fuse());
@@ -135,8 +136,7 @@ public class ComboService implements IComboService {
         combo.setDamage(comboDTO.damage() != null ? comboDTO.damage() : 0);
         combo.setCreatedAt(LocalDate.now());
         combo.setUpDateAt(LocalDate.now());
-        combo.setPrivateCombo(true);
-        // TODO: el combo sera marcado como oficial o no en funcion del usuario que lo
+        combo.setPrivateCombo(true); // TODO: el combo sera marcado como oficial o no en funcion del usuario que lo cree
         combo.setLikeCounter(0);
         combo.setDislikeCounter(0);
         
