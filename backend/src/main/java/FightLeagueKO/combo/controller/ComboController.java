@@ -33,7 +33,7 @@ public class ComboController {
         this.comboService = comboService;
     }
 
-    @GetMapping(value = "{id}")
+    @GetMapping(value = "{comboId}")
     public ResponseEntity<ComboDTO> getComboById(@PathVariable UUID comboId) {
         return ResponseEntity.ok(comboService.getComboById(comboId));
     }
@@ -58,55 +58,55 @@ public class ComboController {
         return ResponseEntity.status(HttpStatus.CREATED).body(comboService.createCombo(comboCreateDTO));
     }
 
-    @PatchMapping("/{id}")
+    @PatchMapping("/{comboId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updateCombo(@PathVariable UUID id, @RequestBody ComboUpdateDTO comboUpdateDTO) {
-        comboService.updateCombo(id, comboUpdateDTO);
+    public void updateCombo(@PathVariable UUID comboId, @RequestBody ComboUpdateDTO comboUpdateDTO) {
+        comboService.updateCombo(comboId, comboUpdateDTO);
     }
 
-    @PatchMapping("/{id}/delete")
+    @PatchMapping("/{comboId}/delete")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void softDeleteComb(@PathVariable UUID comboId) {
         comboService.softDeleteCombo(comboId);
     }
 
-    @PatchMapping("/{id}/restore")
+    @PatchMapping("/{comboId}/restore")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void restoreCombo(@PathVariable UUID comboId) {
         comboService.restoreCombo(comboId);
     }
 
-    @PatchMapping("{id}/public")
+    @PatchMapping("{comboId}/public")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void setComboPublic(@PathVariable UUID comboId) {
         comboService.setComboPublic(comboId);
     }
 
-    @PatchMapping("{id}/private")
+    @PatchMapping("{comboId}/private")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void setComboPrivate(@PathVariable UUID comboId) {
         comboService.setComboPrivate(comboId);
     }
 
-    @PatchMapping("{id}/add-like")
+    @PatchMapping("{comboId}/add-like")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void addLikeCombo(@PathVariable UUID comboId) {
         comboService.addLikeCombo(comboId);
     }
 
-    @PatchMapping("{id}/add-dislike")
+    @PatchMapping("{comboId}/add-dislike")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void addDislikeCombo(@PathVariable UUID comboId) {
         comboService.addDislikeCombo(comboId);
     }
 
-    @PatchMapping("{id}/remove-like")
+    @PatchMapping("{comboId}/remove-like")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void removeLikeCombo(@PathVariable UUID comboId) {
         comboService.removeLikeCombo(comboId);
     }
 
-    @PatchMapping("{id}/remove-dislike")
+    @PatchMapping("{comboId}/remove-dislike")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void removeDislikeCombo(@PathVariable UUID comboId) {
         comboService.removeDislikeCombo(comboId);
