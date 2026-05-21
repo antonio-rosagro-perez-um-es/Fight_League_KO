@@ -1,5 +1,7 @@
 package FightLeagueKO.user.service;
 
-public enum UserRepositoryPostgre extends UserRepository{
+import FightLeagueKO.user.repository.UserRepository;
+
+public interface UserRepositoryPostgre extends UserRepository{
 
 }

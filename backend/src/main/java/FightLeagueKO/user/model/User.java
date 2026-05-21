@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import FightLeagueKO.tournament.model.Tournament;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -28,6 +29,8 @@ public class User {
 
     @OneToMany(mappedBy = "winner")
     private List<Tournament> wonTournaments;
+
+    String name;
 
     public User() {
         // POJO
@@ -63,6 +66,14 @@ public class User {
 
     public void setWonTournaments(List<Tournament> wonTournaments) {
         this.wonTournaments = wonTournaments;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
 }

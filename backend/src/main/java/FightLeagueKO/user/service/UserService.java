@@ -1,10 +1,13 @@
 package FightLeagueKO.user.service;
 
+import java.util.ArrayList;
 import java.util.Objects;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import FightLeagueKO.user.dto.CreateUserDTO;
 import FightLeagueKO.user.model.User;
 import FightLeagueKO.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -16,6 +19,7 @@ public class UserService implements IUserService{
 
     private UserRepository userRepository;
 
+    @Autowired
     public UserService(UserRepository userRepository){
         this.userRepository = userRepository;
     }
@@ -29,9 +33,16 @@ public class UserService implements IUserService{
     }
 
     @Override
-    public User createUser(){
+    public User createUser(CreateUserDTO userDTO){
 
-        return userRepository.save(null);
+        User user = new User();
+
+        user.setOwnedTournaments(new ArrayList<>());
+        user.setParticipatedTournaments(new ArrayList<>());
+        user.setWonTournaments(new ArrayList<>());
+        user.setName(userDTO.userName());
+
+        return userRepository.save(user);
     }
 
 }
