@@ -19,7 +19,7 @@ import FightLeagueKO.team.dto.CreateTeamDTO;
 import FightLeagueKO.team.model.Team;
 import FightLeagueKO.team.service.TeamService;
 import FightLeagueKO.user.model.User;
-import FightLeagueKO.user.repository.UserService;
+import FightLeagueKO.user.service.UserService;
 import jakarta.transaction.Transactional;
 
 @Service

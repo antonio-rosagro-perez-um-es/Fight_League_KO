@@ -26,14 +26,12 @@ import jakarta.transaction.Transactional;
 public class TeamService implements ITeamService {
 
     private TeamRepository teamRepository;
-    private FighterRepositoryPostgre fighterRepository;
     private FighterService fighterService;
     private TeamMapper teamMapper;
 
     @Autowired
     public TeamService(TeamRepository teamRepository, FighterRepositoryPostgre fighterRepository, FighterService fighterService, TeamMapper teamMapper) {
         this.teamRepository = teamRepository;
-        this.fighterRepository = fighterRepository;
         this.fighterService = fighterService;
         this.teamMapper = teamMapper;
     }

@@ -20,7 +20,7 @@ import FightLeagueKO.tournament.enums.TournamentStates;
 import FightLeagueKO.tournament.model.Tournament;
 import FightLeagueKO.tournament.repository.TournamentRepository;
 import FightLeagueKO.user.model.User;
-import FightLeagueKO.user.repository.UserService;
+import FightLeagueKO.user.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 

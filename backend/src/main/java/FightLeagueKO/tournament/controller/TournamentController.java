@@ -31,7 +31,7 @@ public class TournamentController {
         this.tournamentService = tournamentService;
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{tournamentId}")
     public ResponseEntity<Tournament> getTournamentById(UUID tournamentId) {
 
         return ResponseEntity.ok(tournamentService.getTournamentById(tournamentId));
@@ -53,19 +53,19 @@ public class TournamentController {
         return ResponseEntity.status(HttpStatus.CREATED).body(tournamentService.createTournament(tournamentDTO));
     }
 
-    @PatchMapping("/{id}")
+    @PatchMapping("/{tournamentId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateTournament(@PathVariable UUID tournamentId, @RequestBody UpdateTournamentDTO tournamentDTO) {
         tournamentService.updateTournament(tournamentId, tournamentDTO);
     }
 
-    @PatchMapping("/{id}/delete")
+    @PatchMapping("/{tournamentId}/delete")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteTournament(@PathVariable UUID tournamentId) {
         tournamentService.softDeleteTournament(tournamentId);
     }
 
-    @PatchMapping("/{id}/restore")
+    @PatchMapping("/{tournamentId}/restore")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void restoreTournament(@PathVariable UUID tournamentId) {
         tournamentService.restoreTournament(tournamentId);
@@ -83,7 +83,7 @@ public class TournamentController {
         tournamentService.exitTournament(tournamentId, userId);
     }
 
-    @PatchMapping("/{id}/close")
+    @PatchMapping("/{tournamentId}/close")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void closeRegistrations(@PathVariable UUID tournamentId) {
         tournamentService.closeRegistrations(tournamentId);
