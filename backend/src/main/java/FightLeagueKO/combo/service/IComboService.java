@@ -3,20 +3,22 @@ package FightLeagueKO.combo.service;
 import java.util.List;
 import java.util.UUID;
 
-import FightLeagueKO.combo.dto.ComboUpdateDTO;
 import FightLeagueKO.combo.dto.ComboCreateDTO;
+import FightLeagueKO.combo.dto.ComboDTO;
 import FightLeagueKO.combo.dto.ComboFiltersDTO;
-import FightLeagueKO.combo.model.Combo;
+import FightLeagueKO.combo.dto.ComboUpdateDTO;
 
 public interface IComboService {
 
-    Combo getComboById(UUID comboId);
+    ComboDTO getComboById(UUID comboId);
 
-    List<Combo> getAllCombo();
+    List<ComboDTO> getOfficialCombosByFighter(UUID fighterId);
 
-    List<Combo> searchCombos(ComboFiltersDTO filters);
+    List<ComboDTO> getAllCombo();
 
-    Combo createCombo(ComboCreateDTO comboDTO);
+    List<ComboDTO> searchCombos(ComboFiltersDTO filters);
+
+    ComboDTO createCombo(ComboCreateDTO comboDTO);
 
     void updateCombo(UUID comboId, ComboUpdateDTO comboDTO);
 

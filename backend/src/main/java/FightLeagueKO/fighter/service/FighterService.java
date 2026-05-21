@@ -11,14 +11,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import FightLeagueKO.fighter.dto.FighterBannerDTO;
+import FightLeagueKO.fighter.dto.FighterDTO;
 import FightLeagueKO.fighter.dto.FighterStatsDTO;
 import FightLeagueKO.fighter.dto.FighterUpdateDTO;
 import FightLeagueKO.fighter.mapper.FighterMapper;
 import FightLeagueKO.fighter.dto.CreateFighterDTO;
 import FightLeagueKO.fighter.model.Fighter;
 import FightLeagueKO.fighter.repository.FighterRepository;
-import FightLeagueKO.combo.dto.ComboDTO;
-import FightLeagueKO.combo.mapper.ComboMapper;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 
@@ -30,15 +29,16 @@ public class FighterService implements IFighterService {
     private FighterMapper fighterMapper;
 
     @Autowired
-    public FighterService(FighterRepository fighterRepository, ComboMapper comboMapper, FighterMapper fighterMapper) {
+    public FighterService(FighterRepository fighterRepository, FighterMapper fighterMapper) {
         this.fighterRepository = fighterRepository;
         this.fighterMapper = fighterMapper;
     }
 
     @Override
-    public List<Fighter> getAllFighters() {
+    public List<FighterDTO> getAllFighters() {
 
         return StreamSupport.stream(fighterRepository.findAll().spliterator(), false)
+                .map(fighterMapper::toFighterDTO)
                 .collect(Collectors.toList());
     }
 
@@ -49,16 +49,28 @@ public class FighterService implements IFighterService {
     }
 
     @Override
+    public FighterDTO getFighterDTOById(UUID fighterId) {
+
+        Objects.requireNonNull(fighterId, "Parameter id could not be null");
+
+        Fighter fighter = fighterRepository.findById(fighterId)
+                .orElseThrow(() -> new EntityNotFoundException("Fighter not found with id: " + fighterId));
+
+        return fighterMapper.toFighterDTO(fighter);
+    }
+
+    @Override
     public Fighter getFighterById(UUID fighterId) {
 
         Objects.requireNonNull(fighterId, "Parameter id could not be null");
 
         return fighterRepository.findById(fighterId)
                 .orElseThrow(() -> new EntityNotFoundException("Fighter not found with id: " + fighterId));
+
     }
 
     @Override
-    public Fighter createFighter(CreateFighterDTO fighterDTO) {
+    public FighterDTO createFighter(CreateFighterDTO fighterDTO) {
 
         Objects.requireNonNull(fighterDTO, "Parameter fighterDTO could not be null");
 
@@ -136,7 +148,8 @@ public class FighterService implements IFighterService {
         fighter.setMobility(fighterDTO.mobility());
         fighter.setEasyOfUse(fighterDTO.easyOfUse());
 
-        return fighterRepository.save(fighter);
+        Fighter saved = fighterRepository.save(fighter);
+        return fighterMapper.toFighterDTO(saved);
     }
 
     @Override

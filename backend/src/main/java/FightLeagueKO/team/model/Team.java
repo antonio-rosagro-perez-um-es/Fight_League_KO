@@ -5,15 +5,12 @@ import java.util.UUID;
 import org.hibernate.annotations.UuidGenerator;
 
 import FightLeagueKO.combo.enums.FuseType;
-import FightLeagueKO.fighter.model.Fighter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -25,13 +22,11 @@ public class Team {
     @UuidGenerator
     private UUID id;
 
-    @ManyToOne
-    @JoinColumn(name = "first_fighter_id", nullable = false)
-    private Fighter pointFighter;
+    @Column(name = "first_fighter_id", nullable = false)
+    private UUID pointFighterId;
 
-    @ManyToOne
-    @JoinColumn(name = "second_fighter_id", nullable = false)
-    private Fighter secondFighter;
+    @Column(name = "second_fighter_id", nullable = false)
+    private UUID secondFighterId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -61,20 +56,20 @@ public class Team {
         this.id = id;
     }
 
-    public Fighter getPointFighter() {
-        return pointFighter;
+    public UUID getPointFighterId() {
+        return pointFighterId;
     }
 
-    public void setPointFighter(Fighter pointFighter) {
-        this.pointFighter = pointFighter;
+    public void setPointFighterId(UUID pointFighterId) {
+        this.pointFighterId = pointFighterId;
     }
 
-    public Fighter getSecondFighter() {
-        return secondFighter;
+    public UUID getSecondFighterId() {
+        return secondFighterId;
     }
 
-    public void setSecondFighter(Fighter secondFighter) {
-        this.secondFighter = secondFighter;
+    public void setSecondFighterId(UUID secondFighterId) {
+        this.secondFighterId = secondFighterId;
     }
 
     public FuseType getFuse() {

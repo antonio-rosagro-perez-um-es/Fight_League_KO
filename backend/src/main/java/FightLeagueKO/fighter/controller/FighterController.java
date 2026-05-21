@@ -16,10 +16,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import FightLeagueKO.fighter.dto.FighterBannerDTO;
+import FightLeagueKO.fighter.dto.FighterDTO;
 import FightLeagueKO.fighter.dto.FighterStatsDTO;
 import FightLeagueKO.fighter.dto.FighterUpdateDTO;
 import FightLeagueKO.fighter.dto.CreateFighterDTO;
-import FightLeagueKO.fighter.model.Fighter;
 import FightLeagueKO.fighter.service.IFighterService;
 
 @RestController
@@ -34,12 +34,12 @@ public class FighterController {
     }
 
     @GetMapping(value = "/{id}")
-    public ResponseEntity<Fighter> getFighterById(@PathVariable UUID id) {
-        return ResponseEntity.ok(fightersService.getFighterById(id));
+    public ResponseEntity<FighterDTO> getFighterById(@PathVariable UUID id) {
+        return ResponseEntity.ok(fightersService.getFighterDTOById(id));
     }
 
     @GetMapping
-    public ResponseEntity<List<Fighter>> getAllFighters() {
+    public ResponseEntity<List<FighterDTO>> getAllFighters() {
         return ResponseEntity.ok(fightersService.getAllFighters());
     }
 
@@ -49,10 +49,10 @@ public class FighterController {
     }
 
     @PostMapping
-    public ResponseEntity<Fighter> createFighter(
+    public ResponseEntity<FighterDTO> createFighter(
             @RequestBody CreateFighterDTO fighterDTO) {
 
-        Fighter created = fightersService.createFighter(fighterDTO);
+        FighterDTO created = fightersService.createFighter(fighterDTO);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
