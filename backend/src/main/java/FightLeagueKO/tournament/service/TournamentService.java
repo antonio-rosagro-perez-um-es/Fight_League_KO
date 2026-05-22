@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import FightLeagueKO.game.dto.CreateGameDTO;
 import FightLeagueKO.game.model.Game;
@@ -36,11 +37,11 @@ public class TournamentService implements ITournamentService {
         this.gameService = gameService;
     }
 
-    public Tournament getTournamentById(UUID id) {
-        Objects.requireNonNull(id, "Paramenter id could not be null");
+    public Tournament getTournamentById(@PathVariable UUID tournamentId) {
+        Objects.requireNonNull(tournamentId);
 
-        return tournamentRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Tournament not found with id: " + id));
+        return tournamentRepository.findById(tournamentId)
+                .orElseThrow(() -> new EntityNotFoundException("Tournament not found with id: " + tournamentId));
     }
 
     @Override

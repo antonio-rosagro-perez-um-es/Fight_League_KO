@@ -32,7 +32,7 @@ public class TournamentController {
     }
 
     @GetMapping("/{tournamentId}")
-    public ResponseEntity<Tournament> getTournamentById(UUID tournamentId) {
+    public ResponseEntity<Tournament> getTournamentById(@PathVariable UUID tournamentId) {
 
         return ResponseEntity.ok(tournamentService.getTournamentById(tournamentId));
     }
