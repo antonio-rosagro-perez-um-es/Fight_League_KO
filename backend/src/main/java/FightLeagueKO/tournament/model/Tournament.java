@@ -6,16 +6,14 @@ import java.util.UUID;
 
 import FightLeagueKO.game.model.Game;
 import FightLeagueKO.tournament.enums.TournamentStates;
-import FightLeagueKO.user.model.User;
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
@@ -27,9 +25,8 @@ public class Tournament {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @ManyToOne
-    @JoinColumn(name = "owner_id", nullable = false)
-    private User userOwner;
+    @Column(name = "owner_id", nullable = false)
+    private UUID userOwnerId;
 
     @Column(nullable = false)
     private String title;
@@ -40,13 +37,13 @@ public class Tournament {
     @Column(nullable = false)
     private int maxPlayers;
 
-    @ManyToMany
-    @JoinTable(
+    @ElementCollection
+    @CollectionTable(
         name = "tournament_players",
-        joinColumns = @JoinColumn(name = "tournament_id"),
-        inverseJoinColumns = @JoinColumn(name = "user_id")
+        joinColumns = @JoinColumn(name = "tournament_id")
     )
-    private List<User> playersList;
+    @Column(name = "user_id")
+    private List<UUID> playersIds;
 
     @OneToMany(mappedBy = "tournament")
     private List<Game> gamesList;
@@ -57,9 +54,8 @@ public class Tournament {
 
     private boolean manualClose;
 
-    @ManyToOne
-    @JoinColumn(name = "winner_id")
-    private User winner;
+    @Column(name = "winner_id")
+    private UUID winnerId;
 
     private boolean deleted;
 
@@ -75,12 +71,12 @@ public class Tournament {
         this.id = id;
     }
 
-    public User getUserOwner() {
-        return userOwner;
+    public UUID getUserOwnerId() {
+        return userOwnerId;
     }
 
-    public void setUserOwner(User userOwner) {
-        this.userOwner = userOwner;
+    public void setUserOwnerId(UUID userOwnerId) {
+        this.userOwnerId = userOwnerId;
     }
 
     public String getTitle() {
@@ -107,12 +103,12 @@ public class Tournament {
         this.maxPlayers = maxPlayers;
     }
 
-    public List<User> getPlayersList() {
-        return playersList;
+    public List<UUID> getPlayersIds() {
+        return playersIds;
     }
 
-    public void setPlayersList(List<User> playersList) {
-        this.playersList = playersList;
+    public void setPlayersIds(List<UUID> playersIds) {
+        this.playersIds = playersIds;
     }
 
     public List<Game> getGamesList() {
@@ -147,12 +143,12 @@ public class Tournament {
         this.manualClose = manualClose;
     }
 
-    public User getWinner() {
-        return winner;
+    public UUID getWinnerId() {
+        return winnerId;
     }
 
-    public void setWinner(User winner) {
-        this.winner = winner;
+    public void setWinnerId(UUID winnerId) {
+        this.winnerId = winnerId;
     }
 
     public boolean isDeleted() {
@@ -163,12 +159,12 @@ public class Tournament {
         this.deleted = deleted;
     }
 
-    public void addPlayer(User user) {
-        playersList.add(user);
+    public void addPlayer(UUID userId) {
+        playersIds.add(userId);
     }
 
-    public void removePlayer(User user) {
-        playersList.remove(user);
+    public void removePlayer(UUID userId) {
+        playersIds.remove(userId);
     }
 
 }

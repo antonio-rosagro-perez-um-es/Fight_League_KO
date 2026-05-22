@@ -16,11 +16,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import FightLeagueKO.fighter.dto.FighterBannerDTO;
-import FightLeagueKO.fighter.dto.FighterDetailDTO;
+import FightLeagueKO.fighter.dto.FighterDTO;
 import FightLeagueKO.fighter.dto.FighterStatsDTO;
 import FightLeagueKO.fighter.dto.FighterUpdateDTO;
 import FightLeagueKO.fighter.dto.CreateFighterDTO;
-import FightLeagueKO.fighter.model.Fighter;
 import FightLeagueKO.fighter.service.IFighterService;
 
 @RestController
@@ -35,17 +34,12 @@ public class FighterController {
     }
 
     @GetMapping(value = "/{id}")
-    public ResponseEntity<Fighter> getFighterById(@PathVariable UUID fighterId) {
-        return ResponseEntity.ok(fightersService.getFighterById(fighterId));
-    }
-
-    @GetMapping(value = "/{id}/official-combos")
-    public ResponseEntity<FighterDetailDTO> getFighterWithOfficialCombos(@PathVariable UUID fighterId) {
-        return ResponseEntity.ok(fightersService.getFighterWithOfficialCombos(fighterId));
+    public ResponseEntity<FighterDTO> getFighterById(@PathVariable UUID id) {
+        return ResponseEntity.ok(fightersService.getFighterDTOById(id));
     }
 
     @GetMapping
-    public ResponseEntity<List<Fighter>> getAllFighters() {
+    public ResponseEntity<List<FighterDTO>> getAllFighters() {
         return ResponseEntity.ok(fightersService.getAllFighters());
     }
 
@@ -55,10 +49,10 @@ public class FighterController {
     }
 
     @PostMapping
-    public ResponseEntity<Fighter> createFighter(
+    public ResponseEntity<FighterDTO> createFighter(
             @RequestBody CreateFighterDTO fighterDTO) {
 
-        Fighter created = fightersService.createFighter(fighterDTO);
+        FighterDTO created = fightersService.createFighter(fighterDTO);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
@@ -66,26 +60,26 @@ public class FighterController {
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateFighter(
-            @PathVariable UUID fighterId,
+            @PathVariable UUID id,
             @RequestBody FighterUpdateDTO fighterDTO) {
-        fightersService.updateFighter(fighterId, fighterDTO);
+        fightersService.updateFighter(id, fighterDTO);
     }
 
     @PatchMapping("/{id}/deactivate")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void softDeleteFighter(@PathVariable UUID fighterId) {
-        fightersService.softDeleteFighter(fighterId);
+    public void softDeleteFighter(@PathVariable UUID id) {
+        fightersService.softDeleteFighter(id);
     }
 
     @PatchMapping("/{id}/restore")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void restoreFighter(@PathVariable UUID fighterId) {
-        fightersService.restoreFighter(fighterId);
+    public void restoreFighter(@PathVariable UUID id) {
+        fightersService.restoreFighter(id);
     }
 
     @GetMapping("/{id}/stats")
-    public ResponseEntity<FighterStatsDTO> getFighterStats(@PathVariable UUID fighterId) {
-        return ResponseEntity.ok(fightersService.getFighterStats(fighterId));
+    public ResponseEntity<FighterStatsDTO> getFighterStats(@PathVariable UUID id) {
+        return ResponseEntity.ok(fightersService.getFighterStats(id));
     }
 
     @GetMapping("/ranking")

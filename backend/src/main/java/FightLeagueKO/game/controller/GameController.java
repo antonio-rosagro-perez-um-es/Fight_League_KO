@@ -53,19 +53,19 @@ public class GameController {
         return ResponseEntity.status(HttpStatus.CREATED).body(gameService.createGame(gameDTO));
     }
 
-    @PatchMapping
+    @PatchMapping("/{gameId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateGame(@PathVariable UUID gameId, @RequestBody UpdateGameDTO gameDTO) {
         gameService.updateGame(gameId, gameDTO);
     }
 
-    @PatchMapping("/{id}/delete")
+    @PatchMapping("/{gameId}/delete")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteGame(@PathVariable UUID gameId) {
         gameService.softDeleteGame(gameId);
     }
 
-    @PatchMapping("/{id}/restore")
+    @PatchMapping("/{gameId}/restore")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void restoreGame(@PathVariable UUID gameId) {
         gameService.restoreGame(gameId);

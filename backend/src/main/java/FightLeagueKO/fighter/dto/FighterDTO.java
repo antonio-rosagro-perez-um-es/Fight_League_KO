@@ -1,11 +1,8 @@
 package FightLeagueKO.fighter.dto;
 
-import java.util.List;
 import java.util.UUID;
 
-import FightLeagueKO.combo.dto.ComboDTO;
-
-public record FighterDetailDTO(
+public record FighterDTO(
     UUID id,
     String name,
     String description,
@@ -15,12 +12,16 @@ public record FighterDetailDTO(
     String itLikes,
     String itDislike,
     String slug,
+    boolean deleted,
     int health,
     int range,
     int power,
     int vitality,
     int mobility,
     int easyOfUse,
-    List<ComboDTO> officialCombos
+    int winCounter,
+    int loseCounter,
+    int playCounter,
+    double winRate
 ) {
 }

@@ -32,7 +32,7 @@ public class TeamController {
         this.teamService = teamService;
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{teamId}")
     public ResponseEntity<Team> getTeamById(@PathVariable UUID teamId) {
         return ResponseEntity.ok(teamService.getTeamById(teamId));
     }
@@ -52,25 +52,25 @@ public class TeamController {
         return ResponseEntity.status(HttpStatus.CREATED).body(teamService.createTeam(teamDTO));
     }
 
-    @PatchMapping("/{id}")
+    @PatchMapping("/{teamId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updateTeam(@PathVariable UUID id, @RequestBody UpdateTeamDTO teamDTO){
-        teamService.updateTeam(id, teamDTO);
+    public void updateTeam(@PathVariable UUID teamId, @RequestBody UpdateTeamDTO teamDTO){
+        teamService.updateTeam(teamId, teamDTO);
     }
 
-    @PatchMapping("{id}/delete")
+    @PatchMapping("{teamId}/delete")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteTeam(@PathVariable UUID id){
-        teamService.softDeleteTeam(id);
+    public void deleteTeam(@PathVariable UUID teamId){
+        teamService.softDeleteTeam(teamId);
     }
 
-    @PatchMapping("{id}/restore")
+    @PatchMapping("{teamId}/restore")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void restoreTeam(@PathVariable UUID teamId){
         teamService.restoreTeam(teamId);
     }
 
-    @GetMapping("/{id}/stats")
+    @GetMapping("/{teamId}/stats")
     public ResponseEntity<TeamStatsDTO> getTeamStats(@PathVariable UUID teamId){
         return ResponseEntity.ok(teamService.getTeamStats(teamId));
     }

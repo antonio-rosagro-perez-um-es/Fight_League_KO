@@ -7,14 +7,12 @@ import org.hibernate.annotations.UuidGenerator;
 
 import FightLeagueKO.combo.enums.ComboDificulty;
 import FightLeagueKO.combo.enums.FuseType;
-import FightLeagueKO.fighter.model.Fighter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -35,16 +33,16 @@ public class Combo {
     @Column(nullable = false)
     private boolean oficial;
 
-    @ManyToOne
-    @JoinColumn(name = "point_fighter_id", nullable = false)
-    private Fighter pointFighter;
-    @ManyToOne
-    @JoinColumn(name = "second_fighter_id", nullable = true)
-    private Fighter secondFighter;
+    @Column(name = "point_fighter_id", nullable = false)
+    private UUID pointFighterId;
+
+    @Column(name = "second_fighter_id")
+    private UUID secondFighterId;
 
     @Column(nullable = false)
     private String textNotation;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ComboDificulty comboDificulty;
 
@@ -54,8 +52,7 @@ public class Combo {
     @Column(nullable = false)
     private String mediaUrl;
 
-    @Lob
-    @Column(nullable = false)
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String description;
 
     private LocalDate createdAt;
@@ -107,20 +104,20 @@ public class Combo {
         this.oficial = oficial;
     }
 
-    public Fighter getPointFighter() {
-        return pointFighter;
+    public UUID getPointFighterId() {
+        return pointFighterId;
     }
 
-    public void setPointFighter(Fighter pointFighter) {
-        this.pointFighter = pointFighter;
+    public void setPointFighterId(UUID pointFighterId) {
+        this.pointFighterId = pointFighterId;
     }
 
-    public Fighter getSecondFighter() {
-        return secondFighter;
+    public UUID getSecondFighterId() {
+        return secondFighterId;
     }
 
-    public void setSecondFighter(Fighter secondFighter) {
-        this.secondFighter = secondFighter;
+    public void setSecondFighterId(UUID secondFighterId) {
+        this.secondFighterId = secondFighterId;
     }
 
     public String getTextNotation() {

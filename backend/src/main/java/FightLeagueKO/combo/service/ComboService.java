@@ -14,9 +14,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import FightLeagueKO.combo.dto.ComboDTO;
 import FightLeagueKO.combo.dto.ComboUpdateDTO;
-import FightLeagueKO.fighter.model.Fighter;
-import FightLeagueKO.fighter.service.FighterService;
+import FightLeagueKO.combo.mapper.ComboMapper;
 import FightLeagueKO.combo.dto.ComboCreateDTO;
 import FightLeagueKO.combo.dto.ComboFiltersDTO;
 import FightLeagueKO.combo.enums.ComboDificulty;
@@ -32,45 +32,61 @@ import jakarta.transaction.Transactional;
 public class ComboService implements IComboService {
 
     private ComboRepository comboRepository;
-    private FighterService fighterService;
+    private ComboMapper comboMapper;
 
     @Autowired
-    public ComboService(ComboRepository comboRepository, FighterService fighterService) {
+    public ComboService(ComboRepository comboRepository, ComboMapper comboMapper) {
         this.comboRepository = comboRepository;
-        this.fighterService = fighterService;
+        this.comboMapper = comboMapper;
     }
 
     @Override
-    public Combo getComboById(UUID comboId) {
-
-        Objects.requireNonNull(comboId, "Parameter comboId for combo could not be null");
-
-        return comboRepository.findById(comboId)
-                .orElseThrow(() -> new EntityNotFoundException("Combo not found with Id: " + comboId));
-    }
-
-    @Override
-    public List<Combo> getAllCombo(){
-         return StreamSupport.stream(comboRepository.findAll().spliterator(), false)
+    public List<ComboDTO> getOfficialCombosByFighter(UUID fighterId) {
+        Objects.requireNonNull(fighterId, "fighterId must not be null");
+        return comboRepository.findOfficialCombosByPointFighterId(fighterId)
+                .stream()
+                .map(comboMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<Combo> searchCombos(ComboFiltersDTO filters) {
+    public ComboDTO getComboById(UUID comboId) {
+
+        Objects.requireNonNull(comboId, "Parameter comboId for combo could not be null");
+
+        Combo combo = comboRepository.findById(comboId)
+                .orElseThrow(() -> new EntityNotFoundException("Combo not found with Id: " + comboId));
+
+        return comboMapper.toDTO(combo);
+    }
+
+    @Override
+    public List<ComboDTO> getAllCombo(){
+         return StreamSupport.stream(comboRepository.findAll().spliterator(), false)
+                .map(comboMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ComboDTO> searchCombos(ComboFiltersDTO filters) {
 
         if (filters == null) {
-            return comboRepository.findAll();
+            return comboRepository.findAll().stream()
+                    .map(comboMapper::toDTO)
+                    .collect(Collectors.toList());
         }
 
         Sort sort = filters.latest() == null
                 ? Sort.unsorted()
                 : Sort.by(filters.latest() ? Sort.Direction.DESC : Sort.Direction.ASC, "createdAt");
 
-        return comboRepository.findAll(buildFilters(filters), sort);
+        return comboRepository.findAll(buildFilters(filters), sort).stream()
+                .map(comboMapper::toDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public Combo createCombo(ComboCreateDTO comboDTO) {
+    public ComboDTO createCombo(ComboCreateDTO comboDTO) {
 
         Objects.requireNonNull(comboDTO, "Parameters could not be null");
 
@@ -104,16 +120,13 @@ public class ComboService implements IComboService {
             throw new IllegalArgumentException("Description cant be null or empty");
         }
 
-        Fighter secondFighter = new Fighter();
-        if (comboDTO.secondFighter() != null)
-            secondFighter = fighterService.getFighterById(comboDTO.secondFighter());
-
-        Fighter pointFighter = fighterService.getFighterById(comboDTO.pointFighter());
-
         combo.setTitle(comboDTO.title());
         combo.setDeleted(false);
-        combo.setPointFighter(pointFighter);
-        combo.setSecondFighter(secondFighter);
+        combo.setPointFighterId(comboDTO.pointFighter());
+
+        if (comboDTO.secondFighter() != null && !comboDTO.pointFighter().equals(comboDTO.secondFighter()) )
+            combo.setSecondFighterId(comboDTO.secondFighter());
+
         combo.setTextNotation(comboDTO.textNotation());
         combo.setComboDificulty(comboDTO.comboDificulty());
         combo.setFuse(comboDTO.fuse());
@@ -123,13 +136,13 @@ public class ComboService implements IComboService {
         combo.setDamage(comboDTO.damage() != null ? comboDTO.damage() : 0);
         combo.setCreatedAt(LocalDate.now());
         combo.setUpDateAt(LocalDate.now());
-        combo.setPrivateCombo(true);
-        // TODO: el combo sera marcado como oficial o no en funcion del usuario que lo
+        combo.setPrivateCombo(true); // TODO: el combo sera marcado como oficial o no en funcion del usuario que lo cree
         combo.setLikeCounter(0);
         combo.setDislikeCounter(0);
         
 
-        return comboRepository.save(combo);
+        Combo saved = comboRepository.save(combo);
+        return comboMapper.toDTO(saved);
     }
 
     @Override
@@ -142,12 +155,10 @@ public class ComboService implements IComboService {
                 .ifPresent(combo::setTitle);
 
         Optional.ofNullable(comboDTO.pointFighter())
-                .map(fighterService::getFighterById)
-                .ifPresent(combo::setPointFighter);
+                .ifPresent(combo::setPointFighterId);
 
         Optional.ofNullable(comboDTO.secondFighter())
-                .map(fighterService::getFighterById)
-                .ifPresent(combo::setSecondFighter);
+                .ifPresent(combo::setSecondFighterId);
 
         Optional.ofNullable(comboDTO.textNotation())
                 .ifPresent(combo::setTextNotation);

@@ -1,18 +1,13 @@
 package FightLeagueKO.fighter.model;
 
-import java.util.Set;
 import java.util.UUID;
 
 import org.hibernate.annotations.UuidGenerator;
 
-import FightLeagueKO.combo.model.Combo;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -27,8 +22,7 @@ public class Fighter {
     @Column(nullable = false, length = 80)
     private String name;
 
-    @Lob
-    @Column(nullable = false)
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String description;
 
     @Column(nullable = false, length = 80)
@@ -68,9 +62,6 @@ public class Fighter {
     private int loseCounter;
 
     private int playCounter;
-
-    @OneToMany(mappedBy = "pointFighter", fetch = FetchType.LAZY)
-    private Set<Combo> officialCombos;
 
     public Fighter() {
     }
@@ -201,14 +192,6 @@ public class Fighter {
 
     public void setEasyOfUse(int easyOfUse) {
         this.easyOfUse = easyOfUse;
-    }
-
-    public Set<Combo> getOfficialCombos() {
-        return officialCombos;
-    }
-
-    public void setOfficialCombos(Set<Combo> officialCombos) {
-        this.officialCombos = officialCombos;
     }
 
     public int getWinCounter() {

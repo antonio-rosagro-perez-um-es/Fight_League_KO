@@ -11,16 +11,17 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
 
+import FightLeagueKO.game.dto.CreateGameDTO;
 import FightLeagueKO.game.model.Game;
 import FightLeagueKO.game.repository.GameRepository;
+import FightLeagueKO.game.service.GameService;
 import FightLeagueKO.tournament.dto.CreateTournamentDTO;
 import FightLeagueKO.tournament.dto.UpdateTournamentDTO;
 import FightLeagueKO.tournament.enums.TournamentStates;
 import FightLeagueKO.tournament.model.Tournament;
 import FightLeagueKO.tournament.repository.TournamentRepository;
-import FightLeagueKO.user.model.User;
-import FightLeagueKO.user.repository.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 
@@ -29,20 +30,18 @@ import jakarta.transaction.Transactional;
 public class TournamentService implements ITournamentService {
 
     private TournamentRepository tournamentRepository;
-    private UserService userService;
-    private GameRepository gameRepository;
+    private GameService gameService;
 
-    public TournamentService(TournamentRepository tournamentRepository, UserService userService, GameRepository gameRepository) {
+    public TournamentService(TournamentRepository tournamentRepository, GameService gameService) {
         this.tournamentRepository = tournamentRepository;
-        this.userService = userService;
-        this.gameRepository = gameRepository;
+        this.gameService = gameService;
     }
 
-    public Tournament getTournamentById(UUID id) {
-        Objects.requireNonNull(id, "Paramenter id could not be null");
+    public Tournament getTournamentById(@PathVariable UUID tournamentId) {
+        Objects.requireNonNull(tournamentId);
 
-        return tournamentRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Tournament not found with id: " + id));
+        return tournamentRepository.findById(tournamentId)
+                .orElseThrow(() -> new EntityNotFoundException("Tournament not found with id: " + tournamentId));
     }
 
     @Override
@@ -65,12 +64,10 @@ public class TournamentService implements ITournamentService {
 
         Tournament tournament = new Tournament();
 
-        User user = userService.getUserById(tournamentDTO.userOwner());
-
         if (tournamentDTO.title() == null || tournamentDTO.title().isEmpty())
             throw new IllegalArgumentException("Tournament title cant be empty or null");
 
-        if (tournamentDTO.starDate().isAfter(tournamentDTO.inscriptionCloseDate()))
+        if (tournamentDTO.starDate().isBefore(tournamentDTO.inscriptionCloseDate()))
             throw new IllegalArgumentException("Tournament start date cant be before close inscription date");
 
         if (tournamentDTO.starDate().isBefore(LocalDate.now()))
@@ -79,16 +76,16 @@ public class TournamentService implements ITournamentService {
         if (tournamentDTO.inscriptionCloseDate().isBefore(LocalDate.now()))
             throw new IllegalArgumentException("Tournament inscriptions close date cant be befor now");
 
-        tournament.setUserOwner(user);
+        tournament.setUserOwnerId(tournamentDTO.userOwner());
         tournament.setTitle(tournamentDTO.title());
         tournament.setTournamentState(TournamentStates.REGISTRATION);
         tournament.setMaxPlayers(tournamentDTO.maxPlayers());
-        tournament.setPlayersList(new ArrayList<User>());
+        tournament.setPlayersIds(new ArrayList<>());
         tournament.setGamesList(new ArrayList<Game>());
         tournament.setStartDate(tournamentDTO.starDate());
         tournament.setInscriptionCloseDate(tournamentDTO.inscriptionCloseDate());
         tournament.setManualClose(false);
-        tournament.setWinner(null);
+        tournament.setWinnerId(null);
         tournament.setDeleted(false);
 
         return tournamentRepository.save(tournament);
@@ -151,14 +148,12 @@ public class TournamentService implements ITournamentService {
         if (!tournament.getTournamentState().equals(TournamentStates.REGISTRATION))
             throw new IllegalStateException("Registration period has ended");
 
-        if (tournament.getPlayersList().size() < tournament.getMaxPlayers()) {
+        if (tournament.getPlayersIds().size() < tournament.getMaxPlayers()) {
 
-            User user = userService.getUserById(userId);
-
-            tournament.addPlayer(user);
+            tournament.addPlayer(userId);
         }
 
-        if (tournament.getPlayersList().size() >= tournament.getMaxPlayers())
+        if (tournament.getPlayersIds().size() >= tournament.getMaxPlayers())
             tournament.setTournamentState(TournamentStates.WAITING_START);
 
     }
@@ -172,9 +167,7 @@ public class TournamentService implements ITournamentService {
         if (!tournament.getTournamentState().equals(TournamentStates.REGISTRATION))
             throw new IllegalStateException("Can't leave a tournamen when registration is closed");
 
-        User user = userService.getUserById(userId);
-
-        tournament.removePlayer(user);
+        tournament.removePlayer(userId);
 
         if (!tournament.isManualClose())
             tournament.setTournamentState(TournamentStates.REGISTRATION);
@@ -210,7 +203,7 @@ public class TournamentService implements ITournamentService {
 
         // Check if any current round games are still pending (no winner)
         long pendingCount = allGames.stream()
-                .filter(g -> g.getWinner() == null)
+                .filter(g -> g.getWinnerId() == null)
                 .count();
 
         if (pendingCount > 0) {
@@ -219,22 +212,21 @@ public class TournamentService implements ITournamentService {
 
         if (allGames.isEmpty()) {
             // === FIRST ROUND: pair up all registered players ===
-            List<User> players = new ArrayList<>(tournament.getPlayersList());
+            List<UUID> playerIds = new ArrayList<>(tournament.getPlayersIds());
 
-            if (players.size() < 2) {
+            if (playerIds.size() < 2) {
                 throw new IllegalStateException("Need at least 2 players to generate matchups");
             }
 
-            Collections.shuffle(players);
+            Collections.shuffle(playerIds);
 
             List<Game> newGames = new ArrayList<>();
-            for (int i = 0; i < players.size() - 1; i += 2) {
-                Game game = new Game();
-                game.setUser1(players.get(i));
-                game.setUser2(players.get(i + 1));
-                game.setGameDate(LocalDate.now());
-                game.setDelete(false);
-                newGames.add(gameRepository.save(game));
+            for (int i = 0; i < playerIds.size() - 1; i += 2) {
+                CreateGameDTO gameDTO = new CreateGameDTO(
+                        playerIds.get(i),
+                        playerIds.get(i + 1),
+                        tournament.getStartDate());
+                newGames.add(gameService.createGame(gameDTO));
             }
 
             allGames.addAll(newGames);
@@ -242,27 +234,26 @@ public class TournamentService implements ITournamentService {
 
         } else {
             // === SUBSEQUENT ROUNDS: collect winners and pair them ===
-            List<User> winners = allGames.stream()
-                    .map(Game::getWinner)
+            List<UUID> winnerIds = allGames.stream()
+                    .map(Game::getWinnerId)
                     .collect(Collectors.toList());
 
-            if (winners.size() == 1) {
-                tournament.setWinner(winners.get(0));
+            if (winnerIds.size() == 1) {
+                tournament.setWinnerId(winnerIds.get(0));
                 tournament.setTournamentState(TournamentStates.FINISHED);
                 tournamentRepository.save(tournament);
                 return;
             }
 
-            Collections.shuffle(winners);
+            Collections.shuffle(winnerIds);
 
             List<Game> newGames = new ArrayList<>();
-            for (int i = 0; i < winners.size() - 1; i += 2) {
-                Game game = new Game();
-                game.setUser1(winners.get(i));
-                game.setUser2(winners.get(i + 1));
-                game.setGameDate(LocalDate.now());
-                game.setDelete(false);
-                newGames.add(gameRepository.save(game));
+            for (int i = 0; i < winnerIds.size() - 1; i += 2) {
+                CreateGameDTO gameDTO = new CreateGameDTO(
+                        winnerIds.get(i),
+                        winnerIds.get(i + 1),
+                        LocalDate.now());
+                newGames.add(gameService.createGame(gameDTO));
             }
 
             allGames.addAll(newGames);

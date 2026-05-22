@@ -16,10 +16,7 @@ import FightLeagueKO.game.dto.UpdateGameDTO;
 import FightLeagueKO.game.model.Game;
 import FightLeagueKO.game.repository.GameRepository;
 import FightLeagueKO.team.dto.CreateTeamDTO;
-import FightLeagueKO.team.model.Team;
 import FightLeagueKO.team.service.TeamService;
-import FightLeagueKO.user.model.User;
-import FightLeagueKO.user.repository.UserService;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -27,13 +24,11 @@ import jakarta.transaction.Transactional;
 public class GameService implements IGameService {
 
     private GameRepository gameRepository;
-    private UserService userService;
     private TeamService teamService;
 
     @Autowired
-    public GameService(GameRepository gameRepository, UserService userService, TeamService teamService) {
+    public GameService(GameRepository gameRepository, TeamService teamService) {
         this.gameRepository = gameRepository;
-        this.userService = userService;
         this.teamService = teamService;
     }
 
@@ -71,11 +66,8 @@ public class GameService implements IGameService {
         if (gameDTO.gameDate().isBefore(LocalDate.now()))
             throw new IllegalArgumentException("Invalid game date");
 
-        User user1 = userService.getUserById(gameDTO.user1());
-        User user2 = userService.getUserById(gameDTO.user2());
-
-        game.setUser1(user1);
-        game.setUser2(user2);
+        game.setUser1Id(gameDTO.user1());
+        game.setUser2Id(gameDTO.user2());
         game.setGameDate(gameDTO.gameDate());
         game.setDelete(false);
 
@@ -89,24 +81,19 @@ public class GameService implements IGameService {
                 .orElseThrow(() -> new IllegalArgumentException("Game not found with id " + gameId));
 
         Optional.ofNullable(gameDTO.user1())
-                .map(userService::getUserById)
-                .ifPresent(game::setUser1);
+                .ifPresent(game::setUser1Id);
 
         Optional.ofNullable(gameDTO.user2())
-                .map(userService::getUserById)
-                .ifPresent(game::setUser2);
+                .ifPresent(game::setUser2Id);
 
         Optional.ofNullable(gameDTO.team1())
-                .map(teamService::getTeamById)
-                .ifPresent(game::setTeamUser1);
+                .ifPresent(game::setTeamUser1Id);
 
         Optional.ofNullable(gameDTO.team2())
-                .map(teamService::getTeamById)
-                .ifPresent(game::setTeamUser2);
+                .ifPresent(game::setTeamUser2Id);
 
         Optional.ofNullable(gameDTO.winner())
-                .map(userService::getUserById)
-                .ifPresent(game::setWinner);
+                .ifPresent(game::setWinnerId);
 
         gameRepository.save(game);
 
@@ -139,10 +126,10 @@ public class GameService implements IGameService {
         Game game = gameRepository.findById(gameId)
                 .orElseThrow(() -> new IllegalArgumentException("Game not found with id " + gameId));
 
-        Team team1 = teamService.createTeam(teamUser1);
-        Team team2 = teamService.createTeam(teamUser2);
-        game.setTeamUser1(team1);
-        game.setTeamUser2(team2);
+        UUID team1Id = teamService.createTeam(teamUser1).getId();
+        UUID team2Id = teamService.createTeam(teamUser2).getId();
+        game.setTeamUser1Id(team1Id);
+        game.setTeamUser2Id(team2Id);
 
         gameRepository.save(game);
     }
@@ -153,19 +140,17 @@ public class GameService implements IGameService {
         Game game = gameRepository.findById(gameId)
                 .orElseThrow(() -> new IllegalArgumentException("Game not found with id " + gameId));
 
-        User winnerUser = userService.getUserById(userId);
-
-        if (winnerUser.getId() == game.getUser1().getId()) {
-            teamService.updateTeamStats(game.getTeamUser1().getId(), true);
-            teamService.updateTeamStats(game.getTeamUser2().getId(), false);
+        if (userId.equals(game.getUser1Id())) {
+            teamService.updateTeamStats(game.getTeamUser1Id(), true);
+            teamService.updateTeamStats(game.getTeamUser2Id(), false);
         }
 
-        if (winnerUser.getId() == game.getUser2().getId()) {
-            teamService.updateTeamStats(game.getTeamUser1().getId(), false);
-            teamService.updateTeamStats(game.getTeamUser2().getId(), true);
+        if (userId.equals(game.getUser2Id())) {
+            teamService.updateTeamStats(game.getTeamUser1Id(), false);
+            teamService.updateTeamStats(game.getTeamUser2Id(), true);
         }
 
-        game.setWinner(winnerUser);
+        game.setWinnerId(userId);
 
         gameRepository.save(game);
     }
