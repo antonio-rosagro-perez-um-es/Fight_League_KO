@@ -16,7 +16,6 @@ import FightLeagueKO.game.dto.UpdateGameDTO;
 import FightLeagueKO.game.model.Game;
 import FightLeagueKO.game.repository.GameRepository;
 import FightLeagueKO.team.dto.CreateTeamDTO;
-import FightLeagueKO.team.model.Team;
 import FightLeagueKO.team.service.TeamService;
 import jakarta.transaction.Transactional;
 
@@ -70,6 +69,8 @@ public class GameService implements IGameService {
         game.setUser1Id(gameDTO.user1());
         game.setUser2Id(gameDTO.user2());
         game.setGameDate(gameDTO.gameDate());
+        game.setTeamUser1Id(null);
+        game.setTournament(null);
         game.setDelete(false);
 
         return gameRepository.save(game);
@@ -88,12 +89,10 @@ public class GameService implements IGameService {
                 .ifPresent(game::setUser2Id);
 
         Optional.ofNullable(gameDTO.team1())
-                .map(teamService::getTeamById)
-                .ifPresent(game::setTeamUser1);
+                .ifPresent(game::setTeamUser1Id);
 
         Optional.ofNullable(gameDTO.team2())
-                .map(teamService::getTeamById)
-                .ifPresent(game::setTeamUser2);
+                .ifPresent(game::setTeamUser2Id);
 
         Optional.ofNullable(gameDTO.winner())
                 .ifPresent(game::setWinnerId);
@@ -129,10 +128,10 @@ public class GameService implements IGameService {
         Game game = gameRepository.findById(gameId)
                 .orElseThrow(() -> new IllegalArgumentException("Game not found with id " + gameId));
 
-        Team team1 = teamService.createTeam(teamUser1);
-        Team team2 = teamService.createTeam(teamUser2);
-        game.setTeamUser1(team1);
-        game.setTeamUser2(team2);
+        UUID team1Id = teamService.createTeam(teamUser1).getId();
+        UUID team2Id = teamService.createTeam(teamUser2).getId();
+        game.setTeamUser1Id(team1Id);
+        game.setTeamUser2Id(team2Id);
 
         gameRepository.save(game);
     }
@@ -144,13 +143,13 @@ public class GameService implements IGameService {
                 .orElseThrow(() -> new IllegalArgumentException("Game not found with id " + gameId));
 
         if (userId.equals(game.getUser1Id())) {
-            teamService.updateTeamStats(game.getTeamUser1().getId(), true);
-            teamService.updateTeamStats(game.getTeamUser2().getId(), false);
+            teamService.updateTeamStats(game.getTeamUser1Id(), true);
+            teamService.updateTeamStats(game.getTeamUser2Id(), false);
         }
 
         if (userId.equals(game.getUser2Id())) {
-            teamService.updateTeamStats(game.getTeamUser1().getId(), false);
-            teamService.updateTeamStats(game.getTeamUser2().getId(), true);
+            teamService.updateTeamStats(game.getTeamUser1Id(), false);
+            teamService.updateTeamStats(game.getTeamUser2Id(), true);
         }
 
         game.setWinnerId(userId);

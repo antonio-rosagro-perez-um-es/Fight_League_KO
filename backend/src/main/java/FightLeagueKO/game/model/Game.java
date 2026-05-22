@@ -3,7 +3,6 @@ package FightLeagueKO.game.model;
 import java.time.LocalDate;
 import java.util.UUID;
 
-import FightLeagueKO.team.model.Team;
 import FightLeagueKO.tournament.model.Tournament;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -32,13 +31,11 @@ public class Game {
     @Column(name = "user2_id", nullable = false)
     private UUID user2Id;
 
-    @ManyToOne
-    @JoinColumn(name = "team_user1_id", nullable = false)
-    private Team teamUser1;
+    @Column(name = "team_user1_id")
+    private UUID teamUser1Id;
 
-    @ManyToOne
-    @JoinColumn(name = "team_user2_id", nullable = false)
-    private Team teamUser2;
+    @Column(name = "team_user2_id")
+    private UUID teamUser2Id;
 
     @Column(name = "winner_id")
     private UUID winnerId;
@@ -76,20 +73,20 @@ public class Game {
         this.user2Id = user2Id;
     }
 
-    public Team getTeamUser1() {
-        return teamUser1;
+    public UUID getTeamUser1Id() {
+        return teamUser1Id;
     }
 
-    public void setTeamUser1(Team teamUser1) {
-        this.teamUser1 = teamUser1;
+    public void setTeamUser1Id(UUID teamUser1Id) {
+        this.teamUser1Id = teamUser1Id;
     }
 
-    public Team getTeamUser2() {
-        return teamUser2;
+    public UUID getTeamUser2Id() {
+        return teamUser2Id;
     }
 
-    public void setTeamUser2(Team teamUser2) {
-        this.teamUser2 = teamUser2;
+    public void setTeamUser2Id(UUID teamUser2Id) {
+        this.teamUser2Id = teamUser2Id;
     }
 
     public UUID getWinnerId() {
