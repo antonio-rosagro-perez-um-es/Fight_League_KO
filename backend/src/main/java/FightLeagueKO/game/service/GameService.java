@@ -69,8 +69,6 @@ public class GameService implements IGameService {
         game.setUser1Id(gameDTO.user1());
         game.setUser2Id(gameDTO.user2());
         game.setGameDate(gameDTO.gameDate());
-        game.setTeamUser1Id(null);
-        game.setTournament(null);
         game.setDelete(false);
 
         return gameRepository.save(game);
