@@ -5,7 +5,6 @@ import java.util.UUID;
 
 import FightLeagueKO.team.model.Team;
 import FightLeagueKO.tournament.model.Tournament;
-import FightLeagueKO.user.model.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -27,13 +26,11 @@ public class Game {
     @JoinColumn(name = "tournament_id")
     private Tournament tournament;
 
-    @ManyToOne
-    @JoinColumn(name = "user1_id", nullable = false)
-    private User user1;
+    @Column(name = "user1_id", nullable = false)
+    private UUID user1Id;
 
-    @ManyToOne
-    @JoinColumn(name = "user2_id", nullable = false)
-    private User user2;
+    @Column(name = "user2_id", nullable = false)
+    private UUID user2Id;
 
     @ManyToOne
     @JoinColumn(name = "team_user1_id", nullable = false)
@@ -43,9 +40,8 @@ public class Game {
     @JoinColumn(name = "team_user2_id", nullable = false)
     private Team teamUser2;
 
-    @ManyToOne
-    @JoinColumn(name = "winner_id")
-    private User winner;
+    @Column(name = "winner_id")
+    private UUID winnerId;
 
     @Column(nullable = false)
     private LocalDate gameDate;
@@ -64,20 +60,20 @@ public class Game {
         this.tournament = tournament;
     }
 
-    public User getUser1() {
-        return user1;
+    public UUID getUser1Id() {
+        return user1Id;
     }
 
-    public void setUser1(User user1) {
-        this.user1 = user1;
+    public void setUser1Id(UUID user1Id) {
+        this.user1Id = user1Id;
     }
 
-    public User getUser2() {
-        return user2;
+    public UUID getUser2Id() {
+        return user2Id;
     }
 
-    public void setUser2(User user2) {
-        this.user2 = user2;
+    public void setUser2Id(UUID user2Id) {
+        this.user2Id = user2Id;
     }
 
     public Team getTeamUser1() {
@@ -96,12 +92,12 @@ public class Game {
         this.teamUser2 = teamUser2;
     }
 
-    public User getWinner() {
-        return winner;
+    public UUID getWinnerId() {
+        return winnerId;
     }
 
-    public void setWinner(User winner) {
-        this.winner = winner;
+    public void setWinnerId(UUID winnerId) {
+        this.winnerId = winnerId;
     }
 
     public LocalDate getGameDate() {

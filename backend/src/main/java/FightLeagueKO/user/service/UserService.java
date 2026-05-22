@@ -1,6 +1,5 @@
 package FightLeagueKO.user.service;
 
-import java.util.ArrayList;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -37,9 +36,6 @@ public class UserService implements IUserService{
 
         User user = new User();
 
-        user.setOwnedTournaments(new ArrayList<>());
-        user.setParticipatedTournaments(new ArrayList<>());
-        user.setWonTournaments(new ArrayList<>());
         user.setName(userDTO.userName());
 
         return userRepository.save(user);
