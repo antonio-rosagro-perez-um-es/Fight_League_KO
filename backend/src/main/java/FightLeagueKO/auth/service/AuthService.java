@@ -17,17 +17,18 @@ import org.springframework.stereotype.Service;
 import FightLeagueKO.auth.dto.AuthResponse;
 import FightLeagueKO.auth.dto.LoginRequest;
 import FightLeagueKO.auth.dto.RegisterRequest;
-import FightLeagueKO.user.enums.UserRole;
+import FightLeagueKO.user.dto.CreateUserDTO;
+import FightLeagueKO.user.dto.UserDTO;
 import FightLeagueKO.user.mapper.UserMapper;
 import FightLeagueKO.user.model.User;
-import FightLeagueKO.user.repository.UserRepository;
+import FightLeagueKO.user.service.UserService;
 import jakarta.transaction.Transactional;
 
 @Service
 @Transactional
 public class AuthService {
 
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final PasswordEncoder passwordEncoder;
     private final JwtEncoder jwtEncoder;
     private final UserMapper userMapper;
@@ -35,13 +36,13 @@ public class AuthService {
     private final long expirationMinutes;
 
     public AuthService(
-            UserRepository userRepository,
+            UserService userService,
             PasswordEncoder passwordEncoder,
             JwtEncoder jwtEncoder,
             UserMapper userMapper,
             @Value("${app.security.jwt.issuer}") String issuer,
             @Value("${app.security.jwt.expiration-minutes}") long expirationMinutes) {
-        this.userRepository = userRepository;
+        this.userService = userService;
         this.passwordEncoder = passwordEncoder;
         this.jwtEncoder = jwtEncoder;
         this.userMapper = userMapper;
@@ -50,28 +51,14 @@ public class AuthService {
     }
 
     public AuthResponse register(RegisterRequest request) {
-        if (userRepository.existsByUsername(request.username())) {
-            throw new IllegalArgumentException("Username already exists");
-        }
-
-        if (userRepository.existsByEmail(request.email())) {
-            throw new IllegalArgumentException("Email already exists");
-        }
-
-        User user = new User();
-        user.setUsername(request.username());
-        user.setEmail(request.email());
-        user.setPassword(passwordEncoder.encode(request.password()));
-        user.setRole(UserRole.REGISTERED);
-        user.setDeleted(false);
-
-        User saved = userRepository.save(user);
-        return new AuthResponse(createToken(saved), userMapper.toDTO(saved));
+        UserDTO saved = userService.createUser(new CreateUserDTO(
+                request.username(), request.email(), request.password()));
+        return new AuthResponse(createToken(saved), saved);
     }
 
     public AuthResponse login(LoginRequest request) {
-        User user = userRepository.findByUsername(request.usernameOrEmail())
-                .or(() -> userRepository.findByEmail(request.usernameOrEmail()))
+        User user = userService.findByUsername(request.usernameOrEmail())
+                .or(() -> userService.findByEmail(request.usernameOrEmail()))
                 .filter(found -> !found.isDeleted())
                 .orElseThrow(() -> new BadCredentialsException("Invalid credentials"));
 
@@ -79,18 +66,19 @@ public class AuthService {
             throw new BadCredentialsException("Invalid credentials");
         }
 
-        return new AuthResponse(createToken(user), userMapper.toDTO(user));
+        UserDTO userDTO = userMapper.toDTO(user);
+        return new AuthResponse(createToken(userDTO), userDTO);
     }
 
-    private String createToken(User user) {
+    private String createToken(UserDTO user) {
         Instant now = Instant.now();
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer(issuer)
                 .issuedAt(now)
                 .expiresAt(now.plus(expirationMinutes, ChronoUnit.MINUTES))
-                .subject(user.getId().toString())
-                .claim("username", user.getUsername())
-                .claim("roles", List.of(user.getRole().name()))
+                .subject(user.id().toString())
+                .claim("username", user.username())
+                .claim("roles", List.of(user.role().name()))
                 .build();
 
         JwsHeader header = JwsHeader.with(MacAlgorithm.HS256).build();

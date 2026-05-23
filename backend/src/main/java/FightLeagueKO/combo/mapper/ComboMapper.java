@@ -1,7 +1,5 @@
 package FightLeagueKO.combo.mapper;
 
-import java.util.UUID;
-
 import org.springframework.stereotype.Component;
 
 import FightLeagueKO.combo.dto.ComboDTO;
@@ -9,36 +7,12 @@ import FightLeagueKO.combo.dto.OfficialComboDTO;
 import FightLeagueKO.combo.enums.ComboDificulty;
 import FightLeagueKO.combo.enums.FuseType;
 import FightLeagueKO.combo.model.Combo;
-import FightLeagueKO.fighter.model.Fighter;
-import FightLeagueKO.fighter.repository.FighterRepositoryPostgre;
 
 @Component
 public class ComboMapper {
 
-    private final FighterRepositoryPostgre fighterRepository;
-
-    public ComboMapper(FighterRepositoryPostgre fighterRepository) {
-        this.fighterRepository = fighterRepository;
-    }
-
-    private String resolveFighterName(UUID fighterId) {
-        if (fighterId == null) return null;
-        return fighterRepository.findById(fighterId)
-                .map(Fighter::getName)
-                .orElse(null);
-    }
-
-    private String resolveFighterSlug(UUID fighterId) {
-        if (fighterId == null) return null;
-        return fighterRepository.findById(fighterId)
-                .map(Fighter::getSlug)
-                .orElse(null);
-    }
-
-    public ComboDTO toDTO(Combo combo) {
-        UUID pointFighterId = combo.getPointFighterId();
-        UUID secondFighterId = combo.getSecondFighterId();
-
+    public ComboDTO toDTO(Combo combo, String pointFighterName, String pointFighterSlug,
+                          String secondFighterName, String secondFighterSlug) {
         return new ComboDTO(
             combo.getId(),
             combo.getTitle(),
@@ -57,19 +31,17 @@ public class ComboMapper {
             combo.getLikeCounter(),
             combo.getDislikeCounter(),
             combo.getCreatorUserId(),
-            pointFighterId,
-            resolveFighterName(pointFighterId),
-            resolveFighterSlug(pointFighterId),
-            secondFighterId,
-            resolveFighterName(secondFighterId),
-            resolveFighterSlug(secondFighterId)
+            combo.getPointFighterId(),
+            pointFighterName,
+            pointFighterSlug,
+            combo.getSecondFighterId(),
+            secondFighterName,
+            secondFighterSlug
         );
     }
 
-        public OfficialComboDTO toOficialDTO(Combo combo) {
-        UUID pointFighterId = combo.getPointFighterId();
-        UUID secondFighterId = combo.getSecondFighterId();
-
+    public OfficialComboDTO toOfficialDTO(Combo combo, String pointFighterName, String pointFighterSlug,
+                                         String secondFighterName, String secondFighterSlug) {
         return new OfficialComboDTO(
             combo.getId(),
             combo.getTitle(),
@@ -80,12 +52,12 @@ public class ComboMapper {
             combo.getDescription(),
             combo.getMeterCost(),
             combo.getDamage(),
-            pointFighterId,
-            resolveFighterName(pointFighterId),
-            resolveFighterSlug(pointFighterId),
-            secondFighterId,
-            resolveFighterName(secondFighterId),
-            resolveFighterSlug(secondFighterId)
+            combo.getPointFighterId(),
+            pointFighterName,
+            pointFighterSlug,
+            combo.getSecondFighterId(),
+            secondFighterName,
+            secondFighterSlug
         );
     }
 

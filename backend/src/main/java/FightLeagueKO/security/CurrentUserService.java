@@ -8,23 +8,20 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import FightLeagueKO.user.model.User;
-import FightLeagueKO.user.repository.UserRepository;
-import jakarta.persistence.EntityNotFoundException;
+import FightLeagueKO.user.service.UserService;
 
 @Service
 public class CurrentUserService {
 
-    private final UserRepository userRepository;
+    private final UserService userService;
 
-    public CurrentUserService(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public CurrentUserService(UserService userService) {
+        this.userService = userService;
     }
 
     public User getCurrentUser() {
         UUID userId = getCurrentUserId();
-        return userRepository.findById(userId)
-                .filter(user -> !user.isDeleted())
-                .orElseThrow(() -> new EntityNotFoundException("Authenticated user not found"));
+        return userService.findUserEntityById(userId);
     }
 
     public UUID getCurrentUserId() {

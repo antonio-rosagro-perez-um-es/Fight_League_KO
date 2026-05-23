@@ -1,6 +1,7 @@
 package FightLeagueKO.user.service;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,14 +19,14 @@ import jakarta.transaction.Transactional;
 
 @Service
 @Transactional
-public class UserService implements IUserService{
+public class UserService implements IUserService {
 
     private UserRepository userRepository;
     private UserMapper userMapper;
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserService(UserRepository userRepository, UserMapper userMapper, PasswordEncoder passwordEncoder){
+    public UserService(UserRepository userRepository, UserMapper userMapper, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
@@ -33,7 +34,7 @@ public class UserService implements IUserService{
 
     @Override
     public UserDTO getUserById(UUID userId) {
-          Objects.requireNonNull(userId, "Paramenter id could not be null");
+        Objects.requireNonNull(userId, "Paramenter id could not be null");
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
@@ -42,7 +43,7 @@ public class UserService implements IUserService{
     }
 
     @Override
-    public UserDTO createUser(CreateUserDTO userDTO){
+    public UserDTO createUser(CreateUserDTO userDTO) {
 
         Objects.requireNonNull(userDTO, "User data could not be null");
 
@@ -63,6 +64,32 @@ public class UserService implements IUserService{
         user.setDeleted(false);
 
         return userMapper.toDTO(userRepository.save(user));
+    }
+
+    @Override
+    public User findUserEntityById(UUID userId) {
+        Objects.requireNonNull(userId, "Parameter id could not be null");
+
+        return userRepository.findById(userId)
+                .filter(user -> !user.isDeleted())
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
+    }
+
+    @Override
+    public Optional<User> findByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
+
+    @Override
+    public Optional<User> findByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
+    @Override
+    public void updateRole(UUID userId, UserRole role) {
+        User user = findUserEntityById(userId);
+        user.setRole(role);
+        userRepository.save(user);
     }
 
 }

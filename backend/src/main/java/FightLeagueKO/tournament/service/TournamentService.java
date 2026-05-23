@@ -25,7 +25,7 @@ import FightLeagueKO.tournament.model.Tournament;
 import FightLeagueKO.tournament.repository.TournamentRepository;
 import FightLeagueKO.user.enums.UserRole;
 import FightLeagueKO.user.model.User;
-import FightLeagueKO.user.repository.UserRepository;
+import FightLeagueKO.user.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 
@@ -36,14 +36,14 @@ public class TournamentService implements ITournamentService {
     private TournamentRepository tournamentRepository;
     private GameService gameService;
     private CurrentUserService currentUserService;
-    private UserRepository userRepository;
+    private UserService userService;
 
     public TournamentService(TournamentRepository tournamentRepository, GameService gameService,
-            CurrentUserService currentUserService, UserRepository userRepository) {
+            CurrentUserService currentUserService, UserService userService) {
         this.tournamentRepository = tournamentRepository;
         this.gameService = gameService;
         this.currentUserService = currentUserService;
-        this.userRepository = userRepository;
+        this.userService = userService;
     }
 
     public Tournament getTournamentById(@PathVariable UUID tournamentId) {
@@ -101,8 +101,7 @@ public class TournamentService implements ITournamentService {
         Tournament saved = tournamentRepository.save(tournament);
 
         if (currentUser.getRole() == UserRole.REGISTERED) {
-            currentUser.setRole(UserRole.ORGANIZER);
-            userRepository.save(currentUser);
+            userService.updateRole(currentUser.getId(), UserRole.ORGANIZER);
         }
 
         return saved;
