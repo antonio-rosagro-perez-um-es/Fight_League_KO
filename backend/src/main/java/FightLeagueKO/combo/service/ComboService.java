@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import FightLeagueKO.combo.dto.ComboDTO;
 import FightLeagueKO.combo.dto.ComboUpdateDTO;
+import FightLeagueKO.combo.dto.OfficialComboDTO;
 import FightLeagueKO.combo.mapper.ComboMapper;
 import FightLeagueKO.combo.dto.ComboCreateDTO;
 import FightLeagueKO.combo.dto.ComboFiltersDTO;
@@ -23,6 +24,9 @@ import FightLeagueKO.combo.enums.ComboDificulty;
 import FightLeagueKO.combo.enums.FuseType;
 import FightLeagueKO.combo.model.Combo;
 import FightLeagueKO.combo.repository.ComboRepository;
+import FightLeagueKO.security.CurrentUserService;
+import FightLeagueKO.user.enums.UserRole;
+import FightLeagueKO.user.model.User;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -33,19 +37,22 @@ public class ComboService implements IComboService {
 
     private ComboRepository comboRepository;
     private ComboMapper comboMapper;
+    private CurrentUserService currentUserService;
 
     @Autowired
-    public ComboService(ComboRepository comboRepository, ComboMapper comboMapper) {
+    public ComboService(ComboRepository comboRepository, ComboMapper comboMapper, CurrentUserService currentUserService) {
         this.comboRepository = comboRepository;
         this.comboMapper = comboMapper;
+        this.currentUserService = currentUserService;
     }
 
     @Override
-    public List<ComboDTO> getOfficialCombosByFighter(UUID fighterId) {
+    public List<OfficialComboDTO> getOfficialCombosByFighter(UUID fighterId) {
         Objects.requireNonNull(fighterId, "fighterId must not be null");
+        
         return comboRepository.findOfficialCombosByPointFighterId(fighterId)
                 .stream()
-                .map(comboMapper::toDTO)
+                .map(comboMapper::toOficialDTO)
                 .collect(Collectors.toList());
     }
 
@@ -56,6 +63,10 @@ public class ComboService implements IComboService {
 
         Combo combo = comboRepository.findById(comboId)
                 .orElseThrow(() -> new EntityNotFoundException("Combo not found with Id: " + comboId));
+
+        if (combo.isPrivateCombo()) {
+            assertOwnerOrAdmin(combo);
+        }
 
         return comboMapper.toDTO(combo);
     }
@@ -91,6 +102,7 @@ public class ComboService implements IComboService {
         Objects.requireNonNull(comboDTO, "Parameters could not be null");
 
         Combo combo = new Combo();
+        User currentUser = currentUserService.getCurrentUser();
 
         if (comboDTO.title() == null || comboDTO.title().isEmpty()) {
             throw new IllegalArgumentException("Title cant be null");
@@ -120,8 +132,14 @@ public class ComboService implements IComboService {
             throw new IllegalArgumentException("Description cant be null or empty");
         }
 
+        boolean isPrivate = false;
+        if (currentUser.getRole() != UserRole.ADMIN)
+            isPrivate = true;
+
         combo.setTitle(comboDTO.title());
         combo.setDeleted(false);
+        combo.setCreatorUserId(currentUser.getId());
+        combo.setOficial(currentUser.getRole() == UserRole.ADMIN);
         combo.setPointFighterId(comboDTO.pointFighter());
 
         if (comboDTO.secondFighter() != null && !comboDTO.pointFighter().equals(comboDTO.secondFighter()) )
@@ -136,7 +154,7 @@ public class ComboService implements IComboService {
         combo.setDamage(comboDTO.damage() != null ? comboDTO.damage() : 0);
         combo.setCreatedAt(LocalDate.now());
         combo.setUpDateAt(LocalDate.now());
-        combo.setPrivateCombo(true); // TODO: el combo sera marcado como oficial o no en funcion del usuario que lo cree
+        combo.setPrivateCombo(isPrivate);
         combo.setLikeCounter(0);
         combo.setDislikeCounter(0);
         
@@ -150,6 +168,8 @@ public class ComboService implements IComboService {
 
         Combo combo = comboRepository.findById(comboId)
                 .orElseThrow(() -> new EntityNotFoundException("Combo not found exception with Id: " + comboId));
+
+        assertOwnerOrAdmin(combo);
 
         Optional.ofNullable(comboDTO.title())
                 .ifPresent(combo::setTitle);
@@ -191,6 +211,8 @@ public class ComboService implements IComboService {
         Combo combo = comboRepository.findById(comboId)
                 .orElseThrow(() -> new EntityNotFoundException("Combo not found exception with id: " + comboId));
 
+        assertOwnerOrAdmin(combo);
+
         combo.setDeleted(true);
 
         comboRepository.save(combo);
@@ -200,6 +222,8 @@ public class ComboService implements IComboService {
     public void restoreCombo(UUID comboId) {
         Combo combo = comboRepository.findById(comboId)
                 .orElseThrow(() -> new EntityNotFoundException("Combo not found exception with id: " + comboId));
+
+        assertAdmin();
 
         combo.setDeleted(false);
 
@@ -248,6 +272,8 @@ public class ComboService implements IComboService {
          Combo combo = comboRepository.findById(comboId)
                 .orElseThrow(() -> new EntityNotFoundException("Combo not found exception with id: " + comboId));
 
+        assertOwnerOrAdmin(combo);
+
         combo.setPrivateCombo(false);
 
         comboRepository.save(combo);
@@ -257,6 +283,8 @@ public class ComboService implements IComboService {
     public void setComboPrivate(UUID comboId) {
         Combo combo = comboRepository.findById(comboId)
                 .orElseThrow(() -> new EntityNotFoundException("Combo not found exception with id: " + comboId));
+
+        assertOwnerOrAdmin(combo);
 
         combo.setPrivateCombo(true);
 
@@ -301,6 +329,23 @@ public class ComboService implements IComboService {
         combo.removeDislikeCombo();
 
         comboRepository.save(combo);
+    }
+
+    private void assertOwnerOrAdmin(Combo combo) {
+        User currentUser = currentUserService.getCurrentUser();
+        if (currentUser.getRole() == UserRole.ADMIN) {
+            return;
+        }
+
+        if (combo.getCreatorUserId() == null || !combo.getCreatorUserId().equals(currentUser.getId())) {
+            throw new SecurityException("Only the combo owner or an admin can perform this action");
+        }
+    }
+
+    private void assertAdmin() {
+        if (currentUserService.getCurrentUser().getRole() != UserRole.ADMIN) {
+            throw new SecurityException("Only admins can perform this action");
+        }
     }
 
 }

@@ -33,6 +33,9 @@ public class Combo {
     @Column(nullable = false)
     private boolean oficial;
 
+    @Column(name = "creator_user_id")
+    private UUID creatorUserId;
+
     @Column(name = "point_fighter_id", nullable = false)
     private UUID pointFighterId;
 
@@ -102,6 +105,14 @@ public class Combo {
 
     public void setOficial(boolean oficial) {
         this.oficial = oficial;
+    }
+
+    public UUID getCreatorUserId() {
+        return creatorUserId;
+    }
+
+    public void setCreatorUserId(UUID creatorUserId) {
+        this.creatorUserId = creatorUserId;
     }
 
     public UUID getPointFighterId() {

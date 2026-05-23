@@ -5,6 +5,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Component;
 
 import FightLeagueKO.combo.dto.ComboDTO;
+import FightLeagueKO.combo.dto.OfficialComboDTO;
 import FightLeagueKO.combo.enums.ComboDificulty;
 import FightLeagueKO.combo.enums.FuseType;
 import FightLeagueKO.combo.model.Combo;
@@ -55,6 +56,30 @@ public class ComboMapper {
             combo.getUpDateAt(),
             combo.getLikeCounter(),
             combo.getDislikeCounter(),
+            combo.getCreatorUserId(),
+            pointFighterId,
+            resolveFighterName(pointFighterId),
+            resolveFighterSlug(pointFighterId),
+            secondFighterId,
+            resolveFighterName(secondFighterId),
+            resolveFighterSlug(secondFighterId)
+        );
+    }
+
+        public OfficialComboDTO toOficialDTO(Combo combo) {
+        UUID pointFighterId = combo.getPointFighterId();
+        UUID secondFighterId = combo.getSecondFighterId();
+
+        return new OfficialComboDTO(
+            combo.getId(),
+            combo.getTitle(),
+            combo.getTextNotation(),
+            combo.getComboDificulty().name(),
+            combo.getFuse().name(),
+            combo.getMediaUrl(),
+            combo.getDescription(),
+            combo.getMeterCost(),
+            combo.getDamage(),
             pointFighterId,
             resolveFighterName(pointFighterId),
             resolveFighterSlug(pointFighterId),

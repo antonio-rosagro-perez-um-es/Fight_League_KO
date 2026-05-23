@@ -23,9 +23,9 @@ public interface ITournamentService {
 
     void restoreTournament(UUID tournamentId);
 
-    void joinTournament(UUID tournamentId, UUID userId);
+    void joinTournament(UUID tournamentId);
 
-    void exitTournament(UUID tournamentId, UUID userId);
+    void exitTournament(UUID tournamentId);
 
     void closeRegistrations(UUID tournamentId);
 

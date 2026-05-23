@@ -7,12 +7,13 @@ import FightLeagueKO.combo.dto.ComboCreateDTO;
 import FightLeagueKO.combo.dto.ComboDTO;
 import FightLeagueKO.combo.dto.ComboFiltersDTO;
 import FightLeagueKO.combo.dto.ComboUpdateDTO;
+import FightLeagueKO.combo.dto.OfficialComboDTO;
 
 public interface IComboService {
 
     ComboDTO getComboById(UUID comboId);
 
-    List<ComboDTO> getOfficialCombosByFighter(UUID fighterId);
+    List<OfficialComboDTO> getOfficialCombosByFighter(UUID fighterId);
 
     List<ComboDTO> getAllCombo();
 

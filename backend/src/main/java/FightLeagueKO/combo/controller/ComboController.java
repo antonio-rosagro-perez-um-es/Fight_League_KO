@@ -20,6 +20,7 @@ import FightLeagueKO.combo.dto.ComboCreateDTO;
 import FightLeagueKO.combo.dto.ComboDTO;
 import FightLeagueKO.combo.dto.ComboFiltersDTO;
 import FightLeagueKO.combo.dto.ComboUpdateDTO;
+import FightLeagueKO.combo.dto.OfficialComboDTO;
 import FightLeagueKO.combo.service.IComboService;
 
 @RestController
@@ -39,7 +40,7 @@ public class ComboController {
     }
 
     @GetMapping("/{fighterId}/official")
-    public ResponseEntity<List<ComboDTO>> getOfficialCombos(@PathVariable UUID fighterId) {
+    public ResponseEntity<List<OfficialComboDTO>> getOfficialCombos(@PathVariable UUID fighterId) {
         return ResponseEntity.ok(comboService.getOfficialCombosByFighter(fighterId));
     }
 

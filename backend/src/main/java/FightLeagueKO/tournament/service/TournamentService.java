@@ -17,11 +17,15 @@ import FightLeagueKO.game.dto.CreateGameDTO;
 import FightLeagueKO.game.model.Game;
 import FightLeagueKO.game.repository.GameRepository;
 import FightLeagueKO.game.service.GameService;
+import FightLeagueKO.security.CurrentUserService;
 import FightLeagueKO.tournament.dto.CreateTournamentDTO;
 import FightLeagueKO.tournament.dto.UpdateTournamentDTO;
 import FightLeagueKO.tournament.enums.TournamentStates;
 import FightLeagueKO.tournament.model.Tournament;
 import FightLeagueKO.tournament.repository.TournamentRepository;
+import FightLeagueKO.user.enums.UserRole;
+import FightLeagueKO.user.model.User;
+import FightLeagueKO.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 
@@ -31,10 +35,15 @@ public class TournamentService implements ITournamentService {
 
     private TournamentRepository tournamentRepository;
     private GameService gameService;
+    private CurrentUserService currentUserService;
+    private UserRepository userRepository;
 
-    public TournamentService(TournamentRepository tournamentRepository, GameService gameService) {
+    public TournamentService(TournamentRepository tournamentRepository, GameService gameService,
+            CurrentUserService currentUserService, UserRepository userRepository) {
         this.tournamentRepository = tournamentRepository;
         this.gameService = gameService;
+        this.currentUserService = currentUserService;
+        this.userRepository = userRepository;
     }
 
     public Tournament getTournamentById(@PathVariable UUID tournamentId) {
@@ -61,6 +70,7 @@ public class TournamentService implements ITournamentService {
     public Tournament createTournament(CreateTournamentDTO tournamentDTO) {
 
         Objects.requireNonNull(tournamentDTO, "TournamentDTO could not be null");
+        User currentUser = currentUserService.getCurrentUser();
 
         Tournament tournament = new Tournament();
 
@@ -76,7 +86,7 @@ public class TournamentService implements ITournamentService {
         if (tournamentDTO.inscriptionCloseDate().isBefore(LocalDate.now()))
             throw new IllegalArgumentException("Tournament inscriptions close date cant be befor now");
 
-        tournament.setUserOwnerId(tournamentDTO.userOwner());
+        tournament.setUserOwnerId(currentUser.getId());
         tournament.setTitle(tournamentDTO.title());
         tournament.setTournamentState(TournamentStates.REGISTRATION);
         tournament.setMaxPlayers(tournamentDTO.maxPlayers());
@@ -88,7 +98,14 @@ public class TournamentService implements ITournamentService {
         tournament.setWinnerId(null);
         tournament.setDeleted(false);
 
-        return tournamentRepository.save(tournament);
+        Tournament saved = tournamentRepository.save(tournament);
+
+        if (currentUser.getRole() == UserRole.REGISTERED) {
+            currentUser.setRole(UserRole.ORGANIZER);
+            userRepository.save(currentUser);
+        }
+
+        return saved;
     }
 
     @Override
@@ -98,6 +115,8 @@ public class TournamentService implements ITournamentService {
 
         Tournament tournament = tournamentRepository.findById(tournamentId)
                 .orElseThrow(() -> new IllegalArgumentException("Tournament not found with id: " + tournamentId));
+
+        assertOwnerOrAdmin(tournament);
 
         if (tournament.getTournamentState() != TournamentStates.REGISTRATION)
             throw new IllegalStateException("Cant modify a tournament after registration is closed");
@@ -123,6 +142,8 @@ public class TournamentService implements ITournamentService {
         Tournament tournament = tournamentRepository.findById(tournamentId)
                 .orElseThrow(() -> new IllegalArgumentException("Tournament not found with id:" + tournamentId));
 
+        assertOwnerOrAdmin(tournament);
+
         tournament.setDeleted(true);
 
         tournamentRepository.save(tournament);
@@ -134,16 +155,23 @@ public class TournamentService implements ITournamentService {
         Tournament tournament = tournamentRepository.findById(tournamentId)
                 .orElseThrow(() -> new IllegalArgumentException("Tournament not found with id:" + tournamentId));
 
+        assertAdmin();
+
         tournament.setDeleted(false);
 
         tournamentRepository.save(tournament);
     }
 
     @Override
-    public void joinTournament(UUID tournamentId, UUID userId) {
+    public void joinTournament(UUID tournamentId) {
 
         Tournament tournament = tournamentRepository.findById(tournamentId)
                 .orElseThrow(() -> new IllegalArgumentException("Tournament not found with id" + tournamentId));
+        UUID userId = currentUserService.getCurrentUserId();
+
+        if (tournament.getUserOwnerId().equals(userId)) {
+            throw new IllegalStateException("Organizer cannot join their own tournament");
+        }
 
         if (!tournament.getTournamentState().equals(TournamentStates.REGISTRATION))
             throw new IllegalStateException("Registration period has ended");
@@ -159,10 +187,11 @@ public class TournamentService implements ITournamentService {
     }
 
     @Override
-    public void exitTournament(UUID tournamentId, UUID userId) {
+    public void exitTournament(UUID tournamentId) {
 
         Tournament tournament = tournamentRepository.findById(tournamentId)
                 .orElseThrow(() -> new IllegalArgumentException("Tournament not found with id" + tournamentId));
+        UUID userId = currentUserService.getCurrentUserId();
 
         if (!tournament.getTournamentState().equals(TournamentStates.REGISTRATION))
             throw new IllegalStateException("Can't leave a tournamen when registration is closed");
@@ -179,6 +208,8 @@ public class TournamentService implements ITournamentService {
         Tournament tournament = tournamentRepository.findById(tournamentId)
                 .orElseThrow(() -> new IllegalArgumentException("Tournament not found with id" + tournamentId));
 
+        assertOwnerOrAdmin(tournament);
+
         if (!tournament.getTournamentState().equals(TournamentStates.REGISTRATION))
             throw new IllegalStateException("Tournament already closed");
 
@@ -190,6 +221,8 @@ public class TournamentService implements ITournamentService {
     @Override
     public void generateMatchups(UUID tournamentId) {
         Tournament tournament = getTournamentById(tournamentId);
+
+        assertOwnerOrAdmin(tournament);
 
         if (tournament.getTournamentState() != TournamentStates.IN_PROGRESS) {
             throw new IllegalStateException("Tournament must be in progress");
@@ -260,6 +293,23 @@ public class TournamentService implements ITournamentService {
         }
 
         tournamentRepository.save(tournament);
+    }
+
+    private void assertOwnerOrAdmin(Tournament tournament) {
+        User currentUser = currentUserService.getCurrentUser();
+        if (currentUser.getRole() == UserRole.ADMIN) {
+            return;
+        }
+
+        if (!tournament.getUserOwnerId().equals(currentUser.getId())) {
+            throw new SecurityException("Only the tournament owner or an admin can perform this action");
+        }
+    }
+
+    private void assertAdmin() {
+        if (currentUserService.getCurrentUser().getRole() != UserRole.ADMIN) {
+            throw new SecurityException("Only admins can perform this action");
+        }
     }
 
 }
