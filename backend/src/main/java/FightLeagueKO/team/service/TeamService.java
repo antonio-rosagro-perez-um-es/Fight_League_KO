@@ -10,7 +10,6 @@ import java.util.stream.StreamSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import FightLeagueKO.fighter.repository.FighterRepositoryPostgre;
 import FightLeagueKO.fighter.service.FighterService;
 import FightLeagueKO.combo.enums.FuseType;
 import FightLeagueKO.team.dto.CreateTeamDTO;
@@ -31,7 +30,7 @@ public class TeamService implements ITeamService {
     private TeamMapper teamMapper;
 
     @Autowired
-    public TeamService(TeamRepository teamRepository, FighterRepositoryPostgre fighterRepository, FighterService fighterService, TeamMapper teamMapper) {
+    public TeamService(TeamRepository teamRepository, FighterService fighterService, TeamMapper teamMapper) {
         this.teamRepository = teamRepository;
         this.fighterService = fighterService;
         this.teamMapper = teamMapper;
@@ -205,7 +204,9 @@ public class TeamService implements ITeamService {
                 ? team.getPlayCounter() * 100.0 / allTeamsPlayRate
                 : 0.0;
 
-        return teamMapper.toTeamStatsDTO(team, playRate);
+        return teamMapper.toTeamStatsDTO(team, playRate,
+                fighterService.getFighterById(team.getPointFighterId()).getName(),
+                fighterService.getFighterById(team.getSecondFighterId()).getName());
     }
 
     @Override
@@ -221,7 +222,9 @@ public class TeamService implements ITeamService {
                     double playRate = allTeamsPlayRate > 0
                             ? team.getPlayCounter() * 100.0 / allTeamsPlayRate
                             : 0.0;
-                    return teamMapper.toTeamStatsDTO(team, playRate);
+                    return teamMapper.toTeamStatsDTO(team, playRate,
+                            fighterService.getFighterById(team.getPointFighterId()).getName(),
+                            fighterService.getFighterById(team.getSecondFighterId()).getName());
                 })
                 .collect(Collectors.toList());
     }

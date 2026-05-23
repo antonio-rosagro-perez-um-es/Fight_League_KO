@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import FightLeagueKO.user.dto.CreateUserDTO;
-import FightLeagueKO.user.model.User;
+import FightLeagueKO.user.dto.UserDTO;
 import FightLeagueKO.user.service.IUserService;
 
 @RestController
@@ -28,12 +28,12 @@ public class UserController {
     }
 
     @GetMapping("{userId}")
-    public ResponseEntity<User> getUserById(@PathVariable UUID userId){
+    public ResponseEntity<UserDTO> getUserById(@PathVariable UUID userId){
         return ResponseEntity.ok(userService.getUserById(userId));
     }
 
     @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody CreateUserDTO userDTO){
+    public ResponseEntity<UserDTO> createUser(@RequestBody CreateUserDTO userDTO){
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.createUser(userDTO));
     }
 }

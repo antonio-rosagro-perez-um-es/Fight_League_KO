@@ -71,16 +71,16 @@ public class TournamentController {
         tournamentService.restoreTournament(tournamentId);
     }
 
-    @PatchMapping("{tournamentId}/join/{userId}")
+    @PatchMapping("{tournamentId}/join")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void joinTournament(@PathVariable UUID tournamentId, @PathVariable UUID userId) {
-        tournamentService.joinTournament(tournamentId, userId);
+    public void joinTournament(@PathVariable UUID tournamentId) {
+        tournamentService.joinTournament(tournamentId);
     }
 
-    @PatchMapping("{tournamentId}/exit/{userId}")
+    @PatchMapping("{tournamentId}/exit")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void exitTournament(@PathVariable UUID tournamentId, @PathVariable UUID userId) {
-        tournamentService.exitTournament(tournamentId, userId);
+    public void exitTournament(@PathVariable UUID tournamentId) {
+        tournamentService.exitTournament(tournamentId);
     }
 
     @PatchMapping("/{tournamentId}/close")

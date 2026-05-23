@@ -1,6 +1,8 @@
 package FightLeagueKO.user.dto;
 
 public record CreateUserDTO(
-    String userName
+    String username,
+    String email,
+    String password
 ) {
 }

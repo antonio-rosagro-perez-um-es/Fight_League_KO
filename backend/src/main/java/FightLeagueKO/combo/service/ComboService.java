@@ -16,13 +16,21 @@ import org.springframework.stereotype.Service;
 
 import FightLeagueKO.combo.dto.ComboDTO;
 import FightLeagueKO.combo.dto.ComboUpdateDTO;
+import FightLeagueKO.combo.dto.OfficialComboDTO;
+import FightLeagueKO.combo.enums.VoteType;
 import FightLeagueKO.combo.mapper.ComboMapper;
 import FightLeagueKO.combo.dto.ComboCreateDTO;
 import FightLeagueKO.combo.dto.ComboFiltersDTO;
 import FightLeagueKO.combo.enums.ComboDificulty;
 import FightLeagueKO.combo.enums.FuseType;
 import FightLeagueKO.combo.model.Combo;
+import FightLeagueKO.combo.model.ComboVote;
 import FightLeagueKO.combo.repository.ComboRepository;
+import FightLeagueKO.combo.repository.ComboVoteRepository;
+import FightLeagueKO.fighter.service.FighterService;
+import FightLeagueKO.security.CurrentUserService;
+import FightLeagueKO.user.enums.UserRole;
+import FightLeagueKO.user.model.User;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -33,19 +41,28 @@ public class ComboService implements IComboService {
 
     private ComboRepository comboRepository;
     private ComboMapper comboMapper;
+    private CurrentUserService currentUserService;
+    private FighterService fighterService;
+    private ComboVoteRepository comboVoteRepository;
 
     @Autowired
-    public ComboService(ComboRepository comboRepository, ComboMapper comboMapper) {
+    public ComboService(ComboRepository comboRepository, ComboMapper comboMapper,
+            CurrentUserService currentUserService, FighterService fighterService,
+            ComboVoteRepository comboVoteRepository) {
         this.comboRepository = comboRepository;
         this.comboMapper = comboMapper;
+        this.currentUserService = currentUserService;
+        this.fighterService = fighterService;
+        this.comboVoteRepository = comboVoteRepository;
     }
 
     @Override
-    public List<ComboDTO> getOfficialCombosByFighter(UUID fighterId) {
+    public List<OfficialComboDTO> getOfficialCombosByFighter(UUID fighterId) {
         Objects.requireNonNull(fighterId, "fighterId must not be null");
+
         return comboRepository.findOfficialCombosByPointFighterId(fighterId)
                 .stream()
-                .map(comboMapper::toDTO)
+                .map(combo -> toOfficialDTO(combo))
                 .collect(Collectors.toList());
     }
 
@@ -57,13 +74,17 @@ public class ComboService implements IComboService {
         Combo combo = comboRepository.findById(comboId)
                 .orElseThrow(() -> new EntityNotFoundException("Combo not found with Id: " + comboId));
 
-        return comboMapper.toDTO(combo);
+        if (combo.isPrivateCombo()) {
+            assertOwnerOrAdmin(combo);
+        }
+
+        return toDTO(combo);
     }
 
     @Override
-    public List<ComboDTO> getAllCombo(){
-         return StreamSupport.stream(comboRepository.findAll().spliterator(), false)
-                .map(comboMapper::toDTO)
+    public List<ComboDTO> getAllCombo() {
+        return StreamSupport.stream(comboRepository.findAll().spliterator(), false)
+                .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
@@ -72,16 +93,21 @@ public class ComboService implements IComboService {
 
         if (filters == null) {
             return comboRepository.findAll().stream()
-                    .map(comboMapper::toDTO)
+                    .map(this::toDTO)
                     .collect(Collectors.toList());
         }
 
-        Sort sort = filters.latest() == null
-                ? Sort.unsorted()
-                : Sort.by(filters.latest() ? Sort.Direction.DESC : Sort.Direction.ASC, "createdAt");
+        Sort sort;
+        if (filters.mostLiked() != null) {
+            sort = Sort.by(filters.mostLiked() ? Sort.Direction.DESC : Sort.Direction.ASC, "likeCounter");
+        } else if (filters.latest() != null) {
+            sort = Sort.by(filters.latest() ? Sort.Direction.DESC : Sort.Direction.ASC, "createdAt");
+        } else {
+            sort = Sort.unsorted();
+        }
 
         return comboRepository.findAll(buildFilters(filters), sort).stream()
-                .map(comboMapper::toDTO)
+                .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
@@ -91,6 +117,7 @@ public class ComboService implements IComboService {
         Objects.requireNonNull(comboDTO, "Parameters could not be null");
 
         Combo combo = new Combo();
+        User currentUser = currentUserService.getCurrentUser();
 
         if (comboDTO.title() == null || comboDTO.title().isEmpty()) {
             throw new IllegalArgumentException("Title cant be null");
@@ -120,11 +147,17 @@ public class ComboService implements IComboService {
             throw new IllegalArgumentException("Description cant be null or empty");
         }
 
+        boolean isPrivate = false;
+        if (currentUser.getRole() != UserRole.ADMIN)
+            isPrivate = true;
+
         combo.setTitle(comboDTO.title());
         combo.setDeleted(false);
+        combo.setCreatorUserId(currentUser.getId());
+        combo.setOficial(currentUser.getRole() == UserRole.ADMIN);
         combo.setPointFighterId(comboDTO.pointFighter());
 
-        if (comboDTO.secondFighter() != null && !comboDTO.pointFighter().equals(comboDTO.secondFighter()) )
+        if (comboDTO.secondFighter() != null && !comboDTO.pointFighter().equals(comboDTO.secondFighter()))
             combo.setSecondFighterId(comboDTO.secondFighter());
 
         combo.setTextNotation(comboDTO.textNotation());
@@ -136,13 +169,9 @@ public class ComboService implements IComboService {
         combo.setDamage(comboDTO.damage() != null ? comboDTO.damage() : 0);
         combo.setCreatedAt(LocalDate.now());
         combo.setUpDateAt(LocalDate.now());
-        combo.setPrivateCombo(true); // TODO: el combo sera marcado como oficial o no en funcion del usuario que lo cree
-        combo.setLikeCounter(0);
-        combo.setDislikeCounter(0);
-        
-
+        combo.setPrivateCombo(isPrivate);
         Combo saved = comboRepository.save(combo);
-        return comboMapper.toDTO(saved);
+        return toDTO(saved);
     }
 
     @Override
@@ -150,6 +179,8 @@ public class ComboService implements IComboService {
 
         Combo combo = comboRepository.findById(comboId)
                 .orElseThrow(() -> new EntityNotFoundException("Combo not found exception with Id: " + comboId));
+
+        assertOwnerOrAdmin(combo);
 
         Optional.ofNullable(comboDTO.title())
                 .ifPresent(combo::setTitle);
@@ -191,6 +222,8 @@ public class ComboService implements IComboService {
         Combo combo = comboRepository.findById(comboId)
                 .orElseThrow(() -> new EntityNotFoundException("Combo not found exception with id: " + comboId));
 
+        assertOwnerOrAdmin(combo);
+
         combo.setDeleted(true);
 
         comboRepository.save(combo);
@@ -200,6 +233,8 @@ public class ComboService implements IComboService {
     public void restoreCombo(UUID comboId) {
         Combo combo = comboRepository.findById(comboId)
                 .orElseThrow(() -> new EntityNotFoundException("Combo not found exception with id: " + comboId));
+
+        assertAdmin();
 
         combo.setDeleted(false);
 
@@ -245,8 +280,10 @@ public class ComboService implements IComboService {
 
     @Override
     public void setComboPublic(UUID comboId) {
-         Combo combo = comboRepository.findById(comboId)
+        Combo combo = comboRepository.findById(comboId)
                 .orElseThrow(() -> new EntityNotFoundException("Combo not found exception with id: " + comboId));
+
+        assertOwnerOrAdmin(combo);
 
         combo.setPrivateCombo(false);
 
@@ -258,49 +295,111 @@ public class ComboService implements IComboService {
         Combo combo = comboRepository.findById(comboId)
                 .orElseThrow(() -> new EntityNotFoundException("Combo not found exception with id: " + comboId));
 
+        assertOwnerOrAdmin(combo);
+
         combo.setPrivateCombo(true);
 
         comboRepository.save(combo);
     }
 
     @Override
-    public void addLikeCombo(UUID comboId) {
-       Combo combo = comboRepository.findById(comboId)
-                .orElseThrow(() -> new EntityNotFoundException("Combo not found exception with id: " + comboId));
-
-        combo.addLikeCombo();
-
-        comboRepository.save(combo);
-    }
-
-    @Override
-    public void addDislikeCombo(UUID comboId) {
+    public void voteCombo(UUID comboId, VoteType newVote) {
         Combo combo = comboRepository.findById(comboId)
                 .orElseThrow(() -> new EntityNotFoundException("Combo not found exception with id: " + comboId));
 
-        combo.addDislikeCombo();
+        UUID currentUserId = currentUserService.getCurrentUser().getId();
+
+        comboVoteRepository.findByComboIdAndUserId(comboId, currentUserId)
+                .ifPresentOrElse(existingVote -> {
+                    if (existingVote.getVoteType() != newVote) {
+                        decrementCounter(combo, existingVote.getVoteType());
+                        existingVote.setVoteType(newVote);
+                        incrementCounter(combo, newVote);
+                        comboVoteRepository.save(existingVote);
+                    }
+                }, () -> {
+                    ComboVote newVoteEntity = new ComboVote(comboId, currentUserId, newVote);
+                    comboVoteRepository.save(newVoteEntity);
+                    incrementCounter(combo, newVote);
+                });
 
         comboRepository.save(combo);
     }
 
     @Override
-    public void removeLikeCombo(UUID comboId) {
-       Combo combo = comboRepository.findById(comboId)
-                .orElseThrow(() -> new EntityNotFoundException("Combo not found exception with id: " + comboId));
-
-        combo.removeLikeCombo();
-
-        comboRepository.save(combo);
-    }
-
-    @Override
-    public void removeDislikeCombo(UUID comboId) {
+    public void withdrawVote(UUID comboId) {
         Combo combo = comboRepository.findById(comboId)
                 .orElseThrow(() -> new EntityNotFoundException("Combo not found exception with id: " + comboId));
 
-        combo.removeDislikeCombo();
+        UUID currentUserId = currentUserService.getCurrentUser().getId();
 
-        comboRepository.save(combo);
+        comboVoteRepository.findByComboIdAndUserId(comboId, currentUserId)
+                .ifPresent(existingVote -> {
+                    decrementCounter(combo, existingVote.getVoteType());
+                    comboVoteRepository.delete(existingVote);
+                    comboRepository.save(combo);
+                });
+    }
+
+    private void incrementCounter(Combo combo, VoteType voteType) {
+        if (voteType == VoteType.LIKE) {
+            combo.setLikeCounter(combo.getLikeCounter() + 1);
+        } else {
+            combo.setDislikeCounter(combo.getDislikeCounter() + 1);
+        }
+    }
+
+    private void decrementCounter(Combo combo, VoteType voteType) {
+        if (voteType == VoteType.LIKE) {
+            combo.setLikeCounter(combo.getLikeCounter() - 1);
+        } else {
+            combo.setDislikeCounter(combo.getDislikeCounter() - 1);
+        }
+    }
+
+    private ComboDTO toDTO(Combo combo) {
+        return comboMapper.toDTO(combo,
+                fighterService.getFighterById(combo.getPointFighterId()).getName(),
+                fighterService.getFighterById(combo.getPointFighterId()).getSlug(),
+                resolveFighterName(combo.getSecondFighterId()),
+                resolveFighterSlug(combo.getSecondFighterId()));
+    }
+
+    private OfficialComboDTO toOfficialDTO(Combo combo) {
+        return comboMapper.toOfficialDTO(combo,
+                fighterService.getFighterById(combo.getPointFighterId()).getName(),
+                fighterService.getFighterById(combo.getPointFighterId()).getSlug(),
+                resolveFighterName(combo.getSecondFighterId()),
+                resolveFighterSlug(combo.getSecondFighterId()));
+    }
+
+    private String resolveFighterName(UUID fighterId) {
+        if (fighterId == null)
+            return null;
+        return fighterService.getFighterById(fighterId).getName();
+    }
+
+    private String resolveFighterSlug(UUID fighterId) {
+        if (fighterId == null)
+            return null;
+        return fighterService.getFighterById(fighterId).getSlug();
+    }
+
+    private void assertOwnerOrAdmin(Combo combo) {
+        User currentUser = currentUserService.getCurrentUser();
+        if (currentUser.getRole() == UserRole.ADMIN) {
+            return;
+        }
+
+        if (combo.getCreatorUserId() == null || !combo.getCreatorUserId().equals(currentUser.getId())) {
+            throw new SecurityException("Only the combo owner or an admin can perform this action");
+        }
+    }
+
+    private void assertAdmin() {
+        if (currentUserService.getCurrentUser().getRole() != UserRole.ADMIN) {
+            throw new SecurityException("Only admins can perform this action");
+        }
     }
 
 }
