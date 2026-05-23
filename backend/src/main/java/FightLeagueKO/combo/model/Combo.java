@@ -227,20 +227,4 @@ public class Combo {
         this.privateCombo = privateCombo;
     }
 
-    public void addLikeCombo() {
-        this.likeCounter++;
-    }
-
-    public void removeLikeCombo() {
-        this.likeCounter--;
-    }
-
-    public void addDislikeCombo() {
-        this.dislikeCounter++;
-    }
-
-    public void removeDislikeCombo() {
-        this.dislikeCounter--;
-    }
-
 }

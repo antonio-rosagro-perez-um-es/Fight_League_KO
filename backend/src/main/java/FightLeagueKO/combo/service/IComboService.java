@@ -8,6 +8,7 @@ import FightLeagueKO.combo.dto.ComboDTO;
 import FightLeagueKO.combo.dto.ComboFiltersDTO;
 import FightLeagueKO.combo.dto.ComboUpdateDTO;
 import FightLeagueKO.combo.dto.OfficialComboDTO;
+import FightLeagueKO.combo.enums.VoteType;
 
 public interface IComboService {
 
@@ -31,11 +32,7 @@ public interface IComboService {
 
     void setComboPrivate(UUID comboId);
 
-    void addLikeCombo(UUID comboId);
+    void voteCombo(UUID comboId, VoteType voteType);
 
-    void addDislikeCombo(UUID comboId);
-
-    void removeLikeCombo(UUID comboId);
-
-    void removeDislikeCombo(UUID comboId);
+    void withdrawVote(UUID comboId);
 }

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -21,6 +22,7 @@ import FightLeagueKO.combo.dto.ComboDTO;
 import FightLeagueKO.combo.dto.ComboFiltersDTO;
 import FightLeagueKO.combo.dto.ComboUpdateDTO;
 import FightLeagueKO.combo.dto.OfficialComboDTO;
+import FightLeagueKO.combo.enums.VoteType;
 import FightLeagueKO.combo.service.IComboService;
 
 @RestController
@@ -89,28 +91,16 @@ public class ComboController {
         comboService.setComboPrivate(comboId);
     }
 
-    @PatchMapping("{comboId}/add-like")
+    @PatchMapping("{comboId}/vote")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void addLikeCombo(@PathVariable UUID comboId) {
-        comboService.addLikeCombo(comboId);
+    public void voteCombo(@PathVariable UUID comboId, @RequestParam VoteType voteType) {
+        comboService.voteCombo(comboId, voteType);
     }
 
-    @PatchMapping("{comboId}/add-dislike")
+    @PatchMapping("{comboId}/unvote")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void addDislikeCombo(@PathVariable UUID comboId) {
-        comboService.addDislikeCombo(comboId);
-    }
-
-    @PatchMapping("{comboId}/remove-like")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void removeLikeCombo(@PathVariable UUID comboId) {
-        comboService.removeLikeCombo(comboId);
-    }
-
-    @PatchMapping("{comboId}/remove-dislike")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void removeDislikeCombo(@PathVariable UUID comboId) {
-        comboService.removeDislikeCombo(comboId);
+    public void withdrawVote(@PathVariable UUID comboId) {
+        comboService.withdrawVote(comboId);
     }
 
 }
