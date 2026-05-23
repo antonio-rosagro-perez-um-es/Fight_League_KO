@@ -7,6 +7,7 @@ public record ComboFiltersDTO(
     UUID secondFighterId,
     String comboDificulty,
     String fuse,
-    Boolean latest
+    Boolean latest,
+    Boolean mostLiked
 ) {
 }

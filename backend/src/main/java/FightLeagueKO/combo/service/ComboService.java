@@ -97,9 +97,14 @@ public class ComboService implements IComboService {
                     .collect(Collectors.toList());
         }
 
-        Sort sort = filters.latest() == null
-                ? Sort.unsorted()
-                : Sort.by(filters.latest() ? Sort.Direction.DESC : Sort.Direction.ASC, "createdAt");
+        Sort sort;
+        if (filters.mostLiked() != null) {
+            sort = Sort.by(filters.mostLiked() ? Sort.Direction.DESC : Sort.Direction.ASC, "likeCounter");
+        } else if (filters.latest() != null) {
+            sort = Sort.by(filters.latest() ? Sort.Direction.DESC : Sort.Direction.ASC, "createdAt");
+        } else {
+            sort = Sort.unsorted();
+        }
 
         return comboRepository.findAll(buildFilters(filters), sort).stream()
                 .map(this::toDTO)
