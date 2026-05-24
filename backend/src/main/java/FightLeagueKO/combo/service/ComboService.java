@@ -89,6 +89,15 @@ public class ComboService implements IComboService {
     }
 
     @Override
+    public List<ComboDTO> getCurrentUserCombos() {
+        UUID currentUserId = currentUserService.getCurrentUser().getId();
+        return comboRepository.findByCreatorUserIdAndDeletedFalseOrderByCreatedAtDesc(currentUserId)
+                .stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public List<ComboDTO> searchCombos(ComboFiltersDTO filters) {
 
         if (filters == null) {
