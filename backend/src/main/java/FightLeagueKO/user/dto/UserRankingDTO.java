@@ -2,13 +2,9 @@ package FightLeagueKO.user.dto;
 
 import java.util.UUID;
 
-import FightLeagueKO.user.enums.UserRole;
-
-public record UserDTO(
+public record UserRankingDTO(
     UUID id,
     String username,
-    String email,
-    UserRole role,
     int score,
     int tournamentWins
 ) {

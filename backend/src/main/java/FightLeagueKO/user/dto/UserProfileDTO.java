@@ -4,12 +4,15 @@ import java.util.UUID;
 
 import FightLeagueKO.user.enums.UserRole;
 
-public record UserDTO(
+public record UserProfileDTO(
     UUID id,
     String username,
     String email,
     UserRole role,
     int score,
-    int tournamentWins
+    int tournamentWins,
+    int gamesPlayed,
+    int gamesWon,
+    int gamesLost
 ) {
 }

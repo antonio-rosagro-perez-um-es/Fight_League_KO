@@ -30,6 +30,17 @@ As a general functionality, any displayed combo should be translatable from text
 notation to images, as seen on <https://2xkombo.gg/> where we have
 ![alt text](img/image_2.png).
 
+Made view responsive and adaptative.
+
+When a unregister user try to acced or do a operation that dont have permises show a
+notification tellin "You want to try login" made longin a button to go to login view.
+Loging should be tipical login with two fields one for username or mail and other for password.
+Down password display a link that display a message like not registed yet?, try now and made that
+link go to register view. For register view display the needed field to satisfy the register endpoint
+for create a user in backend/src/main/java/FightLeagueKO/user/controller/UserController.java
+
+Dropdown menus for fighters and fuses will have a display with a buble image and a name, fighter/fuse name.
+
 ## Header
 
 The header has four different types, two of which are very similar.
@@ -195,7 +206,7 @@ sorted by date. A view similar to
 
 Same as in Fighters.
 
-### Other Users
+### register and not register user
 
 The tournament view will show a column list of tournaments ordered from nearest
 to farthest, as seen on <https://2xkombo.gg/tournaments>. Clicking on a
@@ -208,8 +219,50 @@ If an unregistered user presses the join button, they will be taken to the
 registration view. This applies to all actions they are not permitted to
 perform.
 
+A register user can create a tournament, this function will be show as a main button,
+when a register user press create tournament button its role update to owner for that
+specific torunament and user update its role to owner.
+
+### Owner user
+
 For organizer users, the tournaments they organize will first be shown in a
 separate section. Clicking on them will open a floating view with information
 fields and the ability to perform authorized actions such as modification,
 closing registrations, cancellation, etc. For all actions, see
 `backend/src/main/java/FightLeagueKO/tournament/controller/TournamentController.java`.
+
+Also inside floating view is a game torunament graph, showing the tournament games, use any library that
+can help you with this, tournament grapht can be not be complete,like in the first fase when there
+are only the first matches, use a default cover for them. When owner user click in any space of the
+matches tournament it will be redirected to a page with the same graph but amplied. Here is a example
+of the graph
+
+![alt text](img/image_3.png)
+
+In the matches for the tournament view uer owner can click into a game and it will show in a floating
+window the information and the field for fighter and fuse will be dropdown menus with the fighers for fighters
+and fuses for fuses (if is a good implemenention try to add a search). Also the winner will be display in the middle and will be
+set by seleceting one of the two users, that can be changed by updating, see backend/src/main/java/FightLeagueKO/game/service/GameService.java
+for use differen endpoints. Here is a basic example.
+![alt text](image.png)
+
+![alt text](img/image_4.png)
+
+## Combos (community)
+
+### Admin
+
+Same as fighter
+
+### register user and owneer
+
+This view will have a view like <https://2xkombo.gg/> but using the filter and search for combos in
+backend/src/main/java/FightLeagueKO/combo/controller/ComboController.java for defect it will create a 
+combo in private and only public combos will be show in this view. Next to the button for upload a combo there
+will be a button for view private combo, the same button can return from private to public combos. In private combos a user
+can do the actions that are allowed for its combos like delete and modify. In private view only will be display combos that user owns.
+
+When creating a combo there will be some restricted fields like fighters and fuses, there will be drop down list with the predesigned names
+op ids for fighter that backend endpoints expects to receive.
+
+In the view user will have the filter aviable ass drop down menus too when user can search applying filters.
