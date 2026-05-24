@@ -13,4 +13,8 @@ public interface GameRepository extends CrudRepository<Game, UUID>{
 
     public List<Game> getAllActiveGames();
 
+    public List<Game> getTournamentGames(UUID tournamentId);
+
+    public List<Game> getRecentGamesByUser(UUID userId);
+
 }

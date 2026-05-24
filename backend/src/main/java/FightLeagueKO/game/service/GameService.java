@@ -15,8 +15,12 @@ import FightLeagueKO.game.dto.CreateGameDTO;
 import FightLeagueKO.game.dto.UpdateGameDTO;
 import FightLeagueKO.game.model.Game;
 import FightLeagueKO.game.repository.GameRepository;
+import FightLeagueKO.security.CurrentUserService;
 import FightLeagueKO.team.dto.CreateTeamDTO;
 import FightLeagueKO.team.service.TeamService;
+import FightLeagueKO.tournament.model.Tournament;
+import FightLeagueKO.user.enums.UserRole;
+import FightLeagueKO.user.model.User;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -25,11 +29,13 @@ public class GameService implements IGameService {
 
     private GameRepository gameRepository;
     private TeamService teamService;
+    private CurrentUserService currentUserService;
 
     @Autowired
-    public GameService(GameRepository gameRepository, TeamService teamService) {
+    public GameService(GameRepository gameRepository, TeamService teamService, CurrentUserService currentUserService) {
         this.gameRepository = gameRepository;
         this.teamService = teamService;
+        this.currentUserService = currentUserService;
     }
 
     @Override
@@ -69,9 +75,43 @@ public class GameService implements IGameService {
         game.setUser1Id(gameDTO.user1());
         game.setUser2Id(gameDTO.user2());
         game.setGameDate(gameDTO.gameDate());
+        game.setRoundNumber(0);
+        game.setBracketPosition(0);
         game.setDelete(false);
 
         return gameRepository.save(game);
+    }
+
+    @Override
+    public Game createTournamentGame(Tournament tournament, UUID user1Id, UUID user2Id, int roundNumber, int bracketPosition) {
+        Objects.requireNonNull(tournament, "Tournament could not be null");
+        Objects.requireNonNull(user1Id, "User 1 id could not be null");
+        Objects.requireNonNull(user2Id, "User 2 id could not be null");
+
+        Game game = new Game();
+        game.setTournament(tournament);
+        game.setUser1Id(user1Id);
+        game.setUser2Id(user2Id);
+        game.setGameDate(LocalDate.now().isBefore(tournament.getStartDate()) ? tournament.getStartDate() : LocalDate.now());
+        game.setRoundNumber(roundNumber);
+        game.setBracketPosition(bracketPosition);
+        game.setDelete(false);
+
+        return gameRepository.save(game);
+    }
+
+    @Override
+    public List<Game> getTournamentGames(UUID tournamentId) {
+        Objects.requireNonNull(tournamentId, "Tournament id could not be null");
+        return gameRepository.getTournamentGames(tournamentId);
+    }
+
+    @Override
+    public List<Game> getRecentGamesByUser(UUID userId) {
+        Objects.requireNonNull(userId, "User id could not be null");
+        return gameRepository.getRecentGamesByUser(userId).stream()
+                .limit(10)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -126,6 +166,8 @@ public class GameService implements IGameService {
         Game game = gameRepository.findById(gameId)
                 .orElseThrow(() -> new IllegalArgumentException("Game not found with id " + gameId));
 
+        assertTournamentOwnerOrAdmin(game);
+
         UUID team1Id = teamService.createTeam(teamUser1).getId();
         UUID team2Id = teamService.createTeam(teamUser2).getId();
         game.setTeamUser1Id(team1Id);
@@ -140,19 +182,50 @@ public class GameService implements IGameService {
         Game game = gameRepository.findById(gameId)
                 .orElseThrow(() -> new IllegalArgumentException("Game not found with id " + gameId));
 
+        assertTournamentOwnerOrAdmin(game);
+
+        if (!userId.equals(game.getUser1Id()) && !userId.equals(game.getUser2Id())) {
+            throw new IllegalArgumentException("Winner must be one of the game players");
+        }
+
+        if (game.getWinnerId() != null) {
+            throw new IllegalStateException("Game winner is already set");
+        }
+
         if (userId.equals(game.getUser1Id())) {
-            teamService.updateTeamStats(game.getTeamUser1Id(), true);
-            teamService.updateTeamStats(game.getTeamUser2Id(), false);
+            updateTeamStatsIfPresent(game.getTeamUser1Id(), true);
+            updateTeamStatsIfPresent(game.getTeamUser2Id(), false);
         }
 
         if (userId.equals(game.getUser2Id())) {
-            teamService.updateTeamStats(game.getTeamUser1Id(), false);
-            teamService.updateTeamStats(game.getTeamUser2Id(), true);
+            updateTeamStatsIfPresent(game.getTeamUser1Id(), false);
+            updateTeamStatsIfPresent(game.getTeamUser2Id(), true);
         }
 
         game.setWinnerId(userId);
 
         gameRepository.save(game);
+    }
+
+    private void updateTeamStatsIfPresent(UUID teamId, boolean isWinner) {
+        if (teamId != null) {
+            teamService.updateTeamStats(teamId, isWinner);
+        }
+    }
+
+    private void assertTournamentOwnerOrAdmin(Game game) {
+        if (game.getTournament() == null) {
+            return;
+        }
+
+        User currentUser = currentUserService.getCurrentUser();
+        if (currentUser.getRole() == UserRole.ADMIN) {
+            return;
+        }
+
+        if (!game.getTournament().getUserOwnerId().equals(currentUser.getId())) {
+            throw new SecurityException("Only the tournament owner or an admin can set game results");
+        }
     }
 
 }

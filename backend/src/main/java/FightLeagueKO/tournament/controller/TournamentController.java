@@ -16,19 +16,25 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import FightLeagueKO.tournament.dto.CreateTournamentDTO;
+import FightLeagueKO.tournament.dto.TournamentGameDTO;
+import FightLeagueKO.tournament.dto.TournamentStandingDTO;
+import FightLeagueKO.tournament.dto.TournamentViewDTO;
 import FightLeagueKO.tournament.dto.UpdateTournamentDTO;
 import FightLeagueKO.tournament.model.Tournament;
 import FightLeagueKO.tournament.service.ITournamentService;
+import FightLeagueKO.security.CurrentUserService;
 
 @RestController
 @RequestMapping("/tournaments")
 public class TournamentController {
 
     private ITournamentService tournamentService;
+    private CurrentUserService currentUserService;
 
     @Autowired
-    public TournamentController(ITournamentService tournamentService) {
+    public TournamentController(ITournamentService tournamentService, CurrentUserService currentUserService) {
         this.tournamentService = tournamentService;
+        this.currentUserService = currentUserService;
     }
 
     @GetMapping("/{tournamentId}")
@@ -42,9 +48,37 @@ public class TournamentController {
         return ResponseEntity.ok(tournamentService.getAllTournament());
     }
 
+    @GetMapping("/admin/all")
+    public ResponseEntity<List<TournamentViewDTO>> getAllTournamentViewsForAdmin() {
+        UUID currentUserId = currentUserService.getCurrentUserId();
+        return ResponseEntity.ok(tournamentService.getAllTournamentViews(currentUserId));
+    }
+
     @GetMapping("/all-tournaments")
-    public ResponseEntity<List<Tournament>> getAllActiveTournaments() {
-        return ResponseEntity.ok(tournamentService.getAllActiveTournament());
+    public ResponseEntity<List<TournamentViewDTO>> getAllActiveTournaments() {
+        return ResponseEntity.ok(tournamentService.getAllActiveTournamentViews(null));
+    }
+
+    @GetMapping("/{tournamentId}/view")
+    public ResponseEntity<TournamentViewDTO> getTournamentView(@PathVariable UUID tournamentId) {
+        UUID currentUserId = currentUserService.getCurrentUserIdIfAuthenticated().orElse(null);
+        return ResponseEntity.ok(tournamentService.getTournamentView(tournamentId, currentUserId));
+    }
+
+    @GetMapping("/{tournamentId}/bracket")
+    public ResponseEntity<List<TournamentGameDTO>> getTournamentBracket(@PathVariable UUID tournamentId) {
+        return ResponseEntity.ok(tournamentService.getTournamentBracket(tournamentId));
+    }
+
+    @GetMapping("/{tournamentId}/standings")
+    public ResponseEntity<List<TournamentStandingDTO>> getTournamentStandings(@PathVariable UUID tournamentId) {
+        return ResponseEntity.ok(tournamentService.getTournamentStandings(tournamentId));
+    }
+
+    @GetMapping("/me/owned")
+    public ResponseEntity<List<TournamentViewDTO>> getOwnedTournaments() {
+        UUID currentUserId = currentUserService.getCurrentUserId();
+        return ResponseEntity.ok(tournamentService.getOwnedTournamentViews(currentUserId));
     }
 
     @PostMapping
@@ -87,6 +121,12 @@ public class TournamentController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void closeRegistrations(@PathVariable UUID tournamentId) {
         tournamentService.closeRegistrations(tournamentId);
+    }
+
+    @PatchMapping("/{tournamentId}/generate-matchups")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void generateMatchups(@PathVariable UUID tournamentId) {
+        tournamentService.generateMatchups(tournamentId);
     }
 
 }

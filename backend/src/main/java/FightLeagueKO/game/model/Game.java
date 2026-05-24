@@ -43,11 +43,25 @@ public class Game {
     @Column(nullable = false)
     private LocalDate gameDate;
 
+    @Column(nullable = false, columnDefinition = "integer default 0")
+    private int roundNumber;
+
+    @Column(nullable = false, columnDefinition = "integer default 0")
+    private int bracketPosition;
+
     @Column(nullable = false)
     private boolean deleted;
 
     public Game() {
     } // POJO
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
 
     public Tournament getTournament() {
         return tournament;
@@ -55,6 +69,22 @@ public class Game {
 
     public void setTournament(Tournament tournament) {
         this.tournament = tournament;
+    }
+
+    public int getRoundNumber() {
+        return roundNumber;
+    }
+
+    public void setRoundNumber(int roundNumber) {
+        this.roundNumber = roundNumber;
+    }
+
+    public int getBracketPosition() {
+        return bracketPosition;
+    }
+
+    public void setBracketPosition(int bracketPosition) {
+        this.bracketPosition = bracketPosition;
     }
 
     public UUID getUser1Id() {

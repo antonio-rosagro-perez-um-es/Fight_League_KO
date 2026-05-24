@@ -16,21 +16,37 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import FightLeagueKO.game.dto.CreateGameDTO;
+import FightLeagueKO.game.dto.RecentGameDTO;
 import FightLeagueKO.game.dto.SetTeamsDTO;
 import FightLeagueKO.game.dto.UpdateGameDTO;
 import FightLeagueKO.game.model.Game;
 import FightLeagueKO.game.service.GameService;
 import FightLeagueKO.game.service.IGameService;
+import FightLeagueKO.security.CurrentUserService;
+import FightLeagueKO.tournament.model.Tournament;
+import FightLeagueKO.user.service.UserService;
 
 @RestController
 @RequestMapping("/games")
 public class GameController {
 
     private IGameService gameService;
+    private CurrentUserService currentUserService;
+    private UserService userService;
 
     @Autowired
-    public GameController(GameService gameService) {
+    public GameController(GameService gameService, CurrentUserService currentUserService, UserService userService) {
         this.gameService = gameService;
+        this.currentUserService = currentUserService;
+        this.userService = userService;
+    }
+
+    @GetMapping("/me/recent")
+    public ResponseEntity<List<RecentGameDTO>> getCurrentUserRecentGames() {
+        UUID currentUserId = currentUserService.getCurrentUserId();
+        return ResponseEntity.ok(gameService.getRecentGamesByUser(currentUserId).stream()
+                .map(game -> toRecentGameDTO(game, currentUserId))
+                .toList());
     }
 
     @GetMapping("/{gameId}")
@@ -81,6 +97,23 @@ public class GameController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void setWinner(@PathVariable UUID gameId, @PathVariable UUID userId) {
         gameService.setWinner(gameId, userId);
+    }
+
+    private RecentGameDTO toRecentGameDTO(Game game, UUID currentUserId) {
+        Tournament tournament = game.getTournament();
+        return new RecentGameDTO(
+                game.getId(),
+                tournament != null ? tournament.getId() : null,
+                tournament != null ? tournament.getTitle() : null,
+                game.getUser1Id(),
+                userService.findUserEntityById(game.getUser1Id()).getUsername(),
+                game.getUser2Id(),
+                userService.findUserEntityById(game.getUser2Id()).getUsername(),
+                game.getTeamUser1Id(),
+                game.getTeamUser2Id(),
+                game.getWinnerId(),
+                game.getGameDate(),
+                currentUserId.equals(game.getWinnerId()));
     }
 
 }

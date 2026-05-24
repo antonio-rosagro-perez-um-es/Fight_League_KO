@@ -1,9 +1,12 @@
 package FightLeagueKO.tournament.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -13,12 +16,13 @@ import java.util.stream.StreamSupport;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import FightLeagueKO.game.dto.CreateGameDTO;
 import FightLeagueKO.game.model.Game;
-import FightLeagueKO.game.repository.GameRepository;
 import FightLeagueKO.game.service.GameService;
 import FightLeagueKO.security.CurrentUserService;
 import FightLeagueKO.tournament.dto.CreateTournamentDTO;
+import FightLeagueKO.tournament.dto.TournamentGameDTO;
+import FightLeagueKO.tournament.dto.TournamentStandingDTO;
+import FightLeagueKO.tournament.dto.TournamentViewDTO;
 import FightLeagueKO.tournament.dto.UpdateTournamentDTO;
 import FightLeagueKO.tournament.enums.TournamentStates;
 import FightLeagueKO.tournament.model.Tournament;
@@ -67,6 +71,56 @@ public class TournamentService implements ITournamentService {
     }
 
     @Override
+    public List<TournamentViewDTO> getAllTournamentViews(UUID currentUserId) {
+        return getAllTournament().stream()
+                .map(tournament -> toTournamentViewDTO(tournament, currentUserId))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<TournamentViewDTO> getAllActiveTournamentViews(UUID currentUserId) {
+        return tournamentRepository.getAllActiveTournaments().stream()
+                .map(tournament -> toTournamentViewDTO(tournament, currentUserId))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<TournamentViewDTO> getOwnedTournamentViews(UUID ownerId) {
+        Objects.requireNonNull(ownerId, "Owner id could not be null");
+        return tournamentRepository.getAllActiveTournaments().stream()
+                .filter(tournament -> ownerId.equals(tournament.getUserOwnerId()))
+                .map(tournament -> toTournamentViewDTO(tournament, ownerId))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public TournamentViewDTO getTournamentView(UUID tournamentId, UUID currentUserId) {
+        return toTournamentViewDTO(getTournamentById(tournamentId), currentUserId);
+    }
+
+    @Override
+    public List<TournamentGameDTO> getTournamentBracket(UUID tournamentId) {
+        getTournamentById(tournamentId);
+        return gameService.getTournamentGames(tournamentId).stream()
+                .map(this::toTournamentGameDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<TournamentStandingDTO> getTournamentStandings(UUID tournamentId) {
+        Tournament tournament = getTournamentById(tournamentId);
+        Map<UUID, Integer> placements = calculatePlacements(tournament, gameService.getTournamentGames(tournamentId));
+
+        return placements.entrySet().stream()
+                .map(entry -> new TournamentStandingDTO(
+                        entry.getKey(),
+                        userService.findUserEntityById(entry.getKey()).getUsername(),
+                        entry.getValue(),
+                        entry.getValue() <= 10 ? 11 - entry.getValue() : 0))
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public Tournament createTournament(CreateTournamentDTO tournamentDTO) {
 
         Objects.requireNonNull(tournamentDTO, "TournamentDTO could not be null");
@@ -96,6 +150,8 @@ public class TournamentService implements ITournamentService {
         tournament.setInscriptionCloseDate(tournamentDTO.inscriptionCloseDate());
         tournament.setManualClose(false);
         tournament.setWinnerId(null);
+        tournament.setScored(false);
+        tournament.setScoredAt(null);
         tournament.setDeleted(false);
 
         Tournament saved = tournamentRepository.save(tournament);
@@ -223,75 +279,189 @@ public class TournamentService implements ITournamentService {
 
         assertOwnerOrAdmin(tournament);
 
+        List<Game> allGames = gameService.getTournamentGames(tournamentId);
+        if (allGames.isEmpty()) {
+            generateFirstRound(tournament);
+        } else {
+            generateNextRoundOrFinish(tournament, allGames);
+        }
+        tournamentRepository.save(tournament);
+    }
+
+    private void generateFirstRound(Tournament tournament) {
+        if (tournament.getTournamentState() != TournamentStates.WAITING_START) {
+            throw new IllegalStateException("Tournament registrations must be closed before generating matchups");
+        }
+
+        List<UUID> playerIds = new ArrayList<>(tournament.getPlayersIds());
+        if (playerIds.size() < 2) {
+            throw new IllegalStateException("Need at least 2 players to generate matchups");
+        }
+        if (playerIds.size() % 2 != 0) {
+            throw new IllegalStateException("Tournament brackets currently require an even number of players");
+        }
+
+        Collections.shuffle(playerIds);
+        List<Game> newGames = new ArrayList<>();
+        for (int i = 0; i < playerIds.size(); i += 2) {
+            newGames.add(gameService.createTournamentGame(tournament, playerIds.get(i), playerIds.get(i + 1), 1,
+                    (i / 2) + 1));
+        }
+
+        tournament.setGamesList(newGames);
+        tournament.setTournamentState(TournamentStates.IN_PROGRESS);
+    }
+
+    private void generateNextRoundOrFinish(Tournament tournament, List<Game> allGames) {
         if (tournament.getTournamentState() != TournamentStates.IN_PROGRESS) {
             throw new IllegalStateException("Tournament must be in progress");
         }
 
-        List<Game> allGames = tournament.getGamesList();
-        if (allGames == null) {
-            allGames = new ArrayList<>();
-            tournament.setGamesList(allGames);
-        }
+        int latestRound = allGames.stream()
+                .mapToInt(Game::getRoundNumber)
+                .max()
+                .orElseThrow();
 
-        // Check if any current round games are still pending (no winner)
-        long pendingCount = allGames.stream()
-                .filter(g -> g.getWinnerId() == null)
-                .count();
+        List<Game> latestRoundGames = allGames.stream()
+                .filter(game -> game.getRoundNumber() == latestRound)
+                .collect(Collectors.toList());
 
-        if (pendingCount > 0) {
+        if (latestRoundGames.stream().anyMatch(game -> game.getWinnerId() == null)) {
             throw new IllegalStateException("All current round games must have a winner before generating next round");
         }
 
-        if (allGames.isEmpty()) {
-            // === FIRST ROUND: pair up all registered players ===
-            List<UUID> playerIds = new ArrayList<>(tournament.getPlayersIds());
+        List<UUID> winnerIds = latestRoundGames.stream()
+                .map(Game::getWinnerId)
+                .collect(Collectors.toList());
 
-            if (playerIds.size() < 2) {
-                throw new IllegalStateException("Need at least 2 players to generate matchups");
-            }
-
-            Collections.shuffle(playerIds);
-
-            List<Game> newGames = new ArrayList<>();
-            for (int i = 0; i < playerIds.size() - 1; i += 2) {
-                CreateGameDTO gameDTO = new CreateGameDTO(
-                        playerIds.get(i),
-                        playerIds.get(i + 1),
-                        tournament.getStartDate());
-                newGames.add(gameService.createGame(gameDTO));
-            }
-
-            allGames.addAll(newGames);
-            tournament.setTournamentState(TournamentStates.IN_PROGRESS);
-
-        } else {
-            // === SUBSEQUENT ROUNDS: collect winners and pair them ===
-            List<UUID> winnerIds = allGames.stream()
-                    .map(Game::getWinnerId)
-                    .collect(Collectors.toList());
-
-            if (winnerIds.size() == 1) {
-                tournament.setWinnerId(winnerIds.get(0));
-                tournament.setTournamentState(TournamentStates.FINISHED);
-                tournamentRepository.save(tournament);
-                return;
-            }
-
-            Collections.shuffle(winnerIds);
-
-            List<Game> newGames = new ArrayList<>();
-            for (int i = 0; i < winnerIds.size() - 1; i += 2) {
-                CreateGameDTO gameDTO = new CreateGameDTO(
-                        winnerIds.get(i),
-                        winnerIds.get(i + 1),
-                        LocalDate.now());
-                newGames.add(gameService.createGame(gameDTO));
-            }
-
-            allGames.addAll(newGames);
+        if (winnerIds.size() == 1) {
+            tournament.setWinnerId(winnerIds.get(0));
+            tournament.setTournamentState(TournamentStates.FINISHED);
+            scoreTournament(tournament);
+            return;
         }
 
-        tournamentRepository.save(tournament);
+        if (winnerIds.size() % 2 != 0) {
+            throw new IllegalStateException("Next tournament round requires an even number of winners");
+        }
+
+        Collections.shuffle(winnerIds);
+        List<Game> newGames = new ArrayList<>();
+        int nextRound = latestRound + 1;
+        for (int i = 0; i < winnerIds.size(); i += 2) {
+            newGames.add(gameService.createTournamentGame(tournament, winnerIds.get(i), winnerIds.get(i + 1), nextRound,
+                    (i / 2) + 1));
+        }
+
+        List<Game> tournamentGames = tournament.getGamesList() == null
+                ? new ArrayList<>()
+                : tournament.getGamesList();
+        tournamentGames.addAll(newGames);
+        tournament.setGamesList(tournamentGames);
+    }
+
+    private void scoreTournament(Tournament tournament) {
+        if (tournament.isScored()) {
+            return;
+        }
+
+        Map<UUID, Integer> placements = calculatePlacements(tournament, gameService.getTournamentGames(tournament.getId()));
+
+        placements.forEach((userId, rank) -> {
+            int points = rank <= 10 ? 11 - rank : 0;
+            userService.awardTournamentPoints(userId, points, rank == 1);
+        });
+
+        tournament.setScored(true);
+        tournament.setScoredAt(LocalDateTime.now());
+    }
+
+    private Map<UUID, Integer> calculatePlacements(Tournament tournament, List<Game> games) {
+        Map<UUID, Integer> placements = new LinkedHashMap<>();
+
+        if (tournament.getWinnerId() != null) {
+            placements.put(tournament.getWinnerId(), 1);
+        }
+
+        int latestRound = games.stream()
+                .mapToInt(Game::getRoundNumber)
+                .max()
+                .orElse(0);
+        int placement = 2;
+
+        for (int round = latestRound; round >= 1; round--) {
+            final int currentRound = round;
+            List<UUID> roundLosers = games.stream()
+                    .filter(game -> game.getRoundNumber() == currentRound)
+                    .map(this::getLoserId)
+                    .filter(Objects::nonNull)
+                    .filter(userId -> !placements.containsKey(userId))
+                    .collect(Collectors.toList());
+
+            for (UUID loserId : roundLosers) {
+                placements.put(loserId, placement++);
+            }
+        }
+
+        for (UUID playerId : tournament.getPlayersIds()) {
+            if (!placements.containsKey(playerId)) {
+                placements.put(playerId, placement++);
+            }
+        }
+
+        return placements;
+    }
+
+    private UUID getLoserId(Game game) {
+        if (game.getWinnerId() == null) {
+            return null;
+        }
+        if (game.getWinnerId().equals(game.getUser1Id())) {
+            return game.getUser2Id();
+        }
+        if (game.getWinnerId().equals(game.getUser2Id())) {
+            return game.getUser1Id();
+        }
+        return null;
+    }
+
+    private TournamentViewDTO toTournamentViewDTO(Tournament tournament, UUID currentUserId) {
+        int playerCount = tournament.getPlayersIds() == null ? 0 : tournament.getPlayersIds().size();
+        boolean joinedByCurrentUser = currentUserId != null
+                && tournament.getPlayersIds() != null
+                && tournament.getPlayersIds().contains(currentUserId);
+        boolean ownedByCurrentUser = currentUserId != null && tournament.getUserOwnerId().equals(currentUserId);
+
+        return new TournamentViewDTO(
+                tournament.getId(),
+                tournament.getUserOwnerId(),
+                tournament.getTitle(),
+                tournament.getTournamentState(),
+                tournament.getMaxPlayers(),
+                playerCount,
+                Math.max(tournament.getMaxPlayers() - playerCount, 0),
+                tournament.getStartDate(),
+                tournament.getInscriptionCloseDate(),
+                tournament.getWinnerId(),
+                tournament.isDeleted(),
+                tournament.isScored(),
+                joinedByCurrentUser,
+                ownedByCurrentUser);
+    }
+
+    private TournamentGameDTO toTournamentGameDTO(Game game) {
+        return new TournamentGameDTO(
+                game.getId(),
+                game.getRoundNumber(),
+                game.getBracketPosition(),
+                game.getUser1Id(),
+                userService.findUserEntityById(game.getUser1Id()).getUsername(),
+                game.getUser2Id(),
+                userService.findUserEntityById(game.getUser2Id()).getUsername(),
+                game.getTeamUser1Id(),
+                game.getTeamUser2Id(),
+                game.getWinnerId(),
+                game.getGameDate());
     }
 
     private void assertOwnerOrAdmin(Tournament tournament) {
