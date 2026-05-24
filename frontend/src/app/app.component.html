@@ -1,0 +1,66 @@
+<header class="site-header">
+  <a class="brand" routerLink="/">Fight League KO</a>
+  <nav class="main-nav" aria-label="Main navigation">
+    @if (auth.role() === 'ADMIN') {
+      <a routerLink="/combos">Combos</a>
+      <a routerLink="/users">Users</a>
+      <a routerLink="/games">Games</a>
+      <a routerLink="/teams">Teams</a>
+      <a routerLink="/tournaments">Tournaments</a>
+    } @else {
+      <a routerLink="/">Home</a>
+      <a routerLink="/fighters">Fighters</a>
+      <a routerLink="/statistics">Statistics</a>
+      <a routerLink="/ranking">Ranking</a>
+      <a routerLink="/tournaments">Tournaments</a>
+      <a routerLink="/calendar">Calendar</a>
+      @if (auth.authenticated()) {
+        <a routerLink="/community-combos">Community Combos</a>
+      }
+    }
+  </nav>
+  <div class="account-actions">
+    @if (auth.authenticated()) {
+      <div class="user-dropdown" (click)="$event.stopPropagation()">
+        <button type="button" class="dropdown-trigger icon-link" (click)="toggleDropdown()">
+          <span class="material-symbols-outlined">account_circle</span>
+          {{ auth.user()?.username }}
+        </button>
+        @if (dropdownOpen()) {
+          <div class="dropdown-menu">
+            <a routerLink="/profile" (click)="closeDropdown()">Profile</a>
+            <button type="button" (click)="auth.logout()">Log out</button>
+          </div>
+        }
+      </div>
+    } @else {
+      <a routerLink="/login">Log In</a>
+      <a class="primary-link" routerLink="/register">Register</a>
+    }
+  </div>
+</header>
+
+@if (notification.blockedAction()) {
+  <div class="notification-banner">
+    <span>Want to log in?</span>
+    <a routerLink="/login" (click)="notification.clearBlockedAction()">Log In</a>
+    <button type="button" (click)="notification.clearBlockedAction()">✕</button>
+  </div>
+}
+
+<main class="page-shell">
+  <router-outlet />
+</main>
+
+<footer class="site-footer">
+  <p>Fight League KO is an academic project. Riot Games owns all related products and trademarks.</p>
+  <nav aria-label="Sitemap">
+    <a routerLink="/fighters">Fighters</a>
+    <a routerLink="/ranking">Ranking</a>
+    <a routerLink="/tournaments">Tournaments</a>
+    <a href="mailto:contact@example.com">Contact Me</a>
+    <a href="https://x.com" target="_blank" rel="noreferrer">Twitter</a>
+    <a href="https://instagram.com" target="_blank" rel="noreferrer">Instagram</a>
+    <a href="https://ko-fi.com" target="_blank" rel="noreferrer">Support Me</a>
+  </nav>
+</footer>
