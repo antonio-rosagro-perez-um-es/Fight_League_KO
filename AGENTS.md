@@ -1,6 +1,6 @@
 # Fight League KO (2XKO)
 
-Monorepo: **backend** (Java/Spring Boot 4.0.6) + **frontend** (Angular — not yet scaffolded)
+Monorepo: **backend** (Java/Spring Boot 4.0.6) + **frontend** (Angular 19)
 University thesis project (`# TFG`).
 
 ## Build & Run
@@ -14,7 +14,10 @@ cd backend
 # Database (PostgreSQL)
 docker-compose up -d
 
-# Frontend — NOT YET SCAFFOLDED (planned Angular app)
+# Frontend
+cd frontend
+npm start              # dev server
+npm run build          # production build
 ```
 
 ## Database
@@ -26,16 +29,19 @@ docker-compose up -d
 
 ## Backend Architecture
 
-**6 domain packages** (57 Java source files), each following a layered pattern:
+**8 domain/infra packages** (~58 Java source files), each following a layered pattern:
 
-| Package   | Model       | Key Endpoints / Features |
-|-----------|-------------|--------------------------|
-| `combo/`  | Combo       | CRUD, like/dislike, search/filters, public/private toggle, difficulty (`ComboDificulty`) & fuse (`FuseType`) enums |
-| `fighter/`| Fighter     | CRUD (renamed from `character`), banners, stats, ranking |
-| `team/`   | Team        | CRUD, stats, ranking, point/second fighter same-fighter validation |
-| `game/`   | Game        | CRUD, team assignment, set winner, linked to tournament |
-| `tournament/` | Tournament | CRUD, join/exit, lifecycle scheduler (`@EnableScheduling`), states enum (`TournamentStates`) |
-| `user/`   | User        | Basic CRUD — **name only, no password/roles yet** |
+| Package       | Model          | Key Endpoints / Features |
+|---------------|----------------|--------------------------|
+| `auth/`       | —              | Register, login, JWT token generation via `AuthService` |
+| `combo/`      | Combo          | CRUD, like/dislike, search/filters, public/private toggle, difficulty (`ComboDificulty`) & fuse (`FuseType`) enums |
+| `fighter/`    | Fighter        | CRUD (renamed from `character`), banners, stats, ranking |
+| `team/`       | Team           | CRUD, stats, ranking, point/second fighter same-fighter validation |
+| `game/`       | Game           | CRUD, team assignment, set winner, linked to tournament |
+| `tournament/` | Tournament     | CRUD, join/exit, lifecycle scheduler (`@EnableScheduling`), states enum (`TournamentStates`) |
+| `user/`       | User           | CRUD with username, email, password (BCrypt), role (`UserRole`), soft-delete |
+| `security/`   | —              | `SecurityConfig` (JWT/BCrypt), `DefaultAdminSeeder`, `CurrentUserService` |
+| `common/`     | —              | Global exception handler (`ApiExceptionHandler`) |
 
 ### Architecture Patterns
 
@@ -51,21 +57,43 @@ docker-compose up -d
 - Same-fighter validation in teams/combos
 - Like/dislike system for combos
 
-## Security (planned — not implemented)
+## Security (implemented)
 
-- `spring-security.md` at project root documents the plan
-- **No Spring Security dependency** in `pom.xml` yet
-- Planned: JWT auth, password-based login, role hierarchy (Unregistered → Registered → Organizer → Admin)
-- User model needs password, roles, etc.
+- `SecurityConfig` with JWT (HS256) auth via OAuth2 resource server + BCrypt password encoding
+- `AuthService` handles register/login, issues JWT tokens
+- Role hierarchy: `REGISTERED → ORGANIZER → ADMIN` (enforced via `@EnableMethodSecurity` + request matchers)
+- Unauthenticated: only register, login, fighter/ranking/combos/tournament listing
+- `DefaultAdminSeeder` creates an admin on first startup
+- `CurrentUserService` extracts authenticated user from JWT subject
 
 ## Frontend
 
-**Not started.** `frontend/` contains only a `README.md` placeholder. No Angular project files, no `package.json`. All npm commands are premature.
+Angular frontend is scaffolded and implemented under `frontend/`.
+
+- **Framework**: Angular 19 standalone components + TypeScript
+- **Core services**: `frontend/src/app/core/api.service.ts`, `auth.service.ts`, route guards, notification service
+- **Shared UI**: `frontend/src/app/shared/combo-notation.component.ts` renders CSS icon-style combo notation
+- **Routes/pages**: auth, home, profile, fighters, statistics, ranking, calendar, tournaments, community combos, and admin management pages
+- **Verification**: use `cd frontend && npm run build`
+
+### Implemented Frontend Areas
+
+- Role-aware header/footer, login/register, blocked-action login prompt
+- Home variants for anonymous, registered/organizer, and admin users
+- Fighter public detail and admin fighter management
+- Global statistics rankings, user ranking with clickable profiles, and calendar month grid
+- Tournament public flow, creation, owner controls, bracket views, winner selection, and team assignment
+- Community combo CRUD, filters, visibility, voting, and notation rendering
+- Admin management for combos, users, games, teams, and tournaments
+
+### Pending Frontend Work
+
+Root `pending.md` is the canonical tracker for missing media assets, features limited by missing media, and partial frontend features. Keep detailed pending lists there instead of duplicating them in this file.
 
 ## Tech Stack
 
 - **Backend**: Spring Boot 4.0.6, Java 21, Spring Data JPA, Hibernate, PostgreSQL
-- **Frontend**: Planned — Angular 19+ with Angular Material
-- **Build**: Maven (backend), npm TBD (frontend)
+- **Frontend**: Angular 19+ with TypeScript
+- **Build**: Maven (backend), npm (frontend)
 - **Database**: PostgreSQL 16 via Docker
-- **Testing**: Minimal — single context-load test
+- **Testing**: Minimal backend context-load test + frontend production build verification
