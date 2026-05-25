@@ -7,6 +7,8 @@ import { BehaviorSubject, combineLatest, map, Observable, switchMap } from 'rxjs
 import { ApiService } from '../core/api.service';
 import { FighterBanner, TournamentGame } from '../core/api.models';
 import { AuthService } from '../core/auth.service';
+import { fighterAsset, fuseAsset } from '../shared/asset-paths';
+import { AssetSelectOption, SearchableAssetSelectComponent } from '../shared/searchable-asset-select.component';
 
 type TeamDraft = {
   pointFighterId: string;
@@ -16,7 +18,7 @@ type TeamDraft = {
 
 @Component({
   selector: 'app-tournament-detail',
-  imports: [AsyncPipe, DatePipe, FormsModule, NgTemplateOutlet, RouterLink],
+  imports: [AsyncPipe, DatePipe, FormsModule, NgTemplateOutlet, RouterLink, SearchableAssetSelectComponent],
   template: `
     @if (view$ | async; as view) {
       <section class="hero panel">
@@ -64,7 +66,7 @@ type TeamDraft = {
               <p class="eyebrow">Bracket graph</p>
               <h2>Matches</h2>
             </div>
-            <span>Click a match for details</span>
+            <span>Custom bracket, scroll horizontally on small screens</span>
           </div>
           @if (bracket$ | async; as games) {
             @if (games.length) {
@@ -76,11 +78,11 @@ type TeamDraft = {
                       @for (game of round.games; track game.id) {
                         <button type="button" class="match-card" (click)="openGameModal(game)">
                           <small>Match {{ game.bracketPosition }}</small>
-                          <span [class.winner]="game.winnerId === game.user1Id">{{ game.user1Username || 'TBD' }}</span>
+                          <span class="participant" [class.winner]="game.winnerId === game.user1Id" [class.placeholder]="!game.user1Username">{{ game.user1Username || 'Awaiting player' }}</span>
                           <em>vs</em>
-                          <span [class.winner]="game.winnerId === game.user2Id">{{ game.user2Username || 'TBD' }}</span>
+                          <span class="participant" [class.winner]="game.winnerId === game.user2Id" [class.placeholder]="!game.user2Username">{{ game.user2Username || 'Awaiting player' }}</span>
                           @if (game.winnerId) {
-                            <strong>Winner set</strong>
+                            <strong class="status-ready">Winner set</strong>
                           } @else {
                             <strong class="pending">Pending result</strong>
                           }
@@ -91,7 +93,11 @@ type TeamDraft = {
                 </div>
               </div>
             } @else {
-              <div class="empty-state">Bracket has not been generated yet. Missing match slots will appear once matchups are generated.</div>
+              <div class="empty-state bracket-empty">
+                <span class="material-symbols-outlined">account_tree</span>
+                <strong>Bracket has not been generated yet.</strong>
+                <p>Missing match slots will appear once matchups are generated.</p>
+              </div>
             }
           }
         </div>
@@ -129,8 +135,8 @@ type TeamDraft = {
 
             @if (view.ownedByCurrentUser || auth.role() === 'ADMIN') {
               <div class="winner-actions">
-                <button type="button" (click)="setWinner(selectedGame.id, selectedGame.user1Id)">{{ selectedGame.user1Username }} won</button>
-                <button type="button" (click)="setWinner(selectedGame.id, selectedGame.user2Id)">{{ selectedGame.user2Username }} won</button>
+                <button type="button" (click)="setWinner(selectedGame.id, selectedGame.user1Id)">{{ winnerButtonLabel(selectedGame, selectedGame.user1Username, selectedGame.user1Id) }}</button>
+                <button type="button" (click)="setWinner(selectedGame.id, selectedGame.user2Id)">{{ winnerButtonLabel(selectedGame, selectedGame.user2Username, selectedGame.user2Id) }}</button>
               </div>
 
               @if (fighters$ | async; as fighters) {
@@ -157,28 +163,31 @@ type TeamDraft = {
 
     <ng-template #teamFields let-draft="draft" let-fighters="fighters">
       <label>Point fighter
-        <select [(ngModel)]="draft.pointFighterId" [ngModelOptions]="{ standalone: true }">
-          <option value="">Choose fighter</option>
-          @for (fighter of fighters; track fighter.id) {
-            <option [value]="fighter.id">{{ fighter.name }}</option>
-          }
-        </select>
+        <app-searchable-asset-select
+          [options]="fighterOptions(fighters)"
+          [value]="draft.pointFighterId"
+          placeholder="Choose fighter"
+          searchPlaceholder="Search fighters"
+          (valueChange)="draft.pointFighterId = $event"
+        />
       </label>
       <label>Second fighter
-        <select [(ngModel)]="draft.secondFighterId" [ngModelOptions]="{ standalone: true }">
-          <option value="">Choose fighter</option>
-          @for (fighter of fighters; track fighter.id) {
-            <option [value]="fighter.id">{{ fighter.name }}</option>
-          }
-        </select>
+        <app-searchable-asset-select
+          [options]="fighterOptions(fighters)"
+          [value]="draft.secondFighterId"
+          placeholder="Choose fighter"
+          searchPlaceholder="Search fighters"
+          (valueChange)="draft.secondFighterId = $event"
+        />
       </label>
       <label>Fuse
-        <select [(ngModel)]="draft.fuse" [ngModelOptions]="{ standalone: true }">
-          <option value="">Choose fuse</option>
-          @for (fuse of fuses; track fuse) {
-            <option [value]="fuse">{{ fuse }}</option>
-          }
-        </select>
+        <app-searchable-asset-select
+          [options]="fuseOptions"
+          [value]="draft.fuse"
+          placeholder="Choose fuse"
+          searchPlaceholder="Search fuses"
+          (valueChange)="draft.fuse = $event"
+        />
       </label>
     </ng-template>
   `,
@@ -201,11 +210,19 @@ type TeamDraft = {
     .bracket-grid { align-items: start; display: flex; gap: 1rem; min-width: max-content; }
     .round-column { display: grid; gap: .85rem; min-width: 230px; }
     .round-column h3 { color: #ffbd59; font-size: .85rem; letter-spacing: .08em; margin: 0; text-transform: uppercase; }
-    .match-card { background: linear-gradient(150deg, rgba(255,70,85,.12), rgba(255,255,255,.06)); border: 1px solid rgba(255,255,255,.12); border-radius: 16px; display: grid; gap: .45rem; padding: 1rem; text-align: left; }
+    .match-card { background: linear-gradient(150deg, rgba(255,70,85,.12), rgba(255,255,255,.06)); border: 1px solid rgba(255,255,255,.12); border-radius: 16px; display: grid; gap: .45rem; min-height: 150px; padding: 1rem; position: relative; text-align: left; }
+    .match-card::after { background: linear-gradient(180deg, rgba(255,189,89,.5), transparent); bottom: -1rem; content: ''; position: absolute; right: -0.55rem; top: 50%; width: 1px; }
+    .round-column:last-child .match-card::after { display: none; }
     .match-card small { color: #ffbd59; }
     .match-card em { color: #7f8aa8; font-style: normal; }
     .match-card strong { color: #78ffb0; font-size: .78rem; }
+    .participant { background: rgba(255,255,255,.06); border-radius: 10px; padding: .45rem .55rem; }
+    .participant.placeholder { border: 1px dashed rgba(255,255,255,.18); color: #7f8aa8; }
+    .status-ready { background: rgba(120,255,176,.1); border-radius: 999px; padding: .35rem .55rem; width: fit-content; }
     .match-card .pending { color: #c8d3ed; }
+    .bracket-empty { display: grid; gap: .4rem; place-items: center; }
+    .bracket-empty .material-symbols-outlined { color: #ffbd59; font-size: 2.5rem; }
+    .bracket-empty p { margin: 0; }
     .winner { color: #78ffb0; font-weight: 800; }
     .standing-row { border-bottom: 1px solid rgba(255,255,255,.1); display: grid; gap: .75rem; grid-template-columns: 60px 1fr auto; padding: .9rem 0; }
     .modal-overlay { align-items: center; background: rgba(0,0,0,.58); display: flex; inset: 0; justify-content: center; position: fixed; z-index: 100; }
@@ -216,8 +233,6 @@ type TeamDraft = {
     .team-editor { border-top: 1px solid rgba(255,255,255,.1); margin-top: 1rem; padding-top: 1rem; }
     .team-grid { display: grid; gap: 1rem; grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 1rem 0; }
     label { color: #c8d3ed; display: grid; gap: .35rem; margin-bottom: .65rem; }
-    select { background: rgba(255,255,255,.09); border: 1px solid rgba(255,255,255,.18); border-radius: 12px; color: white; padding: .75rem; }
-    option { background: #12172b; color: white; }
     .error { color: #ff8a8a; }
     @media (max-width: 820px) { .hero, .columns, .team-grid { grid-template-columns: 1fr; } .owner-panel, .panel-heading { align-items: stretch; flex-direction: column; } }
   `]
@@ -229,6 +244,11 @@ export class TournamentDetailComponent {
   private readonly refresh$ = new BehaviorSubject<void>(undefined);
   private readonly tournamentId$ = this.route.paramMap.pipe(map((params) => params.get('id')!));
   readonly fuses = ['DOUBLE_DOWN', 'FREESTYLE', 'TWO_X_ASSIST', 'JUGGERNAUT', 'SIDEKICK'];
+  readonly fuseOptions = this.fuses.map((fuse) => ({
+    value: fuse,
+    label: this.formatFuse(fuse),
+    icon: fuseAsset(fuse),
+  }));
   readonly fighters$ = this.api.getFighterBanners();
   actionError = '';
   selectedGame: TournamentGame | null = null;
@@ -308,8 +328,33 @@ export class TournamentDetailComponent {
     return 'Pending result';
   }
 
+  winnerButtonLabel(game: TournamentGame, username: string, userId: string): string {
+    if (game.winnerId === userId) {
+      return `${username} is winner`;
+    }
+
+    return game.winnerId ? `Change to ${username}` : `${username} won`;
+  }
+
   teamDraftValid(draft: TeamDraft): boolean {
     return !!draft.pointFighterId && !!draft.secondFighterId && !!draft.fuse;
+  }
+
+  fighterOptions(fighters: FighterBanner[]): AssetSelectOption[] {
+    return fighters.map((fighter) => ({
+      value: fighter.id,
+      label: fighter.name,
+      icon: fighterAsset(fighter.slug, 'icon'),
+    }));
+  }
+
+  private formatFuse(fuse: string): string {
+    return fuse
+      .toLowerCase()
+      .split('_')
+      .map((part) => part === 'x' ? 'X' : part.charAt(0).toUpperCase() + part.slice(1))
+      .join(' ')
+      .replace('Two X Assist', '2X Assist');
   }
 
   private runAction(action: () => Observable<void>): void {

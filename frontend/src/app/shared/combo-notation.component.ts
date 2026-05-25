@@ -1,5 +1,7 @@
 import { Component, computed, input } from '@angular/core';
 
+import { controlGlyph } from './asset-paths';
+
 type TokenKind = 'attack' | 'direction' | 'note' | 'separator' | 'text';
 
 type NotationToken = {
@@ -7,6 +9,7 @@ type NotationToken = {
   label: string;
   className: string;
   aria: string;
+  glyph?: string;
 };
 
 const ATTACK_TOKENS: Record<string, { label: string; aria: string; className: string }> = {
@@ -70,6 +73,10 @@ const SEPARATORS: Record<string, string> = {
           <span class="separator-token" [attr.aria-label]="token.aria">{{ token.label }}</span>
         } @else if (token.kind === 'text') {
           <span class="text-token">{{ token.label }}</span>
+        } @else if (token.glyph) {
+          <span class="input-token glyph-token" [class]="token.className" [attr.aria-label]="token.aria">
+            <img [src]="token.glyph" [alt]="token.aria">
+          </span>
         } @else {
           <span class="input-token" [class]="token.className" [attr.aria-label]="token.aria">
             {{ token.label }}
@@ -81,6 +88,8 @@ const SEPARATORS: Record<string, string> = {
   styles: [`
     .notation { align-items: center; display: flex; flex-wrap: wrap; gap: .38rem; line-height: 1; }
     .input-token { align-items: center; border: 2px solid rgba(255,255,255,.34); box-shadow: inset 0 -3px 0 rgba(0,0,0,.22), 0 5px 14px rgba(0,0,0,.18); color: #070910; display: inline-flex; font-size: .78rem; font-weight: 950; height: 2rem; justify-content: center; min-width: 2rem; padding: 0 .5rem; text-transform: uppercase; }
+    .glyph-token { background: #f4f7ff; padding: .18rem; }
+    .glyph-token img { display: block; height: 1.45rem; object-fit: contain; width: 1.45rem; }
     .attack { border-radius: 999px; }
     .direction { border-radius: .55rem; font-size: 1rem; }
     .note { background: #ffcf66; border-radius: .45rem; font-size: .68rem; letter-spacing: .04em; }
@@ -118,6 +127,7 @@ export class ComboNotationComponent {
         label: attack.label,
         className: `attack ${attack.className}`,
         aria: attack.aria,
+        glyph: controlGlyph(normalized) ?? undefined,
       };
     }
 
@@ -128,6 +138,7 @@ export class ComboNotationComponent {
         label: direction.label,
         className: `direction ${direction.className}`,
         aria: direction.aria,
+        glyph: controlGlyph(normalized) ?? undefined,
       };
     }
 

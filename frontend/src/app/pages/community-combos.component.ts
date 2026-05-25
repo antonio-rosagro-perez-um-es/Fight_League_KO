@@ -6,12 +6,14 @@ import { BehaviorSubject, combineLatest, map, switchMap } from 'rxjs';
 
 import { ApiService } from '../core/api.service';
 import { AuthService } from '../core/auth.service';
-import { Combo, ComboCreate, ComboFilters } from '../core/api.models';
+import { Combo, ComboCreate, ComboFilters, FighterBanner } from '../core/api.models';
+import { fighterAsset, fuseAsset } from '../shared/asset-paths';
 import { ComboNotationComponent } from '../shared/combo-notation.component';
+import { AssetSelectOption, SearchableAssetSelectComponent } from '../shared/searchable-asset-select.component';
 
 @Component({
   selector: 'app-community-combos',
-  imports: [AsyncPipe, ComboNotationComponent, ReactiveFormsModule, RouterLink],
+  imports: [AsyncPipe, ComboNotationComponent, ReactiveFormsModule, RouterLink, SearchableAssetSelectComponent],
   template: `
     @if (!auth.authenticated()) {
       <section class="empty-state">
@@ -74,24 +76,28 @@ import { ComboNotationComponent } from '../shared/combo-notation.component';
           <form [formGroup]="form" (ngSubmit)="saveCombo()">
             <label>Title <input formControlName="title"></label>
             <label>Point fighter
-              <select formControlName="pointFighter">
-                <option value="">Select fighter</option>
-                @if (fighters$ | async; as fighters) {
-                  @for (fighter of fighters; track fighter.id) {
-                    <option [value]="fighter.id">{{ fighter.name }}</option>
-                  }
-                }
-              </select>
+              @if (fighters$ | async; as fighters) {
+                <app-searchable-asset-select
+                  [options]="fighterOptions(fighters)"
+                  [value]="form.controls.pointFighter.value || ''"
+                  placeholder="Select fighter"
+                  searchPlaceholder="Search fighters"
+                  (valueChange)="form.controls.pointFighter.setValue($event); form.controls.pointFighter.markAsTouched()"
+                />
+              }
             </label>
             <label>Second fighter
-              <select formControlName="secondFighter">
-                <option value="">None</option>
-                @if (fighters$ | async; as fighters) {
-                  @for (fighter of fighters; track fighter.id) {
-                    <option [value]="fighter.id">{{ fighter.name }}</option>
-                  }
-                }
-              </select>
+              @if (fighters$ | async; as fighters) {
+                <app-searchable-asset-select
+                  [options]="fighterOptions(fighters)"
+                  [value]="form.controls.secondFighter.value || ''"
+                  placeholder="None"
+                  searchPlaceholder="Search fighters"
+                  [allowEmpty]="true"
+                  emptyLabel="No second fighter"
+                  (valueChange)="form.controls.secondFighter.setValue($event); form.controls.secondFighter.markAsTouched()"
+                />
+              }
             </label>
             <label>Notation <input formControlName="textNotation" placeholder="M > H > S1"></label>
             <label>Description <textarea formControlName="description"></textarea></label>
@@ -104,13 +110,13 @@ import { ComboNotationComponent } from '../shared/combo-notation.component';
                 </select>
               </label>
               <label>Fuse
-                <select formControlName="fuse">
-                  <option value="DOUBLE_DOWN">Double Down</option>
-                  <option value="FREESTYLE">Freestyle</option>
-                  <option value="TWO_X_ASSIST">2X Assist</option>
-                  <option value="JUGGERNAUT">Juggernaut</option>
-                  <option value="SIDEKICK">Sidekick</option>
-                </select>
+                <app-searchable-asset-select
+                  [options]="fuseOptions"
+                  [value]="form.controls.fuse.value || ''"
+                  placeholder="Select fuse"
+                  searchPlaceholder="Search fuses"
+                  (valueChange)="form.controls.fuse.setValue($event); form.controls.fuse.markAsTouched()"
+                />
               </label>
               <label>Meter <input formControlName="metercost" type="number" min="0"></label>
               <label>Damage <input formControlName="damage" type="number" min="0"></label>
@@ -222,6 +228,11 @@ export class CommunityCombosComponent {
   private readonly fb = inject(FormBuilder);
   readonly auth = inject(AuthService);
   readonly fighters$ = this.api.getFighterBanners();
+  readonly fuseOptions = ['DOUBLE_DOWN', 'FREESTYLE', 'TWO_X_ASSIST', 'JUGGERNAUT', 'SIDEKICK'].map((fuse) => ({
+    value: fuse,
+    label: this.formatFuse(fuse),
+    icon: fuseAsset(fuse),
+  }));
   readonly refresh$ = new BehaviorSubject<void>(undefined);
   readonly myRefresh$ = new BehaviorSubject<void>(undefined);
   readonly filters$ = new BehaviorSubject<ComboFilters>({ latest: true });
@@ -374,5 +385,22 @@ export class CommunityCombosComponent {
       this.refresh$.next();
       this.myRefresh$.next();
     });
+  }
+
+  fighterOptions(fighters: FighterBanner[]): AssetSelectOption[] {
+    return fighters.map((fighter) => ({
+      value: fighter.id,
+      label: fighter.name,
+      icon: fighterAsset(fighter.slug, 'icon'),
+    }));
+  }
+
+  private formatFuse(fuse: string): string {
+    return fuse
+      .toLowerCase()
+      .split('_')
+      .map((part) => part === 'x' ? 'X' : part.charAt(0).toUpperCase() + part.slice(1))
+      .join(' ')
+      .replace('Two X Assist', '2X Assist');
   }
 }
