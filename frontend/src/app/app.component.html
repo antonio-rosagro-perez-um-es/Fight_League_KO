@@ -1,5 +1,7 @@
 <header class="site-header">
-  <a class="brand" routerLink="/">Fight League KO</a>
+  <a class="brand" routerLink="/" aria-label="Fight League KO home">
+    <img src="/assets/brand/logo.svg" alt="Fight League KO">
+  </a>
   <nav class="main-nav" aria-label="Main navigation">
     @if (auth.role() === 'ADMIN') {
       <a routerLink="/combos">Combos</a>

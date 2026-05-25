@@ -13,12 +13,15 @@
 }
 
 .brand {
-  color: #ffffff;
-  font-family: 'Arial Black', Impact, sans-serif;
-  font-size: 1.15rem;
-  letter-spacing: 0.08em;
+  align-items: center;
+  display: inline-flex;
   text-decoration: none;
-  text-transform: uppercase;
+}
+
+.brand img {
+  display: block;
+  height: 48px;
+  width: auto;
 }
 
 .main-nav,
