@@ -1,30 +1,41 @@
 # Frontend
 
-For frontend development, Angular 19 has been chosen along with Angular Material for icons and components. TypeScript is used throughout. If other libraries are needed, permission must be requested first during the planning phase.
+Frontend development uses Angular 19, Material Symbols for icons, and TypeScript across the application. If another library is needed, request approval during the planning phase before adding it.
 
-The application is a platform where users can view official fighter combos from the game 2XKO, organize community tournaments, and save, publish, and share combos. The views are described in the following sections.
+The application is a platform where users can view official fighter combos from 2XKO, organize community tournaments, and save, publish, and share combos. The required views are described in the following sections.
 
-> **Project context:** See `AGENTS.md` for overall architecture, `ia/spring-security.md` for detailed role permissions, and root `pending.md` for missing asset tracking. The frontend is already scaffolded — 20 page components exist under `frontend/src/app/pages/` with routing, core services (`api.service.ts`, `auth.service.ts`), and a shared `combo-notation.component.ts`.
+> **Project context:** See `AGENTS.md` for the overall architecture, `ia/spring-security.md` for role permissions, and root `pending.md` for missing asset tracking. The frontend is already scaffolded: 21 page components exist under `frontend/src/app/pages/`, with routing, core services (`api.service.ts`, `auth.service.ts`), and the shared `combo-notation.component.ts`.
 
-Use the `frontend/` folder for development, and use `npx autoskills` to install the necessary skills.
+Use the `frontend/` folder for development. Use `npx autoskills` to install the necessary skills.
 
-Store any multimedia content using a proper file architecture so it can be used later. If you cannot obtain multimedia content, leave only the paths and create a separate file called `pending.md` indicating all pending operations or broken links throughout the project.
+Store multimedia content using a maintainable file structure so it can be reused later. If multimedia content cannot be obtained, leave the intended paths in the implementation and document every missing asset, pending operation, or broken link in `pending.md`.
 
-If you consider it necessary, create commits during development to save progress, using good practices such as descriptive names (add, create, fix, etc.).
+Create commits during development only when useful for saving coherent progress. Use concise, descriptive commit messages such as `add`, `create`, `fix`, or `refactor` followed by the affected feature.
 
-Make all views responsive and adaptive.
+All views must be responsive and adaptive for desktop, tablet, and mobile layouts.
+
+## General References
+
+- Angular documentation: <https://angular.dev/>
+- Material Symbols documentation: <https://fonts.google.com/icons>
+- TypeScript documentation: <https://www.typescriptlang.org/docs/>
+- MDN responsive design guide: <https://developer.mozilla.org/en-US/docs/Learn/CSS/CSS_layout/Responsive_Design>
+- MDN CSS Grid guide: <https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_grid_layout>
+- MDN Flexbox guide: <https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_flexible_box_layout>
+- Riot Games legal information: <https://www.riotgames.com/en/legal>
+- 2XKO official site: <https://2xko.riotgames.com/>
 
 ---
 
-## Authentication — Registration — Login
+## Authentication - Registration - Login
 
 ### Login Notification (any role)
 
-When an unregistered user tries to access or perform an operation they don't have permissions for, show a notification saying "Want to log in?" with a button that navigates to the login view.
+When an unregistered user tries to access a restricted route or perform an operation without permission, show a notification saying "Want to log in?" with a button that navigates to the login view.
 
-**Login form:** Two fields — `usernameOrEmail` and `password`. Below the password field, display a link saying "Not registered yet? Try now" that navigates to the register view.
+**Login form:** Include two fields: `usernameOrEmail` and `password`. Below the password field, display a link saying "Not registered yet? Try now" that navigates to the register view.
 
-**Register form:** Must satisfy the user creation endpoint at `POST /auth/register`. Required fields:
+**Register form:** The form must satisfy the user creation endpoint at `POST /auth/register`. Required fields:
 
 - `username` (String, max 50, unique)
 - `email` (String, max 120, unique)
@@ -36,17 +47,17 @@ See `backend/src/main/java/FightLeagueKO/auth/controller/AuthController.java` an
 
 ## Header
 
-The header has four types, two of which are very similar.
+The header has four variants. The registered and organizer variants are intentionally similar.
 
-1. **Unregistered user:** Fields Home, Fighters, Statistics, Ranking, Tournaments, and Calendar aligned left; Log In and Register aligned right.
+1. **Unregistered user:** Show Home, Fighters, Statistics, Ranking, Tournaments, and Calendar aligned to the left. Show Log In and Register aligned to the right.
 
    ![alt text](img/img_heather.png)
 
-2. **Registered user:** Same as unregistered, except instead of Log In and Register, a user icon dropdown with options to go to profile and log out. The left side also includes Community Combos.
+2. **Registered user:** Use the same layout as the unregistered header, but replace Log In and Register with a user icon dropdown containing Profile and Log Out options. Add Community Combos to the left-side navigation.
 
-3. **Organizer:** Same fields as a registered user.
+3. **Organizer:** Use the same fields as the registered user header.
 
-4. **Admin:** The menu shows system management entries: Combo, User, Games, Teams, Tournaments on the left; an admin user icon on the right.
+4. **Admin:** Show system management entries on the left: Combo, User, Games, Teams, and Tournaments. Show an admin user icon on the right.
 
    ![alt text](img/image_heather_1.png)
 
@@ -56,7 +67,7 @@ The header has four types, two of which are very similar.
 
 ## Footer
 
-The footer contains links to social media (Twitter, Instagram), a Contact Me link (template email to be replaced later), and a Support Me link. Before the links, a disclaimer states that no rights are held over the products — they belong to Riot Games and this is for academic purposes only. Add a simplified sitemap.
+The footer contains links to social media (Twitter and Instagram), a Contact Me link (template email to be replaced later), and a Support Me link. Before the links, include a disclaimer stating that this project does not own rights to Riot Games products and is built only for academic purposes. Add a simplified sitemap.
 
 ![alt text](img/footer.png)
 
@@ -64,9 +75,9 @@ The footer contains links to social media (Twitter, Instagram), a Contact Me lin
 
 ## User Profile
 
-### Organizer — Registered User
+### Organizer - Registered User
 
-The profile shows an image, the nickname, and personal statistics such as wins/losses, as seen on <https://2xkombo.gg/player/m80-hikari-1803850?season=season_0>, along with a button to modify allowed parameters.
+The profile shows a user image, nickname, and personal statistics such as wins and losses, similar to <https://2xkombo.gg/player/m80-hikari-1803850?season=season_0>. Include a button that lets the user modify the allowed profile parameters.
 
 **Backend endpoints:** `GET /users/me` returns `UserProfileDTO`; `PATCH /users/me` updates it via `UpdateUserProfileDTO`. See `UserController.java`. The `User` model fields include `username`, `email`, `role` (`REGISTERED`/`ORGANIZER`/`ADMIN`), `score`, and `tournamentWins`.
 
@@ -74,19 +85,21 @@ The profile shows an image, the nickname, and personal statistics such as wins/l
 
 ## Home
 
-Three different view types depending on the user type.
+The home page has three view types depending on the user role.
 
 ### Unregistered
 
-A grid of fighters ordered by creation date, with a design similar to <https://www.streetfighter.com/6/es-es/character>. Clicking on any fighter opens their character sheet. The hover highlight effect is also desired.
+Show a grid of fighters ordered by creation date, with a design inspired by <https://www.streetfighter.com/6/es-es/character>. Clicking any fighter opens the fighter detail page. The grid uses portrait assets (`assets/fighters/{slug}/{slug}_portrait.webp`) in large romboid/parallelogram cards. Use a widened responsive container shared with the home hero/message box so the grid can show six fighters per row on desktop when space allows, four on tablet, and two on mobile. Include a hover/focus highlight effect where fighters are gray by default and recover their original full color on hover or keyboard focus.
 
 **Backend:** `GET /fighters/all-banners` returns `List<FighterBannerDTO>` with active fighters (not deleted). See `FighterController.java`.
 
 **Frontend:** `home.component.ts` handles this view.
 
+The home hero/community message above the grid must use the same adaptive width as the fighter grid. It should use the widened horizontal space instead of staying constrained to the default page width, while keeping a compact height and styled background treatment.
+
 ### Registered User
 
-A list of the user's last played matches. If there are no matches played, show a motivational message saying it's time to join a tournament, with a button leading to tournaments. Matches won by the user are shown with a light green background, lost ones in red. Display using small circular images.
+Show a list of the user's most recent matches. If the user has not played any matches, show a motivational message encouraging them to join a tournament, with a button that navigates to tournaments. Matches won by the user should have a light green background; lost matches should have a red background. Use small circular images for participants or fighters.
 
 **Backend:** `GET /games/me/recent` returns `List<RecentGameDTO>`.
 
@@ -94,21 +107,31 @@ A list of the user's last played matches. If there are no matches played, show a
 
 ### Organizer
 
-Same as registered user.
+Use the same view as the registered user.
 
 ### Admin
 
-A list of the different sections available in the header for direct navigation.
+Show a list of the different sections available in the admin header, with direct navigation to each section.
+
+### Grid explication
+
+In grid view each fighter must have a romboid/parallelogram shape similar to
+
+![alt text](img/image_6.png)
+
+It should have a hover effect: each fighter is grayscale by default, and when the mouse points to a fighter or the card receives keyboard focus, it recovers its original full color. The grid must always be sorted by added date from newest to oldest. Avoid fixed row heights that can make cards overlap; use responsive column sizing, card aspect ratio, and row gaps instead. The `Fighters` label must align with the left edge of the widened grid container so it does not overlap the first row.
 
 ---
 
 ## Fighters
 
-The fighter view is divided into two user types.
+The fighter view is divided into admin and public role groups.
 
 ### Admin
 
-A text header indicating the current section, with a button for creating new fighters located on the right, above a table with the main fighter attributes — only the most relevant ones such as id, name, type (archetype), slug, deleted as columns, with each row representing a fighter. At the end of each row there are buttons for edit, delete, restore, and view all information. At the beginning of each row there is a checkbox to delete multiple fighters at once via multiple delete requests.
+Show a section title and a Create Fighter button aligned to the right. Below them, show a table with the most relevant fighter attributes: id, name, type (archetype), slug, and deleted status. Each row represents one fighter.
+
+At the end of each row, include buttons to edit, delete, restore, and view all information. At the beginning of each row, include a checkbox so multiple fighters can be deleted through multiple delete requests. Each fighter should also have buttons to update its media: banner, portrait, and icon.
 
 ![alt text](img/fighter_admin.png)
 
@@ -122,20 +145,22 @@ A text header indicating the current section, with a button for creating new fig
 
 See `backend/src/main/java/FightLeagueKO/fighter/controller/FighterController.java` for all endpoints and `Fighter.java` for the model fields (`name`, `description`, `region`, `archetype`, `title`, `slug`, `itLikes`, `itDislike`, plus stats: `health`, `range`, `power`, `vitality`, `mobility`, `easyOfUse`).
 
-Forms are displayed via modal windows and submitted when the user presses submit.
+Display forms in modal windows and submit them when the user presses the submit button.
 
 **Frontend:** `admin-fighters.component.ts` handles this view.
 
-### Unregistered — Registered — Organizer
+### Unregistered - Registered - Organizer
 
-A layout similar to <https://www.streetfighter.com/6/es-es/character/cammy>, keeping only the information that matches the fighter fields (description, likes, dislikes) and adding others like type (archetype) or region. A similar distribution is desired with information split left and right, a fighter image in the middle, and a submenu above the information on the right.
+The public Fighters listing grid must match the unregistered home fighter grid before the user enters a fighter detail page. Use the same portrait-based romboid/parallelogram cards, widened responsive grid container, grayscale-to-color hover/focus behavior, and responsive column behavior.
+
+Use a layout inspired by <https://www.streetfighter.com/6/es-es/character/cammy>. Keep only the information that matches the fighter fields, such as description, likes, and dislikes, and add other available fields such as type (archetype), title, and region. The detail layout is split into three visual zones: left-side fighter identity and description, a large centered fighter banner, and right-side tabbed information. The centered fighter banner uses the banner asset (`assets/fighters/{slug}/{slug}_banner.webp`) as a large background-style visual layer so it can be displayed prominently without pushing the side information panels. This banner layer must remain clipped inside its showcase area and include enough top and bottom spacing so it never overlaps the header or the related fighters section.
 
 The submenu has two entries:
 
-1. **Info** — the main view used to return.
-2. **Official Combos** — shows the official combos for this fighter, with a distribution similar to <https://www.streetfighter.com/6/es-es/character/cammy/movelist>.
+1. **Info:** Returns to the main fighter information view.
+2. **Official Combos:** Shows the official combos for this fighter, with a distribution inspired by <https://www.streetfighter.com/6/es-es/character/cammy/movelist>.
 
-Below the fighter detail, include a mini-grid with other fighters.
+Below the fighter detail, include a mini-grid with other fighters. This related-fighter mini-grid should keep compact card sizing, but its cards must use the same romboid/parallelogram shape and grayscale-to-color hover/focus behavior as the public Fighters and Home fighter grids.
 
 **Backend:** `GET /fighters/{id}` returns `FighterDTO`. `GET /fighters/{fighterId}/official` returns `List<OfficialComboDTO>` (public, no auth required). See `ComboController.java`.
 
@@ -147,25 +172,25 @@ Below the fighter detail, include a mini-grid with other fighters.
 
 ## Statistics
 
-The statistics section is divided into 2 sections if the user is not registered and 3 if they are.
+The statistics section has two sections for unregistered users and three sections for registered or organizer users.
 
 ### Admin
 
-Same layout as in Fighters (admin table with CRUD for stats entities).
+Show a read-only admin statistics dashboard using the existing ranking/stat endpoints. The backend currently exposes calculated stats, not editable stats entities, so true admin stats CRUD requires additional backend endpoints before it can be implemented.
 
-### Registered — Organizer
+### Registered - Organizer
 
-1. The user's most played fighters with the best winrate (or one of the two).
-2. The fighters with the best winrate (global).
-3. The teams with the best winrate (global).
+1. The user's most played fighters, the user's fighters with the best win rate, or both.
+2. The global fighters with the best win rate.
+3. The global teams with the best win rate.
 
-Style similar to <https://2xkombo.gg/characters>. Show the top 10 in each case.
+Use a style inspired by <https://2xkombo.gg/characters>. Show the top 10 entries in each section.
 
 **Backend:** `GET /fighters/ranking` returns `List<FighterStatsDTO>` (includes `winRate`). `GET /teams/ranking` returns `List<TeamStatsDTO>`.
 
 ### Unregistered
 
-Same as registered but without showing personal user statistics — only the two global sections.
+Use the same global sections as registered users, but do not show personal user statistics.
 
 **Frontend:** `statistics.component.ts` handles this view.
 
@@ -173,17 +198,17 @@ Same as registered but without showing personal user statistics — only the two
 
 ## Ranking
 
-The ranking shows users with the highest number of tournament wins. Clicking navigates to their profile. There is no admin ranking view. A format similar to <https://2xkombo.gg/rankings> is desired.
+The ranking page shows users with the highest number of tournament wins. Clicking a user navigates to that user's profile. There is no admin-specific ranking view. Use a format inspired by <https://2xkombo.gg/rankings>.
 
 **Backend:** `GET /users/ranking` returns `List<UserRankingDTO>`.
 
-**Score system:** Each `User` has a `score` field. Depending on their tournament placement:
+**Score system:** Each `User` has a `score` field. Points are assigned according to tournament placement:
 
 - 1st place: 10 points
 - 2nd place: 9 points
 - ...
 - 10th place: 1 point
-- 11th+: 0 points
+- 11th place and below: 0 points
 
 This scoring is assigned on the backend when the tournament finishes.
 
@@ -193,7 +218,7 @@ This scoring is assigned on the backend when the tournament finishes.
 
 ## Calendar
 
-A calendar view highlighting the current day, showing upcoming tournaments in calendar format using the tournament list sorted by date. A view similar to <https://2xkombo.gg/tournament-calendar> is desired.
+Show a calendar view that highlights the current day and displays upcoming tournaments using the tournament list sorted by date. Use a format inspired by <https://2xkombo.gg/tournament-calendar>.
 
 **Backend:** `GET /tournaments/all-tournaments` returns `List<TournamentViewDTO>` with `startDate` and `inscriptionCloseDate` fields.
 
@@ -205,15 +230,15 @@ A calendar view highlighting the current day, showing upcoming tournaments in ca
 
 ### Admin
 
-Same layout as in Fighters (admin table with CRUD). See `TournamentController.java` for the full set of admin endpoints.
+Use the same layout as Fighters: an admin table with CRUD actions. See `TournamentController.java` for the full set of admin endpoints.
 
 **Frontend:** `admin-tournaments.component.ts` handles this view.
 
 ### Registered and Unregistered Users
 
-A column list of tournaments ordered from nearest to farthest, as seen on <https://2xkombo.gg/tournaments>. Clicking opens a view showing public information: remaining slots, registration end date, status (`TournamentStates` enum: `REGISTRATION`, `WAITING_START`, `IN_PROGRESS`, `FINISHED`), and a button to join if possible. After joining, the button changes to allow leaving the tournament.
+Show a vertical list of tournaments ordered from nearest to farthest, as seen on <https://2xkombo.gg/tournaments>. Clicking a tournament opens a detail view with public information: remaining slots, registration end date, status (`TournamentStates` enum: `REGISTRATION`, `WAITING_START`, `IN_PROGRESS`, `FINISHED`), and a join button when joining is possible. After the user joins, the button changes to allow leaving the tournament.
 
-If an unregistered user presses the join button, they are taken to the registration view. This applies to all actions they are not permitted to perform.
+If an unregistered user presses the join button, navigate them to the registration view. Apply this behavior to all actions they are not permitted to perform.
 
 **Backend:** `GET /tournaments/all-tournaments` (public list), `GET /tournaments/{id}/view` (public detail). Join: `PATCH /tournaments/{id}/join`. Exit: `PATCH /tournaments/{id}/exit`.
 
@@ -221,32 +246,32 @@ If an unregistered user presses the join button, they are taken to the registrat
 
 ### Registered User Creating a Tournament
 
-A registered user can create a tournament via a prominent button. When they press it:
+A registered user can create a tournament through a prominent button. When they create a tournament:
 
-- Their `UserRole` is upgraded to `ORGANIZER`
-- They become the tournament owner (tracked by `userOwnerId`)
-- They cannot register for their own tournaments
+- Their `UserRole` is upgraded to `ORGANIZER`.
+- They become the tournament owner, tracked by `userOwnerId`.
+- They cannot register for their own tournaments.
 
 **Backend:** `POST /tournaments` via `CreateTournamentDTO`. See `TournamentController.java`.
 
 ### Owner (Organizer) User
 
-For organizer users, their owned tournaments appear in a separate section. Clicking opens a floating/modal view with information fields and authorized actions: modification, close registrations, cancellation, etc.
+For organizer users, owned tournaments appear in a separate section. Clicking one opens a floating/modal view with tournament information and authorized actions such as modification, closing registrations, and cancellation.
 
 **Backend:** `GET /tournaments/me/owned`, plus `PATCH /tournaments/{id}` (update), `PATCH /tournaments/{id}/close` (close registrations), `PATCH /tournaments/{id}/delete` (cancel). See `TournamentController.java`.
 
-Inside the floating view, include a tournament bracket graph showing the tournament games. Use any library that can render tournament brackets. The graph may be incomplete (e.g., in the first phase when only the first matches exist) — use a default placeholder for missing slots. When the owner clicks any match slot, they are redirected to an expanded page with the same graph.
+Inside the floating view, include a tournament bracket graph showing the tournament games. The current implementation intentionally uses a dependency-free custom CSS/layout bracket instead of an external bracket library. The graph may be incomplete, such as during the first phase when only initial matches exist, so use a default placeholder for missing slots. When the owner clicks a match slot, redirect them to an expanded page with the same graph.
 
 ![alt text](img/image_3.png)
 
-In the expanded tournament match view, the owner can click a game to open a floating window showing its information. Fighter and fuse fields are dropdown menus populated from the backend:
+In the expanded tournament match view, the owner can click a game to open a floating window with its information. Fighter and fuse fields are searchable asset dropdowns populated from the backend and root assets:
 
 - Fighters: `GET /fighters/all-banners`
 - Fuses: `FuseType` enum values (`DOUBLE_DOWN`, `FREESTYLE`, `TWO_X_ASSIST`, `JUGGERNAUT`, `SIDEKICK`)
+- Fighter icons: `assets/fighters/{slug}/{slug}_icon.webp`
+- Fuse icons: `assets/fuses/{FuseName}.svg`
 
-If well implemented, add search to these dropdowns.
-
-The winner is displayed in the middle and is set by selecting one of the two users. This can be changed by updating the game.
+The winner is displayed in the middle and is set by selecting one of the two users. The winner can be changed with the same winner endpoint. The backend reverses the previous team/fighter stat effects before applying the new winner.
 
 **Backend for game management:**
 
@@ -266,40 +291,40 @@ See `backend/src/main/java/FightLeagueKO/game/service/GameService.java` and `Gam
 
 ### Admin
 
-Same admin table layout as in Fighters. See `ComboController.java`.
+Use the same admin table layout as Fighters. See `ComboController.java`.
 
 **Frontend:** `admin-combos.component.ts` handles this view.
 
 ### Registered User and Owner (Organizer)
 
-This view is similar to <https://2xkombo.gg/> but uses the search/filter endpoints from `ComboController.java`.
+This view is inspired by <https://2xkombo.gg/> but uses the search and filter endpoints from `ComboController.java`.
 
-**Creating a combo:** By default, a new combo is created as private. Only public combos appear in the community view. Next to the upload combo button there is a toggle button to view private combos (user-owned only). The same button toggles back to public combos. In private view, users can perform allowed actions on their own combos: edit, delete, change visibility.
+**Creating a combo:** By default, a new combo is created as private. Only public combos appear in the community view. Next to the upload combo button, add a toggle button for viewing private combos owned by the current user. The same button toggles back to public combos. In private view, users can perform allowed actions on their own combos: edit, delete, and change visibility.
 
 **Combo creation fields:**
 
 - `title` (String, max 100)
 - `textNotation` (String, the combo button notation)
 - `description` (String, TEXT)
-- `pointFighterId` (UUID, required — select from fighter dropdown)
-- `secondFighterId` (UUID, nullable — select from fighter dropdown)
+- `pointFighterId` (UUID, required - select from fighter dropdown)
+- `secondFighterId` (UUID, nullable - select from fighter dropdown)
 - `comboDificulty` (enum: `BEGINNER`, `INTERMEDIATE`, `ADVANCED`)
 - `fuse` (enum: `DOUBLE_DOWN`, `FREESTYLE`, `TWO_X_ASSIST`, `JUGGERNAUT`, `SIDEKICK`)
 - `mediaUrl` (String, URL to video/image)
 - `meterCost` (int)
 - `damage` (int)
 
-The fighter and fuse fields are dropdowns populated with predefined names/IDs matching what the backend expects.
+The fighter and fuse fields are searchable asset dropdowns populated with predefined names and IDs matching what the backend expects. Fighter options use `assets/fighters/{slug}/{slug}_icon.webp`; fuse options use `assets/fuses/` icons.
 
 **Filtering:** Users can apply filters as dropdown menus in the view. See `POST /combos/search` via `ComboFiltersDTO`.
 
-**Voting:** Users can like/dislike combos. See `PATCH /combos/{comboId}/vote?voteType=LIKE|DISLIKE` and `PATCH /combos/{comboId}/unvote`.
+**Voting:** Users can like or dislike combos. See `PATCH /combos/{comboId}/vote?voteType=LIKE|DISLIKE` and `PATCH /combos/{comboId}/unvote`.
 
-**Notation rendering:** Any displayed combo should be translatable from text notation to images (button icons), as seen on <https://2xkombo.gg/>.
+**Notation rendering:** Any displayed combo should be translated from text notation to control glyph images from `assets/controls/` when available, with text chips as fallback for unknown or unsupported tokens.
 
 ![alt text](img/image_2.png)
 
-**Frontend:** `community-combos.component.ts` handles the list/create/edit views. `combo-notation.component.ts` handles the text-to-image notation rendering. Fighter image asset paths follow `public/assets/fighters/{slug}/portrait.webp` (see `pending.md` for what's missing).
+**Frontend:** `community-combos.component.ts` handles the list, create, and edit views. `combo-notation.component.ts` handles text-to-image notation rendering. Fighter image asset paths follow `assets/fighters/{slug}/{slug}_portrait.webp` (see `pending.md` for missing or misnamed assets).
 
 **Combo endpoints reference:**
 
@@ -320,12 +345,12 @@ The fighter and fuse fields are dropdowns populated with predefined names/IDs ma
 ## Quick Reference: Backend API Groups
 
 | Domain | Base Path | Public Endpoints | Authenticated | Admin Only |
-|--------|-----------|-----------------|---------------|------------|
-| Auth | `/auth` | `register`, `login` | — | — |
-| Fighter | `/fighters` | `/{id}`, `/all-banners`, `/ranking` | — | CRUD, stats |
+|--------|-----------|------------------|---------------|------------|
+| Auth | `/auth` | `register`, `login` | N/A | N/A |
+| Fighter | `/fighters` | `/{id}`, `/all-banners`, `/ranking` | N/A | CRUD, stats |
 | Combo | `/combos` | `/{fighterId}/official` | CRUD, search, vote, visibility | List all, get by ID |
-| Team | `/teams` | `/ranking` | — | CRUD, stats |
-| Game | `/games` | — | `/me/recent`, `/{gameId}/winner/{userId}` | CRUD, team assignment |
+| Team | `/teams` | `/ranking` | N/A | CRUD, stats |
+| Game | `/games` | N/A | `/me/recent`, `/{gameId}/winner/{userId}` | CRUD, team assignment |
 | Tournament | `/tournaments` | `/all-tournaments`, `/{id}/view`, `/{id}/bracket`, `/{id}/standings` | CRUD (owned), join/exit, close, generate | Admin list |
 | User | `/users` | `/ranking` | `/me`, `/{userId}` | `/admin/**`, create |
 
@@ -338,3 +363,35 @@ The fighter and fuse fields are dropdowns populated with predefined names/IDs ma
 | `FuseType` | `DOUBLE_DOWN`, `FREESTYLE`, `TWO_X_ASSIST`, `JUGGERNAUT`, `SIDEKICK` |
 | `VoteType` | `LIKE`, `DISLIKE` |
 | `TournamentStates` | `REGISTRATION`, `WAITING_START`, `IN_PROGRESS`, `FINISHED` |
+
+---
+
+## Media
+
+Fighter media assets are stored under the root `assets/` folder. The Angular configuration copies root `assets/` to `/assets` at build and serve time. Each fighter should have a folder named with its `slug` and three image types:
+
+- Portrait: Used in fighter grids, including the unregistered home grid, public Fighters listing grid, and related fighter grids in fighter detail pages.
+- Banner: Used as the main fighter image when a user opens fighter information.
+- Icon: Used in dropdown menus, such as team insertion in a game or combo creation.
+
+Recommended path structure:
+
+```text
+assets/fighters/{slug}/{slug}_portrait.webp
+assets/fighters/{slug}/{slug}_banner.webp
+assets/fighters/{slug}/{slug}_icon.webp
+```
+
+Example using Akali:
+
+```text
+assets/fighters/akali/akali_portrait.webp
+assets/fighters/akali/akali_banner.webp
+assets/fighters/akali/akali_icon.webp
+```
+
+If an asset is missing or cannot be obtained, keep the expected path in the implementation and document the missing file in root `pending.md`.
+
+### Remaining Media UI Work
+
+Admin fighter management still needs dedicated media update controls for banner, portrait, and icon assets. Track this in root `pending.md` until the upload/replacement workflow is implemented.
