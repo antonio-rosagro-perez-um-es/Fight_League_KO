@@ -18,6 +18,8 @@ public interface IComboService {
 
     List<ComboDTO> getAllCombo();
 
+    List<ComboDTO> getCurrentUserCombos();
+
     List<ComboDTO> searchCombos(ComboFiltersDTO filters);
 
     ComboDTO createCombo(ComboCreateDTO comboDTO);

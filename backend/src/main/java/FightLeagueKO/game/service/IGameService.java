@@ -7,6 +7,7 @@ import FightLeagueKO.game.dto.CreateGameDTO;
 import FightLeagueKO.game.dto.UpdateGameDTO;
 import FightLeagueKO.game.model.Game;
 import FightLeagueKO.team.dto.CreateTeamDTO;
+import FightLeagueKO.tournament.model.Tournament;
 
 public interface IGameService {
 
@@ -17,6 +18,12 @@ public interface IGameService {
     List<Game> getAllActiveGames();
 
     Game createGame(CreateGameDTO gameDTO);
+
+    Game createTournamentGame(Tournament tournament, UUID user1Id, UUID user2Id, int roundNumber, int bracketPosition);
+
+    List<Game> getTournamentGames(UUID tournamentId);
+
+    List<Game> getRecentGamesByUser(UUID userId);
 
     void updateGame(UUID gameId, UpdateGameDTO game);
 

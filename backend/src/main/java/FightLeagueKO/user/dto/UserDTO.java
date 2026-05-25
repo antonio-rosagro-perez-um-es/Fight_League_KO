@@ -8,6 +8,8 @@ public record UserDTO(
     UUID id,
     String username,
     String email,
-    UserRole role
+    UserRole role,
+    int score,
+    int tournamentWins
 ) {
 }

@@ -51,6 +51,11 @@ public class ComboController {
         return ResponseEntity.ok(comboService.getAllCombo());
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<List<ComboDTO>> getCurrentUserCombos() {
+        return ResponseEntity.ok(comboService.getCurrentUserCombos());
+    }
+
     @PostMapping(value = "/search")
     public ResponseEntity<List<ComboDTO>> searchCombos(@RequestBody ComboFiltersDTO filters) {
         return ResponseEntity.ok(comboService.searchCombos(filters));

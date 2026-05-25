@@ -1,6 +1,7 @@
 package FightLeagueKO.tournament.model;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -56,6 +57,11 @@ public class Tournament {
 
     @Column(name = "winner_id")
     private UUID winnerId;
+
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    private boolean scored;
+
+    private LocalDateTime scoredAt;
 
     private boolean deleted;
 
@@ -149,6 +155,22 @@ public class Tournament {
 
     public void setWinnerId(UUID winnerId) {
         this.winnerId = winnerId;
+    }
+
+    public boolean isScored() {
+        return scored;
+    }
+
+    public void setScored(boolean scored) {
+        this.scored = scored;
+    }
+
+    public LocalDateTime getScoredAt() {
+        return scoredAt;
+    }
+
+    public void setScoredAt(LocalDateTime scoredAt) {
+        this.scoredAt = scoredAt;
     }
 
     public boolean isDeleted() {

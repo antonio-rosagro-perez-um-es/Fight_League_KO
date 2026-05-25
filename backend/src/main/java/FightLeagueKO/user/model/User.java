@@ -36,6 +36,12 @@ public class User {
     @Column
     private boolean deleted;
 
+    @Column(nullable = false, columnDefinition = "integer default 0")
+    private int score;
+
+    @Column(nullable = false, columnDefinition = "integer default 0")
+    private int tournamentWins;
+
     public User() {
         // POJO
     }
@@ -86,6 +92,30 @@ public class User {
 
     public void setDeleted(boolean deleted) {
         this.deleted = deleted;
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    public void setScore(int score) {
+        this.score = score;
+    }
+
+    public int getTournamentWins() {
+        return tournamentWins;
+    }
+
+    public void setTournamentWins(int tournamentWins) {
+        this.tournamentWins = tournamentWins;
+    }
+
+    public void addScore(int points) {
+        this.score += points;
+    }
+
+    public void addTournamentWin() {
+        this.tournamentWins++;
     }
 
 }

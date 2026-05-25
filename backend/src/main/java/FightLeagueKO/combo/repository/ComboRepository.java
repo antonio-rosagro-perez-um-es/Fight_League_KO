@@ -14,4 +14,6 @@ public interface ComboRepository extends JpaRepository<Combo, UUID>, JpaSpecific
 
     List<Combo> findOfficialCombosByPointFighterId(UUID fighterId);
 
+    List<Combo> findByCreatorUserIdAndDeletedFalseOrderByCreatedAtDesc(UUID creatorUserId);
+
 }

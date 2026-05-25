@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 420" role="img" aria-label="Fighter banner placeholder">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#080b13"/>
+      <stop offset="0.5" stop-color="#18213a"/>
+      <stop offset="1" stop-color="#ff4655"/>
+    </linearGradient>
+    <linearGradient id="slash" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffbd59" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#ffbd59" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="960" height="420" fill="url(#bg)"/>
+  <path d="M0 420 310 0h180L180 420H0Zm410 0L720 0h240L650 420H410Z" fill="url(#slash)" opacity="0.42"/>
+  <circle cx="735" cy="210" r="112" fill="#0b1020" opacity="0.72"/>
+  <path d="M560 395c38-112 95-168 175-168s137 56 175 168" fill="#0b1020" opacity="0.78"/>
+  <text x="60" y="180" font-family="Arial, Helvetica, sans-serif" font-size="56" font-weight="900" fill="#fff" letter-spacing="4">FIGHTER</text>
+  <text x="64" y="232" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#ffbd59" letter-spacing="6">BANNER PLACEHOLDER</text>
+</svg>

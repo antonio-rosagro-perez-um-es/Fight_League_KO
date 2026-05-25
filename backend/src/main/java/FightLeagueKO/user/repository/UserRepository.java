@@ -1,5 +1,6 @@
 package FightLeagueKO.user.repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -19,4 +20,6 @@ public interface UserRepository extends CrudRepository<User, UUID>{
     boolean existsByEmail(String email);
 
     boolean existsByRole(UserRole role);
+
+    List<User> findTop25ByDeletedFalseOrderByScoreDescTournamentWinsDescUsernameAsc();
 }
