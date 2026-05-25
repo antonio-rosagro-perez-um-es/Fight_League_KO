@@ -188,28 +188,34 @@ public class GameService implements IGameService {
             throw new IllegalArgumentException("Winner must be one of the game players");
         }
 
+        if (userId.equals(game.getWinnerId())) {
+            return;
+        }
+
         if (game.getWinnerId() != null) {
-            throw new IllegalStateException("Game winner is already set");
+            applyTeamStats(game, game.getWinnerId(), true);
         }
 
-        if (userId.equals(game.getUser1Id())) {
-            updateTeamStatsIfPresent(game.getTeamUser1Id(), true);
-            updateTeamStatsIfPresent(game.getTeamUser2Id(), false);
-        }
-
-        if (userId.equals(game.getUser2Id())) {
-            updateTeamStatsIfPresent(game.getTeamUser1Id(), false);
-            updateTeamStatsIfPresent(game.getTeamUser2Id(), true);
-        }
+        applyTeamStats(game, userId, false);
 
         game.setWinnerId(userId);
 
         gameRepository.save(game);
     }
 
-    private void updateTeamStatsIfPresent(UUID teamId, boolean isWinner) {
+    private void applyTeamStats(Game game, UUID winnerId, boolean revert) {
+        boolean user1Won = winnerId.equals(game.getUser1Id());
+        updateTeamStatsIfPresent(game.getTeamUser1Id(), user1Won, revert);
+        updateTeamStatsIfPresent(game.getTeamUser2Id(), !user1Won, revert);
+    }
+
+    private void updateTeamStatsIfPresent(UUID teamId, boolean isWinner, boolean revert) {
         if (teamId != null) {
-            teamService.updateTeamStats(teamId, isWinner);
+            if (revert) {
+                teamService.revertTeamStats(teamId, isWinner);
+            } else {
+                teamService.updateTeamStats(teamId, isWinner);
+            }
         }
     }
 

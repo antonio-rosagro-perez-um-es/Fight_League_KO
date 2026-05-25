@@ -26,6 +26,8 @@ public interface ITeamService {
 
     void updateTeamStats(UUID teamId, boolean result);
 
+    void revertTeamStats(UUID teamId, boolean wasWinner);
+
     TeamStatsDTO getTeamStats(UUID teamId);
 
     List<TeamStatsDTO> getRankingTeams();

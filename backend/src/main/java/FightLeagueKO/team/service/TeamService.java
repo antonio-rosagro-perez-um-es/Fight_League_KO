@@ -193,6 +193,25 @@ public class TeamService implements ITeamService {
     }
 
     @Override
+    public void revertTeamStats(UUID teamId, boolean wasWinner) {
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new EntityNotFoundException("Team not found with id:" + teamId));
+
+        team.removePlayTeamCounter();
+
+        if (wasWinner) {
+            team.removeWinCounter();
+        } else {
+            team.removeLoseCounter();
+        }
+
+        fighterService.revertFighterStats(team.getPointFighterId(), wasWinner);
+        fighterService.revertFighterStats(team.getSecondFighterId(), wasWinner);
+
+        teamRepository.save(team);
+    }
+
+    @Override
     public TeamStatsDTO getTeamStats(UUID teamId) {
 
         Team team = teamRepository.findById(teamId)

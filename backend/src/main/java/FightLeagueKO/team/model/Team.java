@@ -124,6 +124,18 @@ public class Team {
         this.playCounter++;
     }
 
+    public void removePlayTeamCounter() {
+        this.playCounter = Math.max(0, this.playCounter - 1);
+    }
+
+    public void removeWinCounter() {
+        this.winCounter = Math.max(0, this.winCounter - 1);
+    }
+
+    public void removeLoseCounter() {
+        this.loseCounter = Math.max(0, this.loseCounter - 1);
+    }
+
     public double getWinRate() {
 
         if (playCounter == 0) {
