@@ -15,6 +15,7 @@ import {
   GameCreate,
   GameUpdate,
   OfficialCombo,
+  PageResponse,
   RecentGame,
   Team,
   TeamStats,
@@ -64,12 +65,12 @@ export class ApiService {
     return this.http.get<OfficialCombo[]>(`/api/combos/${fighterId}/official`);
   }
 
-  searchCommunityCombos(filters: ComboFilters) {
-    return this.http.post<Combo[]>('/api/combos/search', filters);
+  searchCommunityCombos(filters: ComboFilters, page = 0, size = 10) {
+    return this.http.post<PageResponse<Combo>>('/api/combos/search', filters, { params: { page, size } });
   }
 
-  getAllCombosForAdmin() {
-    return this.http.get<Combo[]>('/api/combos');
+  getAllCombosForAdmin(page = 0, size = 100) {
+    return this.http.get<PageResponse<Combo>>('/api/combos', { params: { page, size } });
   }
 
   getMyCombos() {
