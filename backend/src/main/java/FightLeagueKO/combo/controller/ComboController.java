@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -47,8 +50,8 @@ public class ComboController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ComboDTO>> getAllCombos() {
-        return ResponseEntity.ok(comboService.getAllCombo());
+    public ResponseEntity<Page<ComboDTO>> getAllCombos(@PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(comboService.getAllCombo(pageable));
     }
 
     @GetMapping("/me")
@@ -57,8 +60,9 @@ public class ComboController {
     }
 
     @PostMapping(value = "/search")
-    public ResponseEntity<List<ComboDTO>> searchCombos(@RequestBody ComboFiltersDTO filters) {
-        return ResponseEntity.ok(comboService.searchCombos(filters));
+    public ResponseEntity<Page<ComboDTO>> searchCombos(@RequestBody ComboFiltersDTO filters,
+            @PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(comboService.searchCombos(filters, pageable));
     }
 
     @PostMapping

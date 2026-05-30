@@ -3,6 +3,9 @@ package FightLeagueKO.combo.service;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import FightLeagueKO.combo.dto.ComboCreateDTO;
 import FightLeagueKO.combo.dto.ComboDTO;
 import FightLeagueKO.combo.dto.ComboFiltersDTO;
@@ -16,11 +19,11 @@ public interface IComboService {
 
     List<OfficialComboDTO> getOfficialCombosByFighter(UUID fighterId);
 
-    List<ComboDTO> getAllCombo();
+    Page<ComboDTO> getAllCombo(Pageable pageable);
 
     List<ComboDTO> getCurrentUserCombos();
 
-    List<ComboDTO> searchCombos(ComboFiltersDTO filters);
+    Page<ComboDTO> searchCombos(ComboFiltersDTO filters, Pageable pageable);
 
     ComboDTO createCombo(ComboCreateDTO comboDTO);
 

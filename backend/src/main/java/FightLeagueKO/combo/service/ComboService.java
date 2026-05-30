@@ -7,9 +7,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -82,10 +84,8 @@ public class ComboService implements IComboService {
     }
 
     @Override
-    public List<ComboDTO> getAllCombo() {
-        return StreamSupport.stream(comboRepository.findAll().spliterator(), false)
-                .map(this::toDTO)
-                .collect(Collectors.toList());
+    public Page<ComboDTO> getAllCombo(Pageable pageable) {
+        return comboRepository.findAll(pageable).map(this::toDTO);
     }
 
     @Override
@@ -98,12 +98,10 @@ public class ComboService implements IComboService {
     }
 
     @Override
-    public List<ComboDTO> searchCombos(ComboFiltersDTO filters) {
+    public Page<ComboDTO> searchCombos(ComboFiltersDTO filters, Pageable pageable) {
 
         if (filters == null) {
-            return comboRepository.findAll().stream()
-                    .map(this::toDTO)
-                    .collect(Collectors.toList());
+            return comboRepository.findAll(pageable).map(this::toDTO);
         }
 
         Sort sort;
@@ -115,9 +113,11 @@ public class ComboService implements IComboService {
             sort = Sort.unsorted();
         }
 
-        return comboRepository.findAll(buildFilters(filters), sort).stream()
-                .map(this::toDTO)
-                .collect(Collectors.toList());
+        Pageable effectivePageable = sort.isSorted()
+                ? PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort)
+                : pageable;
+
+        return comboRepository.findAll(buildFilters(filters), effectivePageable).map(this::toDTO);
     }
 
     @Override
