@@ -7,10 +7,11 @@ import { BehaviorSubject, combineLatest, of, switchMap } from 'rxjs';
 import { ApiService } from '../core/api.service';
 import { TournamentGame, TournamentView } from '../core/api.models';
 import { AuthService } from '../core/auth.service';
+import { ConfirmDialogComponent } from '../shared/confirm-dialog.component';
 
 @Component({
   selector: 'app-tournaments',
-  imports: [AsyncPipe, DatePipe, ReactiveFormsModule, RouterLink],
+  imports: [AsyncPipe, ConfirmDialogComponent, DatePipe, ReactiveFormsModule, RouterLink],
   template: `
     <div class="page-heading">
       <div>
@@ -138,33 +139,44 @@ import { AuthService } from '../core/auth.service';
 
           <div class="owner-actions">
             <button type="button" (click)="closeRegistrations(ownerModalTournament.id)" [disabled]="ownerModalTournament.state !== 'REGISTRATION'">Close registrations</button>
-            <button type="button" class="danger" (click)="cancelTournament(ownerModalTournament.id)">Cancel tournament</button>
+            <button type="button" class="danger" (click)="requestCancelTournament(ownerModalTournament.id, ownerModalTournament.title)">Cancel tournament</button>
             <a [routerLink]="['/tournaments', ownerModalTournament.id]">Open expanded bracket</a>
           </div>
         </div>
       </div>
+    }
+
+    @if (confirmDelete) {
+      <app-confirm-dialog
+        [title]="confirmDelete.title"
+        [message]="confirmDelete.message"
+        confirmLabel="Cancel tournament"
+        (confirmed)="confirmDeleteAction()"
+        (cancelled)="cancelDelete()"
+      />
     }
   `,
   styles: [`
     .page-heading { align-items: center; display: flex; justify-content: space-between; margin-bottom: 1.5rem; }
     h1 { font-size: clamp(2rem, 6vw, 4rem); margin: .4rem 0 0; text-transform: uppercase; }
     h2 { margin: 0 0 .35rem; }
-    button, .primary-link, .owner-actions a { background: #ff4655; border: 0; border-radius: 999px; color: white; cursor: pointer; padding: .75rem 1rem; text-decoration: none; }
+    button, .primary-link, .owner-actions a { background: #20d964; border: 0; border-radius: 999px; color: white; cursor: pointer; padding: .75rem 1rem; text-decoration: none; }
     button:disabled { cursor: not-allowed; opacity: .5; }
     .ghost { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.14); }
-    .danger { background: #8d2631; }
+    .danger { background: #c7343f; }
     .owned-section { margin-bottom: 1rem; }
     .section-title { align-items: center; display: flex; justify-content: space-between; margin-bottom: 1rem; }
-    .section-title span, .state-pill { background: rgba(255,189,89,.16); border-radius: 999px; color: #ffbd59; padding: .35rem .65rem; }
+    .section-title span, .state-pill { background: rgba(124,255,159,.16); border-radius: 999px; color: #7cff9f; padding: .35rem .65rem; }
+    .state-pill { display: inline-flex; margin-bottom: .55rem; }
     .owned-grid { display: grid; gap: .75rem; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
-    .owned-card { align-items: start; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); border-radius: 18px; display: grid; gap: .45rem; padding: 1rem; text-align: left; }
+    .owned-card { align-items: start; background: linear-gradient(135deg, rgba(0,0,0,.5), rgba(0,24,36,.72)), url('/assets/Backgrounds/Background_Blue.webp') center/cover; border: 1px solid rgba(124,255,159,.18); border-radius: 18px; display: grid; gap: .45rem; padding: 1rem; text-align: left; }
     .owned-card span { color: #c8d3ed; }
     .tournament-card { align-items: center; color: white; display: flex; gap: 1rem; justify-content: space-between; text-decoration: none; }
     .tournament-card p { color: #c8d3ed; margin: 0; }
     .slots { background: rgba(255, 70, 85, .18); border-radius: 18px; min-width: 110px; padding: 1rem; text-align: center; }
     .slots strong { display: block; font-size: 2rem; }
     .modal-overlay { align-items: center; background: rgba(0,0,0,.58); display: flex; inset: 0; justify-content: center; position: fixed; z-index: 100; }
-    .modal-content { background: #12172b; border: 1px solid rgba(255,255,255,.12); border-radius: 20px; max-height: 84vh; max-width: 640px; overflow-y: auto; padding: 1.5rem; width: 92vw; }
+    .modal-content { background: linear-gradient(135deg, rgba(0,0,0,.82), rgba(6,18,10,.9)), url('/assets/Backgrounds/Background_Purple.webp') center/cover; border: 1px solid rgba(255,255,255,.12); border-radius: 20px; max-height: 84vh; max-width: 640px; overflow-y: auto; padding: 1.5rem; width: 92vw; }
     .modal-content.wide { max-width: 860px; }
     .modal-heading { align-items: center; display: flex; justify-content: space-between; margin-bottom: 1rem; }
     form { display: grid; gap: .85rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -176,7 +188,7 @@ import { AuthService } from '../core/auth.service';
     .compact { margin-bottom: .75rem; }
     .mini-bracket { display: flex; gap: .75rem; overflow-x: auto; padding-bottom: .35rem; }
     .mini-round { display: grid; gap: .45rem; min-width: 180px; }
-    .mini-round strong { color: #ffbd59; }
+    .mini-round strong { color: #7cff9f; }
     .mini-round a { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); border-radius: 12px; color: white; padding: .65rem; text-decoration: none; }
     .error { color: #ff8a8a; }
     @media (max-width: 720px) { .page-heading, .tournament-card, .section-title { align-items: stretch; flex-direction: column; } form { grid-template-columns: 1fr; } }
@@ -201,6 +213,7 @@ export class TournamentsComponent {
   ownerModalTournament: TournamentView | null = null;
   createError = '';
   ownerError = '';
+  confirmDelete: { title: string; message: string; action: () => void } | null = null;
 
   readonly createForm = this.fb.nonNullable.group({
     title: ['', Validators.required],
@@ -288,7 +301,25 @@ export class TournamentsComponent {
     });
   }
 
-  cancelTournament(id: string): void {
+  requestCancelTournament(id: string, title: string): void {
+    this.confirmDelete = {
+      title: `Cancel tournament ${title}?`,
+      message: 'This tournament will be cancelled and hidden from normal tournament lists.',
+      action: () => this.cancelTournament(id),
+    };
+  }
+
+  confirmDeleteAction(): void {
+    const action = this.confirmDelete?.action;
+    this.confirmDelete = null;
+    action?.();
+  }
+
+  cancelDelete(): void {
+    this.confirmDelete = null;
+  }
+
+  private cancelTournament(id: string): void {
     this.ownerError = '';
     this.api.deleteTournament(id).subscribe({
       next: () => this.afterOwnerAction(),
