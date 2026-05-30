@@ -1,6 +1,7 @@
 import { AsyncPipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { map } from 'rxjs';
 
 import { ApiService } from '../core/api.service';
 import { AuthService } from '../core/auth.service';
@@ -88,22 +89,22 @@ import { FighterAssetType, fighterAsset, fighterPlaceholder } from '../shared/as
     }
   `,
   styles: [`
-    .hero { align-items: center; background: radial-gradient(circle at 88% 20%, rgba(255,70,85,.26), transparent 32%), linear-gradient(135deg, rgba(255,255,255,.1), rgba(255,255,255,.04)); border: 1px solid rgba(255,255,255,.14); display: flex; gap: 2rem; justify-content: space-between; margin-bottom: .9rem; margin-left: 50%; max-width: 1800px; padding: 1.45rem 2rem; transform: translateX(-50%); width: min(96vw, 1800px); }
+    .hero { align-items: center; background: radial-gradient(circle at 88% 20%, rgba(32,217,100,.28), transparent 32%), linear-gradient(135deg, rgba(0,0,0,.42), rgba(0,28,12,.78)), url('/assets/Backgrounds/Background_Green.webp') center/cover; border: 1px solid rgba(124,255,159,.22); display: flex; gap: 2rem; justify-content: space-between; margin-bottom: .9rem; margin-left: 50%; max-width: 1800px; padding: 1.45rem 2rem; transform: translateX(-50%); width: min(96vw, 1800px); }
     .hero > div { width: 100%; }
     .hero p:not(.eyebrow) { max-width: 900px; }
     h1 { font-size: clamp(2rem, 5vw, 3.4rem); line-height: 0.95; margin: 0.35rem 0 .65rem; max-width: none; text-transform: uppercase; }
-    .cta { background: #ff4655; border-radius: 999px; color: white; display: inline-block; margin-top: 1rem; padding: 0.85rem 1.1rem; text-decoration: none; }
+    .cta { background: #20d964; border-radius: 999px; color: white; display: inline-block; margin-top: 1rem; padding: 0.85rem 1.1rem; text-decoration: none; }
     .admin-cards { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
     .admin-card { align-items: center; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); border-radius: 18px; color: white; display: flex; flex-direction: column; gap: .5rem; padding: 1.5rem 1rem; text-decoration: none; transition: background .2s, border-color .2s; }
-    .admin-card:hover { background: rgba(255,70,85,.14); border-color: #ff4655; }
+    .admin-card:hover { background: rgba(32,217,100,.14); border-color: #20d964; }
     .admin-card span:first-child { font-size: 2.4rem; }
     .admin-card span:last-child { font-weight: 700; }
     .fighter-showcase { margin-left: 50%; max-width: 1800px; transform: translateX(-50%); width: min(96vw, 1800px); }
     .fighter-showcase > .eyebrow { margin-left: 0; }
     .fighter-grid { column-gap: .65rem; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); margin-top: .65rem; row-gap: 1.15rem; width: 100%; }
-    .fighter-card { aspect-ratio: 2 / 3; background: linear-gradient(155deg, rgba(255,70,85,.34), rgba(255,255,255,.08)); border: 1px solid rgba(255,255,255,.16); clip-path: polygon(13% 0, 100% 0, 87% 100%, 0 100%); color: white; display: grid; isolation: isolate; overflow: hidden; place-items: end center; position: relative; text-decoration: none; transition: transform .22s ease, border-color .22s ease; }
+    .fighter-card { aspect-ratio: 2 / 3; background: linear-gradient(155deg, rgba(32,217,100,.34), rgba(255,255,255,.08)); border: 1px solid rgba(255,255,255,.16); clip-path: polygon(13% 0, 100% 0, 87% 100%, 0 100%); color: white; display: grid; isolation: isolate; overflow: hidden; place-items: end center; position: relative; text-decoration: none; transition: transform .22s ease, border-color .22s ease; }
     .fighter-card::after { background: linear-gradient(180deg, transparent 48%, rgba(0,0,0,.82)); content: ''; inset: 0; pointer-events: none; position: absolute; z-index: 1; }
-    .fighter-card:hover, .fighter-card:focus-visible { border-color: #ff4655; outline: none; transform: translateY(-5px); }
+    .fighter-card:hover, .fighter-card:focus-visible { border-color: #20d964; outline: none; transform: translateY(-5px); }
     .fighter-card img { filter: grayscale(1) brightness(.78); height: 100%; inset: 0; object-fit: cover; position: absolute; transform: scale(1.04); transition: filter .22s ease, transform .22s ease; width: 100%; }
     .fighter-card:hover img, .fighter-card:focus-visible img { filter: grayscale(0) brightness(1); transform: scale(1.08); }
     .fighter-card span { font-size: 1rem; font-weight: 900; letter-spacing: .08em; padding: .85rem 1rem 1rem; position: relative; text-align: center; text-transform: uppercase; width: 100%; z-index: 2; }
@@ -122,7 +123,9 @@ import { FighterAssetType, fighterAsset, fighterPlaceholder } from '../shared/as
 export class HomeComponent {
   readonly api = inject(ApiService);
   readonly auth = inject(AuthService);
-  readonly fighters$ = this.api.getFighterBanners();
+  readonly fighters$ = this.api.getFighterBanners().pipe(
+    map((fighters) => [...fighters].sort((a, b) => a.name.localeCompare(b.name)))
+  );
   readonly recentGames$ = this.api.getRecentGames();
   readonly fighterAsset = fighterAsset;
 

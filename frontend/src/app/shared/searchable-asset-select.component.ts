@@ -47,11 +47,11 @@ export type AssetSelectOption = {
     .asset-select { position: relative; }
     .select-trigger { align-items: center; background: rgba(255,255,255,.09); border: 1px solid rgba(255,255,255,.18); border-radius: 12px; color: white; cursor: pointer; display: flex; gap: .55rem; justify-content: flex-start; min-height: 2.75rem; padding: .55rem .75rem; width: 100%; }
     .select-trigger img, .option img { background: rgba(255,255,255,.1); border-radius: 999px; height: 1.6rem; object-fit: cover; width: 1.6rem; }
-    .select-menu { background: #12172b; border: 1px solid rgba(255,255,255,.18); border-radius: 14px; box-shadow: 0 18px 50px rgba(0,0,0,.36); left: 0; padding: .55rem; position: absolute; right: 0; top: calc(100% + .35rem); z-index: 50; }
+    .select-menu { background: #06120a; border: 1px solid rgba(255,255,255,.18); border-radius: 14px; box-shadow: 0 18px 50px rgba(0,0,0,.36); left: 0; padding: .55rem; position: absolute; right: 0; top: calc(100% + .35rem); z-index: 50; }
     input { background: rgba(255,255,255,.09); border: 1px solid rgba(255,255,255,.18); border-radius: 10px; color: white; margin-bottom: .45rem; padding: .55rem .65rem; width: 100%; }
     .option-list { display: grid; gap: .2rem; max-height: 220px; overflow-y: auto; }
     .option { align-items: center; background: transparent; border: 0; border-radius: 10px; color: white; cursor: pointer; display: flex; gap: .55rem; padding: .5rem; text-align: left; width: 100%; }
-    .option:hover, .option.active { background: rgba(255,70,85,.22); }
+    .option:hover, .option.active { background: rgba(32,217,100,.22); }
     .empty-option { color: #c8d3ed; padding: .7rem; text-align: center; }
   `]
 })

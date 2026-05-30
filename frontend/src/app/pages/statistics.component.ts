@@ -66,7 +66,7 @@ import { AuthService } from '../core/auth.service';
     .admin-note { margin-bottom: 1rem; }
     .admin-note p:last-child { color: #c8d3ed; margin-bottom: 0; }
     .personal-panel article { background: rgba(255,255,255,.06); border-radius: 16px; display: grid; gap: .2rem; padding: 1rem; }
-    .personal-panel strong { color: #ffbd59; font-size: 1.8rem; }
+    .personal-panel strong { color: #7cff9f; font-size: 1.8rem; }
     .personal-panel span { color: #c8d3ed; font-size: .85rem; }
     .stats-layout { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
     .row { align-items: center; border-bottom: 1px solid rgba(255,255,255,.1); display: grid; gap: .75rem; grid-template-columns: 1fr auto auto; padding: .9rem 0; }

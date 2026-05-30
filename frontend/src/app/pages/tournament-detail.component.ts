@@ -195,12 +195,12 @@ type TeamDraft = {
     .hero { align-items: center; display: grid; gap: 2rem; grid-template-columns: 1fr 220px; margin-bottom: 1rem; }
     h1 { font-size: clamp(2rem, 6vw, 4rem); margin: .4rem 0 1rem; text-transform: uppercase; }
     h2 { margin: 0; }
-    .join-card { background: rgba(255,70,85,.16); border-radius: 22px; display: grid; gap: .65rem; padding: 1.25rem; text-align: center; }
+    .join-card { background: linear-gradient(135deg, rgba(0,0,0,.5), rgba(0,34,14,.74)), url('/assets/Backgrounds/Background_Green.webp') center/cover; border: 1px solid rgba(124,255,159,.22); border-radius: 22px; display: grid; gap: .65rem; padding: 1.25rem; text-align: center; }
     .join-card strong { font-size: 3rem; }
-    button, .join-card a { background: #ff4655; border: 0; border-radius: 999px; color: white; cursor: pointer; padding: .8rem 1rem; text-decoration: none; }
+    button, .join-card a { background: #20d964; border: 0; border-radius: 999px; color: white; cursor: pointer; padding: .8rem 1rem; text-decoration: none; }
     button:disabled { cursor: not-allowed; opacity: .55; }
     .ghost { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.14); }
-    .owner-note { color: #ffbd59; font-weight: 700; }
+    .owner-note { color: #7cff9f; font-weight: 700; }
     .owner-panel { align-items: center; display: flex; gap: 1rem; justify-content: space-between; margin-bottom: 1rem; }
     .owner-actions, .winner-actions { display: flex; flex-wrap: wrap; gap: .5rem; }
     .columns { display: grid; gap: 1rem; grid-template-columns: minmax(0, 1.4fr) minmax(280px, .6fr); }
@@ -209,11 +209,11 @@ type TeamDraft = {
     .bracket-scroll { overflow-x: auto; padding-bottom: .5rem; }
     .bracket-grid { align-items: start; display: flex; gap: 1rem; min-width: max-content; }
     .round-column { display: grid; gap: .85rem; min-width: 230px; }
-    .round-column h3 { color: #ffbd59; font-size: .85rem; letter-spacing: .08em; margin: 0; text-transform: uppercase; }
-    .match-card { background: linear-gradient(150deg, rgba(255,70,85,.12), rgba(255,255,255,.06)); border: 1px solid rgba(255,255,255,.12); border-radius: 16px; display: grid; gap: .45rem; min-height: 150px; padding: 1rem; position: relative; text-align: left; }
-    .match-card::after { background: linear-gradient(180deg, rgba(255,189,89,.5), transparent); bottom: -1rem; content: ''; position: absolute; right: -0.55rem; top: 50%; width: 1px; }
+    .round-column h3 { color: #7cff9f; font-size: .85rem; letter-spacing: .08em; margin: 0; text-transform: uppercase; }
+    .match-card { background: linear-gradient(150deg, rgba(0,0,0,.58), rgba(10,36,18,.76)), url('/assets/Backgrounds/Background_Green.webp') center/cover; border: 1px solid rgba(255,255,255,.12); border-radius: 16px; display: grid; gap: .45rem; min-height: 150px; padding: 1rem; position: relative; text-align: left; }
+    .match-card::after { background: linear-gradient(180deg, rgba(124,255,159,.5), transparent); bottom: -1rem; content: ''; position: absolute; right: -0.55rem; top: 50%; width: 1px; }
     .round-column:last-child .match-card::after { display: none; }
-    .match-card small { color: #ffbd59; }
+    .match-card small { color: #7cff9f; }
     .match-card em { color: #7f8aa8; font-style: normal; }
     .match-card strong { color: #78ffb0; font-size: .78rem; }
     .participant { background: rgba(255,255,255,.06); border-radius: 10px; padding: .45rem .55rem; }
@@ -221,12 +221,12 @@ type TeamDraft = {
     .status-ready { background: rgba(120,255,176,.1); border-radius: 999px; padding: .35rem .55rem; width: fit-content; }
     .match-card .pending { color: #c8d3ed; }
     .bracket-empty { display: grid; gap: .4rem; place-items: center; }
-    .bracket-empty .material-symbols-outlined { color: #ffbd59; font-size: 2.5rem; }
+    .bracket-empty .material-symbols-outlined { color: #7cff9f; font-size: 2.5rem; }
     .bracket-empty p { margin: 0; }
     .winner { color: #78ffb0; font-weight: 800; }
     .standing-row { border-bottom: 1px solid rgba(255,255,255,.1); display: grid; gap: .75rem; grid-template-columns: 60px 1fr auto; padding: .9rem 0; }
     .modal-overlay { align-items: center; background: rgba(0,0,0,.58); display: flex; inset: 0; justify-content: center; position: fixed; z-index: 100; }
-    .modal-content { background: #12172b; border: 1px solid rgba(255,255,255,.12); border-radius: 20px; max-height: 84vh; max-width: 820px; overflow-y: auto; padding: 1.5rem; width: 92vw; }
+    .modal-content { background: #06120a; border: 1px solid rgba(255,255,255,.12); border-radius: 20px; max-height: 84vh; max-width: 820px; overflow-y: auto; padding: 1.5rem; width: 92vw; }
     .modal-heading { align-items: center; display: flex; justify-content: space-between; margin-bottom: 1rem; }
     .winner-box { background: rgba(120,255,176,.1); border: 1px solid rgba(120,255,176,.18); border-radius: 18px; display: grid; gap: .25rem; margin-bottom: 1rem; padding: 1rem; }
     .winner-box span { color: #c8d3ed; }
