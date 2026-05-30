@@ -1,6 +1,6 @@
 # Pending Frontend Requirements
 
-This file only tracks requirements from `ia/frontend.md` that are not fully implemented and why they are blocked or deferred.
+This file tracks requirements from `ia/frontend.md` that are not fully implemented and why they are blocked or deferred.
 
 ## Pending
 
@@ -10,14 +10,6 @@ This file only tracks requirements from `ia/frontend.md` that are not fully impl
 - Status: Not implemented.
 - Reason: The backend currently manages fighter data fields but does not expose a media upload/replacement endpoint or file-management workflow.
 - Needed: Define whether media updates should be frontend-only asset path edits, local file replacement, or backend-supported uploads.
-
-### Strict Combo Notation Grammar
-
-- Requirement: `ia/frontend.md` asks displayed combo notation to be translated into button/control images.
-- Status: Partially implemented.
-- Implemented: Known tokens render with glyphs from `assets/controls/`; unknown tokens fall back to text chips.
-- Reason: There is no formal notation grammar or validation rule set yet.
-- Needed: Define accepted notation syntax, invalid-token behavior, and whether combo creation should reject invalid notation.
 
 ### Final Reference-Level Visual Polish
 
@@ -33,7 +25,8 @@ This file only tracks requirements from `ia/frontend.md` that are not fully impl
 - Fighter portrait/banner/icon naming is standardized.
 - Warwick portrait typo is fixed.
 - Searchable fighter/fuse asset dropdowns are implemented.
-- Control glyph rendering is implemented with fallback text chips.
+- Control glyph rendering is implemented with text mode toggle and invalid-token fallback chips.
+- Strict combo notation validation is implemented in combo create/edit forms.
 - Personal statistics are implemented.
 - Admin statistics are implemented as read-only because backend has calculated stats, not editable stats CRUD.
 - Tournament winner changes are implemented with stat reversal.

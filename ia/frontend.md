@@ -57,17 +57,19 @@ The header has four variants. The registered and organizer variants are intentio
 
 3. **Organizer:** Use the same fields as the registered user header.
 
-4. **Admin:** Show system management entries on the left: Combo, User, Games, Teams, and Tournaments. Show an admin user icon on the right.
+4. **Admin:** Show system management entries on the left: Fighters, Combo, User, Games, Teams, and Tournaments. Show an admin user icon on the right.
 
    ![alt text](img/image_heather_1.png)
 
 > **Role reference:** See `ia/spring-security.md` and `backend/src/main/java/FightLeagueKO/security/SecurityConfig.java` for the exact permission model.
 
+On tablet and mobile widths, collapse the header navigation into a hamburger/menu toggle so the links do not wrap across the screen.
+
 ---
 
 ## Footer
 
-The footer contains links to social media (Twitter and Instagram), a Contact Me link (template email to be replaced later), and a Support Me link. Before the links, include a disclaimer stating that this project does not own rights to Riot Games products and is built only for academic purposes. Add a simplified sitemap.
+The footer contains links to social media (Twitter and Instagram), a Contact Me link (template email to be replaced later), and a Support Me link. Before the links, include a disclaimer stating that this project does not own rights to Riot Games products and is built only for academic purposes. Add a simplified sitemap. Keep the sitemap links visually separated from the social/support links.
 
 ![alt text](img/footer.png)
 
@@ -89,7 +91,7 @@ The home page has three view types depending on the user role.
 
 ### Unregistered
 
-Show a grid of fighters ordered by creation date, with a design inspired by <https://www.streetfighter.com/6/es-es/character>. Clicking any fighter opens the fighter detail page. The grid uses portrait assets (`assets/fighters/{slug}/{slug}_portrait.webp`) in large romboid/parallelogram cards. Use a widened responsive container shared with the home hero/message box so the grid can show six fighters per row on desktop when space allows, four on tablet, and two on mobile. Include a hover/focus highlight effect where fighters are gray by default and recover their original full color on hover or keyboard focus.
+Show a grid of fighters ordered alphabetically by fighter name, with a design inspired by <https://www.streetfighter.com/6/es-es/character>. Clicking any fighter opens the fighter detail page. The grid uses portrait assets (`assets/fighters/{slug}/{slug}_portrait.webp`) in large romboid/parallelogram cards. Use a widened responsive container shared with the home hero/message box so the grid can show six fighters per row on desktop when space allows, four on tablet, and two on mobile. Include a hover/focus highlight effect where fighters are gray by default and recover their original full color on hover or keyboard focus.
 
 **Backend:** `GET /fighters/all-banners` returns `List<FighterBannerDTO>` with active fighters (not deleted). See `FighterController.java`.
 
@@ -119,7 +121,7 @@ In grid view each fighter must have a romboid/parallelogram shape similar to
 
 ![alt text](img/image_6.png)
 
-It should have a hover effect: each fighter is grayscale by default, and when the mouse points to a fighter or the card receives keyboard focus, it recovers its original full color. The grid must always be sorted by added date from newest to oldest. Avoid fixed row heights that can make cards overlap; use responsive column sizing, card aspect ratio, and row gaps instead. The `Fighters` label must align with the left edge of the widened grid container so it does not overlap the first row.
+It should have a hover effect: each fighter is grayscale by default, and when the mouse points to a fighter or the card receives keyboard focus, it recovers its original full color. The grid must always be sorted alphabetically by fighter name. Avoid fixed row heights that can make cards overlap; use responsive column sizing, card aspect ratio, and row gaps instead. The `Fighters` label must align with the left edge of the widened grid container so it does not overlap the first row.
 
 ---
 
@@ -131,7 +133,7 @@ The fighter view is divided into admin and public role groups.
 
 Show a section title and a Create Fighter button aligned to the right. Below them, show a table with the most relevant fighter attributes: id, name, type (archetype), slug, and deleted status. Each row represents one fighter.
 
-At the end of each row, include buttons to edit, delete, restore, and view all information. At the beginning of each row, include a checkbox so multiple fighters can be deleted through multiple delete requests. Each fighter should also have buttons to update its media: banner, portrait, and icon.
+At the end of each row, include buttons to edit, delete, restore, and view all information. Delete buttons use a red destructive style and must open a confirmation floating modal before calling the backend. At the beginning of each row, include a checkbox so multiple fighters can be deleted through multiple delete requests after one bulk confirmation. Each fighter should also have buttons to update its media: banner, portrait, and icon.
 
 ![alt text](img/fighter_admin.png)
 
@@ -151,14 +153,14 @@ Display forms in modal windows and submit them when the user presses the submit 
 
 ### Unregistered - Registered - Organizer
 
-The public Fighters listing grid must match the unregistered home fighter grid before the user enters a fighter detail page. Use the same portrait-based romboid/parallelogram cards, widened responsive grid container, grayscale-to-color hover/focus behavior, and responsive column behavior.
+The public Fighters listing grid must match the unregistered home fighter grid before the user enters a fighter detail page. Use the same portrait-based romboid/parallelogram cards, widened responsive grid container, alphabetical fighter-name sorting, grayscale-to-color hover/focus behavior, and responsive column behavior.
 
 Use a layout inspired by <https://www.streetfighter.com/6/es-es/character/cammy>. Keep only the information that matches the fighter fields, such as description, likes, and dislikes, and add other available fields such as type (archetype), title, and region. The detail layout is split into three visual zones: left-side fighter identity and description, a large centered fighter banner, and right-side tabbed information. The centered fighter banner uses the banner asset (`assets/fighters/{slug}/{slug}_banner.webp`) as a large background-style visual layer so it can be displayed prominently without pushing the side information panels. This banner layer must remain clipped inside its showcase area and include enough top and bottom spacing so it never overlaps the header or the related fighters section.
 
 The submenu has two entries:
 
 1. **Info:** Returns to the main fighter information view.
-2. **Official Combos:** Shows the official combos for this fighter, with a distribution inspired by <https://www.streetfighter.com/6/es-es/character/cammy/movelist>.
+2. **Official Combos:** Opens a floating modal without replacing the fighter info panel. The modal is inspired by movelist/combo browser layouts: selected combo info and notation appear at the top, a wide scrollable official combo list is restricted to the left side, and the right side keeps the embedded video/player with the combo description below it. Combo labels include difficulty, damage, meter/bars, and fuse; fuse values should use the root fuse icons with a high-contrast badge. Official combo media uses `mediaUrl`, preferring YouTube embeds when possible and falling back to an external media link. Do not display the second fighter in this official combo modal.
 
 Below the fighter detail, include a mini-grid with other fighters. This related-fighter mini-grid should keep compact card sizing, but its cards must use the same romboid/parallelogram shape and grayscale-to-color hover/focus behavior as the public Fighters and Home fighter grids.
 
@@ -232,6 +234,8 @@ Show a calendar view that highlights the current day and displays upcoming tourn
 
 Use the same layout as Fighters: an admin table with CRUD actions. See `TournamentController.java` for the full set of admin endpoints.
 
+All destructive tournament delete/cancel buttons use a red style and must open a confirmation floating modal before calling the backend.
+
 **Frontend:** `admin-tournaments.component.ts` handles this view.
 
 ### Registered and Unregistered Users
@@ -257,6 +261,8 @@ A registered user can create a tournament through a prominent button. When they 
 ### Owner (Organizer) User
 
 For organizer users, owned tournaments appear in a separate section. Clicking one opens a floating/modal view with tournament information and authorized actions such as modification, closing registrations, and cancellation.
+
+Cancellation is destructive: show a confirmation floating modal before sending the cancel/delete request.
 
 **Backend:** `GET /tournaments/me/owned`, plus `PATCH /tournaments/{id}` (update), `PATCH /tournaments/{id}/close` (close registrations), `PATCH /tournaments/{id}/delete` (cancel). See `TournamentController.java`.
 
@@ -291,7 +297,7 @@ See `backend/src/main/java/FightLeagueKO/game/service/GameService.java` and `Gam
 
 ### Admin
 
-Use the same admin table layout as Fighters. See `ComboController.java`.
+Use the same admin table layout as Fighters. See `ComboController.java`. Delete actions use a red destructive style and must open a confirmation floating modal before calling the backend.
 
 **Frontend:** `admin-combos.component.ts` handles this view.
 
@@ -299,7 +305,7 @@ Use the same admin table layout as Fighters. See `ComboController.java`.
 
 This view is inspired by <https://2xkombo.gg/> but uses the search and filter endpoints from `ComboController.java`.
 
-**Creating a combo:** By default, a new combo is created as private. Only public combos appear in the community view. Next to the upload combo button, add a toggle button for viewing private combos owned by the current user. The same button toggles back to public combos. In private view, users can perform allowed actions on their own combos: edit, delete, and change visibility.
+**Creating a combo:** By default, a new combo is created as private. Only public combos appear in the community view. Next to the upload combo button, add a toggle button for viewing private combos owned by the current user. The same button toggles back to public combos. In private view, users can perform allowed actions on their own combos: edit, delete, and change visibility. Delete actions use a red destructive style and must open a confirmation floating modal before calling the backend.
 
 **Combo creation fields:**
 
@@ -316,11 +322,11 @@ This view is inspired by <https://2xkombo.gg/> but uses the search and filter en
 
 The fighter and fuse fields are searchable asset dropdowns populated with predefined names and IDs matching what the backend expects. Fighter options use `assets/fighters/{slug}/{slug}_icon.webp`; fuse options use `assets/fuses/` icons.
 
-**Filtering:** Users can apply filters as dropdown menus in the view. See `POST /combos/search` via `ComboFiltersDTO`.
+**Filtering and pagination:** Users can apply filters as dropdown menus in the view. See `POST /combos/search` via `ComboFiltersDTO`. Community combo search uses backend pagination with a default page size of 10 combos and frontend previous/next pagination controls.
 
 **Voting:** Users can like or dislike combos. See `PATCH /combos/{comboId}/vote?voteType=LIKE|DISLIKE` and `PATCH /combos/{comboId}/unvote`.
 
-**Notation rendering:** Any displayed combo should be translated from text notation to control glyph images from `assets/controls/` when available, with text chips as fallback for unknown or unsupported tokens.
+**Notation rendering and validation:** Any displayed combo should be translated from text notation to control glyph images from `assets/controls/` when available. Notation blocks default to image notation and include a per-block toggle to show the original text notation. Combo create/edit forms include a `?` helper tooltip explaining accepted syntax. Strict validation accepts numpad directions `1`-`9`, attacks `L`, `M`, `H`, `T`, `S1`, `S2`, repeat counts such as `5H(2)`, air notation such as `j.M` and `j.2HH`, modifiers `air`, `jump`, `jc`, `dash`, `microdash`, `walk`, `hold`, `delay`, `delayed`, `assist`, and `cancel`, plus separators `>` for next, `+` for together, comma for pause, and `/` for alternative. Direction word aliases, motion notation such as `236H`, and free-text move names are rejected in create/edit forms; existing invalid saved notation displays as invalid text chips instead of breaking the page.
 
 ![alt text](img/image_2.png)
 
@@ -391,6 +397,10 @@ assets/fighters/akali/akali_icon.webp
 ```
 
 If an asset is missing or cannot be obtained, keep the expected path in the implementation and document the missing file in root `pending.md`.
+
+Fuse icons are also stored under the root `assets/` folder and are served through the same Angular asset pipeline. Use the naming convention from `FuseType` display names, such as `assets/fuses/Double_Down.svg`, `assets/fuses/2X_Assist.svg`, `assets/fuses/Freestyle.svg`, `assets/fuses/Juggernaut.svg`, and `assets/fuses/Sidekick.svg`.
+
+Background images are stored under `assets/Backgrounds/` and are served through the same Angular asset pipeline. Prefer the `.webp` versions for UI backgrounds. The current visual scheme uses `Background_Green.webp` as the main app/home/combo background treatment, with `Background_Blue.webp` and `Background_Purple.webp` used selectively for tournament surfaces and modals.
 
 ### Remaining Media UI Work
 
