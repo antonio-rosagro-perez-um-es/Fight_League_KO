@@ -1,10 +1,29 @@
 import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { AppComponent } from './app.component';
+import { AuthService } from './core/auth.service';
+import { NotificationService } from './core/notification.service';
 
 describe('AppComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [AppComponent],
+      providers: [
+        provideRouter([]),
+        {
+          provide: AuthService,
+          useValue: {
+            role: () => null,
+            authenticated: () => false,
+            user: () => null,
+            logout: jasmine.createSpy('logout'),
+          },
+        },
+        {
+          provide: NotificationService,
+          useValue: { message: () => null, clear: jasmine.createSpy('clear') },
+        },
+      ],
     }).compileComponents();
   });
 
@@ -14,16 +33,15 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it(`should have the 'fight-league-ko-frontend' title`, () => {
+  it('should close menus', () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
-    expect(app.title).toEqual('fight-league-ko-frontend');
-  });
 
-  it('should render title', () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    fixture.detectChanges();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, fight-league-ko-frontend');
+    app.toggleDropdown();
+    app.toggleMobileMenu();
+    app.closeMenus();
+
+    expect(app.dropdownOpen()).toBeFalse();
+    expect(app.mobileMenuOpen()).toBeFalse();
   });
 });
