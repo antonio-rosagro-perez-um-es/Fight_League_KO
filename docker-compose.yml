@@ -32,7 +32,8 @@ services:
 
   frontend:
     build:
-      context: ./frontend
+      context: .
+      dockerfile: frontend/Dockerfile
     container_name: fight-league-frontend
     restart: unless-stopped
     depends_on:

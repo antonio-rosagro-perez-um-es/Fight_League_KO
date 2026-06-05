@@ -1,0 +1,13 @@
+.git
+.github
+.opencode
+
+.env
+.env.*
+
+backend/target
+frontend/.angular/cache
+frontend/dist
+frontend/node_modules
+
+**/*.log
