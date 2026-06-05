@@ -35,7 +35,7 @@ import { AuthService } from '../core/auth.service';
     form { display: grid; gap: 1rem; }
     label { color: #c8d3ed; display: grid; gap: .4rem; }
     input { background: rgba(255,255,255,.09); border: 1px solid rgba(255,255,255,.18); border-radius: 12px; color: white; padding: .85rem; }
-    button { background: #ff4655; border: 0; border-radius: 999px; color: white; cursor: pointer; padding: .9rem; }
+    button { background: #20d964; border: 0; border-radius: 999px; color: white; cursor: pointer; padding: .9rem; }
     button:disabled { cursor: not-allowed; opacity: .55; }
     .error { color: #ff8a8a; }
   `]

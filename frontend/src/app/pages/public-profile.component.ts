@@ -33,11 +33,11 @@ import { ApiService } from '../core/api.service';
     }
   `,
   styles: [`
-    .back-link { color: #ffbd59; display: inline-block; margin-bottom: 1rem; text-decoration: none; }
+    .back-link { color: #7cff9f; display: inline-block; margin-bottom: 1rem; text-decoration: none; }
     .profile-hero { align-items: center; display: grid; gap: 1.5rem; grid-template-columns: auto 1fr auto; margin-bottom: 1rem; }
-    .avatar span { color: #ffbd59; font-size: 5rem; }
+    .avatar span { color: #7cff9f; font-size: 5rem; }
     h1 { font-size: clamp(2rem, 6vw, 4rem); margin: .2rem 0; text-transform: uppercase; }
-    .score-card { background: rgba(255,70,85,.16); border-radius: 20px; padding: 1rem; text-align: center; }
+    .score-card { background: rgba(32,217,100,.16); border-radius: 20px; padding: 1rem; text-align: center; }
     .score-card strong, .stats-grid strong { display: block; font-size: 2.2rem; }
     .stats-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
     .stats-grid article { text-align: center; }

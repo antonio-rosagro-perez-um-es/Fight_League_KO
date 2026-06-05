@@ -1,5 +1,15 @@
 export type UserRole = 'REGISTERED' | 'ORGANIZER' | 'ADMIN';
 
+export interface PageResponse<T> {
+  content: T[];
+  totalPages: number;
+  totalElements: number;
+  number: number;
+  size: number;
+  first: boolean;
+  last: boolean;
+}
+
 export interface User {
   id: string;
   username: string;

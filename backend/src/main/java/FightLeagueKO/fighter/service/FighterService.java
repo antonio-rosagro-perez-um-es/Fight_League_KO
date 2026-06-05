@@ -241,6 +241,22 @@ public class FighterService implements IFighterService {
     }
 
     @Override
+    public void revertFighterStats(UUID fighterId, boolean wasWinner) {
+        Fighter fighter = fighterRepository.findById(fighterId)
+                .orElseThrow(() -> new EntityNotFoundException("Fighter not found with id:" + fighterId));
+
+        fighter.removePlayCounter();
+
+        if (wasWinner) {
+            fighter.removeWinCounter();
+        } else {
+            fighter.removeLoseCounter();
+        }
+
+        fighterRepository.save(fighter);
+    }
+
+    @Override
     public FighterStatsDTO getFighterStats(UUID fighterId) {
 
         Fighter fighter = fighterRepository.findById(fighterId)

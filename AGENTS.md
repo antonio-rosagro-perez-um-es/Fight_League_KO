@@ -37,7 +37,7 @@ npm run build          # production build
 | `combo/`      | Combo          | CRUD, like/dislike, search/filters, public/private toggle, difficulty (`ComboDificulty`) & fuse (`FuseType`) enums |
 | `fighter/`    | Fighter        | CRUD (renamed from `character`), banners, stats, ranking |
 | `team/`       | Team           | CRUD, stats, ranking, point/second fighter same-fighter validation |
-| `game/`       | Game           | CRUD, team assignment, set winner, linked to tournament |
+| `game/`       | Game           | CRUD, team assignment, stat-safe winner set/change, linked to tournament |
 | `tournament/` | Tournament     | CRUD, join/exit, lifecycle scheduler (`@EnableScheduling`), states enum (`TournamentStates`) |
 | `user/`       | User           | CRUD with username, email, password (BCrypt), role (`UserRole`), soft-delete |
 | `security/`   | —              | `SecurityConfig` (JWT/BCrypt), `DefaultAdminSeeder`, `CurrentUserService` |
@@ -72,7 +72,7 @@ Angular frontend is scaffolded and implemented under `frontend/`.
 
 - **Framework**: Angular 19 standalone components + TypeScript
 - **Core services**: `frontend/src/app/core/api.service.ts`, `auth.service.ts`, route guards, notification service
-- **Shared UI**: `frontend/src/app/shared/combo-notation.component.ts` renders CSS icon-style combo notation
+- **Shared UI**: `frontend/src/app/shared/combo-notation.component.ts` renders control glyph combo notation with text fallback
 - **Routes/pages**: auth, home, profile, fighters, statistics, ranking, calendar, tournaments, community combos, and admin management pages
 - **Verification**: use `cd frontend && npm run build`
 
@@ -81,9 +81,9 @@ Angular frontend is scaffolded and implemented under `frontend/`.
 - Role-aware header/footer, login/register, blocked-action login prompt
 - Home variants for anonymous, registered/organizer, and admin users
 - Fighter public detail and admin fighter management
-- Global statistics rankings, user ranking with clickable profiles, and calendar month grid
-- Tournament public flow, creation, owner controls, bracket views, winner selection, and team assignment
-- Community combo CRUD, filters, visibility, voting, and notation rendering
+- Global statistics rankings, personal statistics, read-only admin statistics, user ranking with clickable profiles, and calendar month grid
+- Tournament public flow, creation, owner controls, custom bracket views, stat-safe winner selection/change, and searchable asset team assignment
+- Community combo CRUD, filters, visibility, voting, searchable fighter/fuse asset dropdowns, and control glyph notation rendering
 - Admin management for combos, users, games, teams, and tournaments
 
 ### Pending Frontend Work

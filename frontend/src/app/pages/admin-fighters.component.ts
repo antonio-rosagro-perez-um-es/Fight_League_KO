@@ -5,10 +5,11 @@ import { BehaviorSubject, forkJoin, switchMap } from 'rxjs';
 
 import { ApiService } from '../core/api.service';
 import { Fighter, FighterWrite } from '../core/api.models';
+import { ConfirmDialogComponent } from '../shared/confirm-dialog.component';
 
 @Component({
   selector: 'app-admin-fighters',
-  imports: [AsyncPipe, ReactiveFormsModule],
+  imports: [AsyncPipe, ConfirmDialogComponent, ReactiveFormsModule],
   template: `
     <div class="admin-heading">
       <div>
@@ -21,7 +22,7 @@ import { Fighter, FighterWrite } from '../core/api.models';
     @if (selectedIds.size) {
       <div class="bulk-bar">
         <span>{{ selectedIds.size }} selected</span>
-        <button type="button" (click)="deleteSelected()">Delete selected</button>
+        <button type="button" class="danger" (click)="requestDeleteSelected()">Delete selected</button>
         <button type="button" class="ghost" (click)="clearSelection()">Clear</button>
       </div>
     }
@@ -86,7 +87,7 @@ import { Fighter, FighterWrite } from '../core/api.models';
                     @if (fighter.deleted) {
                       <button type="button" (click)="restore(fighter.id)">Restore</button>
                     } @else {
-                      <button type="button" (click)="deactivate(fighter.id)">Delete</button>
+                      <button type="button" class="danger" (click)="requestDeactivate(fighter.id, fighter.name)">Delete</button>
                     }
                     <button type="button" (click)="view(fighter)">View</button>
                   </div>
@@ -124,17 +125,28 @@ import { Fighter, FighterWrite } from '../core/api.models';
         </dl>
       </section>
     }
+
+    @if (confirmDelete) {
+      <app-confirm-dialog
+        [title]="confirmDelete.title"
+        [message]="confirmDelete.message"
+        confirmLabel="Delete"
+        (confirmed)="confirmDeleteAction()"
+        (cancelled)="cancelDelete()"
+      />
+    }
   `,
   styles: [`
     .admin-heading { align-items: center; display: flex; justify-content: space-between; margin-bottom: 1rem; }
     h1 { font-size: clamp(2rem, 6vw, 4rem); margin: .3rem 0; text-transform: uppercase; }
-    button { background: #ff4655; border: 0; border-radius: 999px; color: white; cursor: pointer; padding: .65rem .9rem; }
+    button { background: #20d964; border: 0; border-radius: 999px; color: white; cursor: pointer; padding: .65rem .9rem; }
     button:disabled { cursor: not-allowed; opacity: .45; }
     .ghost, .row-actions button { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.14); }
-    .bulk-bar { align-items: center; background: rgba(255,70,85,.12); border-radius: 999px; display: flex; gap: .75rem; margin-bottom: .75rem; padding: .55rem 1rem; }
+    button.danger, .row-actions button.danger { background: #c7343f; border-color: rgba(255,122,132,.55); }
+    .bulk-bar { align-items: center; background: rgba(32,217,100,.12); border-radius: 999px; display: flex; gap: .75rem; margin-bottom: .75rem; padding: .55rem 1rem; }
     .bulk-bar span { font-weight: 700; }
     .modal-overlay { align-items: center; background: rgba(0,0,0,.55); bottom: 0; display: flex; inset: 0; justify-content: center; position: fixed; z-index: 100; }
-    .modal-content { background: #12172b; border: 1px solid rgba(255,255,255,.12); border-radius: 18px; max-height: 80vh; max-width: 720px; overflow-y: auto; padding: 1.5rem; width: 92vw; }
+    .modal-content { background: #06120a; border: 1px solid rgba(255,255,255,.12); border-radius: 18px; max-height: 80vh; max-width: 720px; overflow-y: auto; padding: 1.5rem; width: 92vw; }
     .editor-heading { align-items: center; display: flex; justify-content: space-between; margin-bottom: .5rem; }
     form { display: grid; gap: .85rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
     label { color: #c8d3ed; display: grid; gap: .35rem; }
@@ -143,18 +155,18 @@ import { Fighter, FighterWrite } from '../core/api.models';
     .full { grid-column: 1 / -1; }
     .stat-grid { display: grid; gap: .85rem; grid-template-columns: repeat(3, minmax(0, 1fr)); }
     .table-wrap { overflow-x: auto; }
-    table { border-collapse: collapse; min-width: 950px; width: 100%; }
+    table { border-collapse: collapse; min-width: 1220px; width: 100%; }
     th, td { border-bottom: 1px solid rgba(255,255,255,.1); padding: .8rem; text-align: left; }
-    th { color: #ffbd59; font-size: .78rem; text-transform: uppercase; }
+    th { color: #7cff9f; font-size: .78rem; text-transform: uppercase; }
     th:first-child, td:first-child { width: 40px; }
     th:first-child input, td:first-child input { width: 16px; height: 16px; cursor: pointer; }
     td:nth-child(2) { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: .78rem; max-width: 190px; overflow: hidden; text-overflow: ellipsis; }
     .deleted { opacity: .55; }
-    .selected { background: rgba(255,70,85,.08); }
+    .selected { background: rgba(32,217,100,.08); }
     .row-actions { display: flex; flex-wrap: wrap; gap: .5rem; }
     .info-panel { margin-top: 1rem; }
     dl { display: grid; gap: .75rem; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
-    dt { color: #ffbd59; font-size: .75rem; text-transform: uppercase; }
+    dt { color: #7cff9f; font-size: .75rem; text-transform: uppercase; }
     dd { margin: .2rem 0 0; }
     .error { color: #ff8a8a; }
     @media (max-width: 760px) { form, .stat-grid { grid-template-columns: 1fr; } }
@@ -170,6 +182,7 @@ export class AdminFightersComponent {
   editingId: string | null = null;
   selectedFighter: Fighter | null = null;
   error = '';
+  confirmDelete: { title: string; message: string; action: () => void } | null = null;
 
   readonly form = this.fb.nonNullable.group({
     name: ['', Validators.required],
@@ -212,7 +225,19 @@ export class AdminFightersComponent {
     this.selectedIds.clear();
   }
 
-  deleteSelected(): void {
+  requestDeleteSelected(): void {
+    const count = this.selectedIds.size;
+    if (!count) {
+      return;
+    }
+    this.confirmDelete = {
+      title: `Delete ${count} selected fighter${count === 1 ? '' : 's'}?`,
+      message: 'Selected fighters will be deactivated and hidden from normal use.',
+      action: () => this.deleteSelected(),
+    };
+  }
+
+  private deleteSelected(): void {
     const ids = [...this.selectedIds];
     if (!ids.length) {
       return;
@@ -280,7 +305,25 @@ export class AdminFightersComponent {
     this.refresh$.next();
   }
 
-  deactivate(id: string): void {
+  requestDeactivate(id: string, name: string): void {
+    this.confirmDelete = {
+      title: `Delete fighter ${name}?`,
+      message: 'This fighter will be deactivated and hidden from normal use.',
+      action: () => this.deactivate(id),
+    };
+  }
+
+  confirmDeleteAction(): void {
+    const action = this.confirmDelete?.action;
+    this.confirmDelete = null;
+    action?.();
+  }
+
+  cancelDelete(): void {
+    this.confirmDelete = null;
+  }
+
+  private deactivate(id: string): void {
     this.api.deactivateFighter(id).subscribe(() => this.refresh$.next());
   }
 

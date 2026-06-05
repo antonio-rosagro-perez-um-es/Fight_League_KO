@@ -76,12 +76,12 @@ import { UserProfile } from '../core/api.models';
   `,
   styles: [`
     .profile { align-items: center; display: grid; gap: 1.5rem; grid-template-columns: auto 1fr auto auto; margin-bottom: 1rem; }
-    .avatar span { color: #ffbd59; font-size: 5rem; }
+    .avatar span { color: #7cff9f; font-size: 5rem; }
     h1 { font-size: clamp(2rem, 6vw, 4rem); margin: .2rem 0; }
-    button { background: #ff4655; border: 0; border-radius: 999px; color: white; cursor: pointer; padding: .65rem .9rem; }
+    button { background: #20d964; border: 0; border-radius: 999px; color: white; cursor: pointer; padding: .65rem .9rem; }
     button:disabled { cursor: not-allowed; opacity: .45; }
     .ghost { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.14); }
-    .score-card { background: rgba(255,70,85,.16); border-radius: 20px; padding: 1rem; text-align: center; }
+    .score-card { background: rgba(32,217,100,.16); border-radius: 20px; padding: 1rem; text-align: center; }
     .score-card strong, .stats-grid strong { display: block; font-size: 2.2rem; }
     .stats-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); margin-bottom: 1rem; }
     .stats-grid article { text-align: center; }

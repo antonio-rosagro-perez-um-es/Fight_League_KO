@@ -1,51 +1,33 @@
-# Pending Assets And Work
+# Pending Frontend Requirements
 
-## Media Assets
+This file tracks requirements from `ia/frontend.md` that are not fully implemented and why they are blocked or deferred.
 
-- Placeholder fighter media has been added under `frontend/public/assets/placeholders/`:
-  - `fighter-portrait.svg`
-  - `fighter-banner.svg`
-  - `fighter-full.svg`
-- Fighter image usages now fall back to those placeholders when slug-based `.webp` files are missing.
-- Final licensed fighter image assets are still pending.
-- Expected final fighter paths:
-  - `frontend/public/assets/fighters/{slug}/portrait.webp`
-  - `frontend/public/assets/fighters/{slug}/banner.webp`
-  - `frontend/public/assets/fighters/{slug}/full.webp`
+## Pending
 
-## Features Blocked Or Limited By Missing Media
+### Admin Fighter Media Management
 
-- Anonymous home fighter cards use placeholder portraits until final `portrait.webp` files are added.
-- Fighter detail pages use placeholder full-body art until final `full.webp` files are added.
-- Fighter mini-grids use placeholder portraits until final `portrait.webp` files are added.
-- Banner-focused layouts use placeholder banners until final `banner.webp` files are added.
-- Exact 2XKO-style combo button artwork is unavailable; the frontend currently uses CSS icon-style notation tokens.
-- Final visual polish matching the reference screenshots is limited until the missing media assets are available.
+- Requirement: `ia/frontend.md` asks admin fighter rows to include controls for updating banner, portrait, and icon media.
+- Status: Not implemented.
+- Reason: The backend currently manages fighter data fields but does not expose a media upload/replacement endpoint or file-management workflow.
+- Needed: Define whether media updates should be frontend-only asset path edits, local file replacement, or backend-supported uploads.
 
-## Combo Notation
+### Final Reference-Level Visual Polish
 
-- `frontend/src/app/shared/combo-notation.component.ts` now renders CSS icon-style tokens for:
-  - Numeric directions: `1 2 3 4 5 6 7 8 9`
-  - Direction aliases: `d`, `dl`, `dr`, `u`, `ul`, `ur`, `left`, `right`
-  - Attack buttons: `L`, `M`, `H`, `T`, `S1`, `S2`
-  - Notes: `jump`, `j`, `air`, `hold`, `delay`, `dash`, `microdash`, `walk`, `assist`
-  - Separators: `>`, `+`, `,`, `(`, `)`, `/`
-- Final artwork is still pending if exact 2XKO button image assets are required.
-- A stricter notation grammar is still pending; unknown tokens intentionally render as fallback text chips.
+- Requirement: Several views reference external visual targets such as Street Fighter and 2XKO-style pages.
+- Status: Partially implemented.
+- Reason: Layouts are functional and responsive, but exact reference-level polish depends on final design decisions and complete media quality.
+- Needed: Final visual pass after all assets and UX decisions are stable.
 
-## Partial Features Still Open
+## Not Pending
 
-- Statistics personal section for registered and organizer users is not implemented yet.
-- Admin statistics CRUD view is not implemented yet.
-- Tournament winner-change/update flow after a winner has already been set is not implemented yet.
-- Search inside tournament fighter/fuse dropdowns is not implemented yet.
-- External bracket library integration is not used; the current bracket display is custom CSS/layout.
-
-## Wired Features
-
-- Auth, register, login, blocked-action prompt, role-aware header, and footer are wired.
-- Home, profile, fighters, statistics, ranking, calendar, tournaments, and community combos are wired.
-- Admin fighter, combo, game, team, user, and tournament management are wired.
-- Community combo list, create, edit, delete, visibility, filters, sorting, and voting are wired.
-- Tournament creation, owned-tournament controls, bracket preview, bracket detail, winner selection, and team assignment are wired.
-- Calendar grid and clickable ranking profile rows are wired.
+- Root `assets/` pipeline is wired through `frontend/angular.json`.
+- Brand logo and favicon are available.
+- Fighter portrait/banner/icon naming is standardized.
+- Warwick portrait typo is fixed.
+- Searchable fighter/fuse asset dropdowns are implemented.
+- Control glyph rendering is implemented with text mode toggle and invalid-token fallback chips.
+- Strict combo notation validation is implemented in combo create/edit forms.
+- Personal statistics are implemented.
+- Admin statistics are implemented as read-only because backend has calculated stats, not editable stats CRUD.
+- Tournament winner changes are implemented with stat reversal.
+- Custom CSS bracket is intentionally used instead of an external library.

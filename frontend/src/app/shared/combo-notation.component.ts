@@ -1,161 +1,60 @@
-import { Component, computed, input } from '@angular/core';
+import { Component, computed, input, signal } from '@angular/core';
 
-type TokenKind = 'attack' | 'direction' | 'note' | 'separator' | 'text';
-
-type NotationToken = {
-  kind: TokenKind;
-  label: string;
-  className: string;
-  aria: string;
-};
-
-const ATTACK_TOKENS: Record<string, { label: string; aria: string; className: string }> = {
-  l: { label: 'L', aria: 'Light attack', className: 'attack-light' },
-  m: { label: 'M', aria: 'Medium attack', className: 'attack-medium' },
-  h: { label: 'H', aria: 'Heavy attack', className: 'attack-heavy' },
-  t: { label: 'T', aria: 'Throw', className: 'attack-throw' },
-  s1: { label: 'S1', aria: 'Special one', className: 'attack-special-one' },
-  s2: { label: 'S2', aria: 'Special two', className: 'attack-special-two' },
-};
-
-const DIRECTION_TOKENS: Record<string, { label: string; aria: string; className: string }> = {
-  '1': { label: '↙', aria: 'Down-left', className: 'direction-diagonal' },
-  '2': { label: '↓', aria: 'Down', className: 'direction-cardinal' },
-  '3': { label: '↘', aria: 'Down-right', className: 'direction-diagonal' },
-  '4': { label: '←', aria: 'Left', className: 'direction-cardinal' },
-  '5': { label: '•', aria: 'Neutral', className: 'direction-neutral' },
-  '6': { label: '→', aria: 'Right', className: 'direction-cardinal' },
-  '7': { label: '↖', aria: 'Up-left', className: 'direction-diagonal' },
-  '8': { label: '↑', aria: 'Up', className: 'direction-cardinal' },
-  '9': { label: '↗', aria: 'Up-right', className: 'direction-diagonal' },
-  dl: { label: '↙', aria: 'Down-left', className: 'direction-diagonal' },
-  d: { label: '↓', aria: 'Down', className: 'direction-cardinal' },
-  dr: { label: '↘', aria: 'Down-right', className: 'direction-diagonal' },
-  lft: { label: '←', aria: 'Left', className: 'direction-cardinal' },
-  left: { label: '←', aria: 'Left', className: 'direction-cardinal' },
-  r: { label: '→', aria: 'Right', className: 'direction-cardinal' },
-  right: { label: '→', aria: 'Right', className: 'direction-cardinal' },
-  u: { label: '↑', aria: 'Up', className: 'direction-cardinal' },
-  ul: { label: '↖', aria: 'Up-left', className: 'direction-diagonal' },
-  ur: { label: '↗', aria: 'Up-right', className: 'direction-diagonal' },
-};
-
-const NOTE_TOKENS: Record<string, string> = {
-  j: 'Jump',
-  jump: 'Jump',
-  air: 'Air',
-  hold: 'Hold',
-  delay: 'Delay',
-  microdash: 'Microdash',
-  dash: 'Dash',
-  walk: 'Walk',
-  assist: 'Assist',
-};
-
-const SEPARATORS: Record<string, string> = {
-  '>': 'then',
-  '+': 'with',
-  ',': 'pause',
-  '(': 'open note',
-  ')': 'close note',
-  '/': 'or',
-};
+import { parseComboNotation } from './combo-notation';
 
 @Component({
   selector: 'app-combo-notation',
   template: `
-    <div class="notation" [attr.aria-label]="readableNotation()">
-      @for (token of tokens(); track $index) {
-        @if (token.kind === 'separator') {
-          <span class="separator-token" [attr.aria-label]="token.aria">{{ token.label }}</span>
-        } @else if (token.kind === 'text') {
-          <span class="text-token">{{ token.label }}</span>
-        } @else {
-          <span class="input-token" [class]="token.className" [attr.aria-label]="token.aria">
-            {{ token.label }}
-          </span>
+    <div class="notation-box">
+      <button type="button" class="mode-toggle" (click)="showText.set(!showText())">
+        {{ showText() ? 'Images' : 'Text' }}
+      </button>
+
+      @if (showText()) {
+        <p class="text-notation">{{ notation() }}</p>
+      } @else {
+        <div class="notation" [attr.aria-label]="readableNotation()">
+          @for (token of tokens(); track $index) {
+            @if (token.kind === 'separator') {
+              <span class="separator-token" [attr.aria-label]="token.aria">{{ token.label }}</span>
+            } @else if (token.kind === 'text') {
+              <span class="text-token">{{ token.label }}</span>
+            } @else if (token.glyph) {
+              <span class="input-token glyph-token" [class]="token.className" [attr.aria-label]="token.aria">
+                <img [src]="token.glyph" [alt]="token.aria">
+              </span>
+            } @else {
+              <span class="input-token" [class]="token.className" [attr.aria-label]="token.aria">
+                {{ token.label }}
+              </span>
+            }
+          }
+        </div>
         }
-      }
     </div>
   `,
   styles: [`
-    .notation { align-items: center; display: flex; flex-wrap: wrap; gap: .38rem; line-height: 1; }
-    .input-token { align-items: center; border: 2px solid rgba(255,255,255,.34); box-shadow: inset 0 -3px 0 rgba(0,0,0,.22), 0 5px 14px rgba(0,0,0,.18); color: #070910; display: inline-flex; font-size: .78rem; font-weight: 950; height: 2rem; justify-content: center; min-width: 2rem; padding: 0 .5rem; text-transform: uppercase; }
+    .notation-box { background: #364153; border: 1px solid #4b5568; border-radius: 12px; box-shadow: inset 0 1px 0 rgba(255,255,255,.12); color: #f8fafc; padding: .75rem 4.6rem .75rem .85rem; position: relative; }
+    .mode-toggle { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.22); border-radius: 7px; color: #f8fafc; cursor: pointer; font-size: .68rem; font-weight: 800; line-height: 1; padding: .38rem .52rem; position: absolute; right: .55rem; text-transform: uppercase; top: .5rem; }
+    .mode-toggle:hover, .mode-toggle:focus-visible { background: rgba(255,255,255,.18); border-color: rgba(255,255,255,.42); color: #ffffff; outline: none; }
+    .notation { align-items: center; display: flex; flex-wrap: wrap; gap: .42rem; line-height: 1; }
+    .input-token { align-items: center; background: transparent; border: 0; box-shadow: none; color: #111827; display: inline-flex; font-size: .78rem; font-weight: 950; height: 1.85rem; justify-content: center; min-width: 1.85rem; padding: 0 .12rem; text-transform: uppercase; }
+    .glyph-token { background: transparent; padding: 0; }
+    .glyph-token img { display: block; height: 1.65rem; object-fit: contain; width: 1.65rem; }
     .attack { border-radius: 999px; }
     .direction { border-radius: .55rem; font-size: 1rem; }
-    .note { background: #ffcf66; border-radius: .45rem; font-size: .68rem; letter-spacing: .04em; }
-    .attack-light { background: #6dff9f; }
-    .attack-medium { background: #f4d35e; }
-    .attack-heavy { background: #ff7d7d; }
-    .attack-throw { background: #cbff5b; }
-    .attack-special-one { background: #56c7ff; }
-    .attack-special-two { background: #b879ff; }
-    .direction-cardinal { background: #f4f7ff; }
-    .direction-diagonal { background: linear-gradient(135deg, #ffffff, #b9c7ff); }
-    .direction-neutral { background: #dce4f7; }
-    .separator-token { color: #ffbd59; font-weight: 900; padding: 0 .08rem; }
-    .text-token { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12); border-radius: 999px; color: #c8d3ed; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: .78rem; padding: .38rem .55rem; }
+    .note { background: #fff7ed; border: 1px solid #fdba74; border-radius: 999px; color: #9a3412; font-size: .68rem; letter-spacing: .04em; padding: 0 .55rem; }
+    .separator-token { color: #e2e8f0; font-weight: 950; padding: 0 .08rem; }
+    .text-token, .text-notation { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .text-token { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 999px; color: #334155; font-size: .78rem; padding: .38rem .55rem; }
+    .text-token.invalid-text { background: #fee2e2; border-color: #fca5a5; color: #991b1b; }
+    .text-notation { color: #f8fafc; font-size: .88rem; line-height: 1.55; margin: 0; overflow-wrap: anywhere; white-space: pre-wrap; }
+    @media (max-width: 520px) { .notation-box { padding: 2.35rem .75rem .75rem; } }
   `]
 })
 export class ComboNotationComponent {
   readonly notation = input.required<string>();
-  readonly tokens = computed(() => this.parseNotation(this.notation()));
+  readonly showText = signal(false);
+  readonly tokens = computed(() => parseComboNotation(this.notation()));
   readonly readableNotation = computed(() => this.tokens().map((token) => token.aria).join(' '));
-
-  private parseNotation(notation: string): NotationToken[] {
-    return notation
-      .split(/\s*(>|\+|,|\(|\)|\/)\s*|\s+/)
-      .filter((token): token is string => !!token && token.trim().length > 0)
-      .map((rawToken) => this.mapToken(rawToken.trim()));
-  }
-
-  private mapToken(token: string): NotationToken {
-    const normalized = token.toLowerCase();
-    const attack = ATTACK_TOKENS[normalized];
-    if (attack) {
-      return {
-        kind: 'attack',
-        label: attack.label,
-        className: `attack ${attack.className}`,
-        aria: attack.aria,
-      };
-    }
-
-    const direction = DIRECTION_TOKENS[normalized];
-    if (direction) {
-      return {
-        kind: 'direction',
-        label: direction.label,
-        className: `direction ${direction.className}`,
-        aria: direction.aria,
-      };
-    }
-
-    const note = NOTE_TOKENS[normalized];
-    if (note) {
-      return {
-        kind: 'note',
-        label: note,
-        className: 'note',
-        aria: note,
-      };
-    }
-
-    const separator = SEPARATORS[token];
-    if (separator) {
-      return {
-        kind: 'separator',
-        label: token,
-        className: '',
-        aria: separator,
-      };
-    }
-
-    return {
-      kind: 'text',
-      label: token,
-      className: '',
-      aria: token,
-    };
-  }
 }

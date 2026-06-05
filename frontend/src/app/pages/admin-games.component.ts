@@ -5,10 +5,11 @@ import { BehaviorSubject, combineLatest, switchMap } from 'rxjs';
 
 import { ApiService } from '../core/api.service';
 import { AdminUser, FighterBanner, Game, GameCreate, Team } from '../core/api.models';
+import { ConfirmDialogComponent } from '../shared/confirm-dialog.component';
 
 @Component({
   selector: 'app-admin-games',
-  imports: [AsyncPipe, ReactiveFormsModule],
+  imports: [AsyncPipe, ConfirmDialogComponent, ReactiveFormsModule],
   template: `
     <div class="admin-heading">
       <div>
@@ -108,7 +109,7 @@ import { AdminUser, FighterBanner, Game, GameCreate, Team } from '../core/api.mo
                     @if (game.delete) {
                       <button type="button" (click)="restore(game.id)">Restore</button>
                     } @else {
-                      <button type="button" (click)="delete(game.id)">Delete</button>
+                      <button type="button" class="danger" (click)="requestDelete(game.id, username(game.user1Id, vm.users), username(game.user2Id, vm.users))">Delete</button>
                     }
                   </div>
                 </td>
@@ -118,24 +119,35 @@ import { AdminUser, FighterBanner, Game, GameCreate, Team } from '../core/api.mo
         </table>
       </section>
     }
+
+    @if (confirmDelete) {
+      <app-confirm-dialog
+        [title]="confirmDelete.title"
+        [message]="confirmDelete.message"
+        confirmLabel="Delete"
+        (confirmed)="confirmDeleteAction()"
+        (cancelled)="cancelDelete()"
+      />
+    }
   `,
   styles: [`
     .admin-heading { align-items: center; display: flex; justify-content: space-between; margin-bottom: 1rem; }
     h1 { font-size: clamp(2rem, 6vw, 4rem); margin: .3rem 0; text-transform: uppercase; }
-    button { background: #ff4655; border: 0; border-radius: 999px; color: white; cursor: pointer; padding: .65rem .9rem; }
+    button { background: #20d964; border: 0; border-radius: 999px; color: white; cursor: pointer; padding: .65rem .9rem; }
     button:disabled { cursor: not-allowed; opacity: .45; }
     .ghost, .row-actions button { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.14); }
+    .row-actions button.danger { background: #c7343f; border-color: rgba(255,122,132,.55); }
     .editor { margin-bottom: 1rem; }
     .editor-heading { align-items: center; display: flex; justify-content: space-between; }
     form { display: grid; gap: .85rem; grid-template-columns: repeat(3, minmax(0, 1fr)); }
     label { color: #c8d3ed; display: grid; gap: .35rem; }
     input, select { background: rgba(255,255,255,.09); border: 1px solid rgba(255,255,255,.18); border-radius: 12px; color: white; padding: .75rem; }
-    option { color: #0b1020; }
+    option { color: #001f0b; }
     .full { grid-column: 1 / -1; }
     .table-wrap { overflow-x: auto; }
-    table { border-collapse: collapse; min-width: 1180px; width: 100%; }
+    table { border-collapse: collapse; min-width: 1440px; width: 100%; }
     th, td { border-bottom: 1px solid rgba(255,255,255,.1); padding: .8rem; text-align: left; vertical-align: top; }
-    th { color: #ffbd59; font-size: .78rem; text-transform: uppercase; }
+    th { color: #7cff9f; font-size: .78rem; text-transform: uppercase; }
     td:first-child { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: .78rem; max-width: 190px; overflow: hidden; text-overflow: ellipsis; }
     .deleted { opacity: .55; }
     .row-actions { display: flex; flex-wrap: wrap; gap: .5rem; }
@@ -156,6 +168,7 @@ export class AdminGamesComponent {
   showForm = false;
   editingId: string | null = null;
   error = '';
+  confirmDelete: { title: string; message: string; action: () => void } | null = null;
 
   readonly form = this.fb.nonNullable.group({
     user1: ['', Validators.required],
@@ -222,7 +235,25 @@ export class AdminGamesComponent {
     this.api.setGameWinner(gameId, userId).subscribe(() => this.refresh$.next());
   }
 
-  delete(id: string): void {
+  requestDelete(id: string, user1: string, user2: string): void {
+    this.confirmDelete = {
+      title: `Delete game ${user1} vs ${user2}?`,
+      message: 'This game will be deactivated and excluded from normal admin lists.',
+      action: () => this.delete(id),
+    };
+  }
+
+  confirmDeleteAction(): void {
+    const action = this.confirmDelete?.action;
+    this.confirmDelete = null;
+    action?.();
+  }
+
+  cancelDelete(): void {
+    this.confirmDelete = null;
+  }
+
+  private delete(id: string): void {
     this.api.deleteGame(id).subscribe(() => this.refresh$.next());
   }
 
