@@ -1,0 +1,54 @@
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined');
+
+:root {
+  color-scheme: dark;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background:
+    radial-gradient(circle at top left, rgba(39, 255, 122, 0.2), transparent 34rem),
+    radial-gradient(circle at 86% 12%, rgba(255, 255, 255, 0.08), transparent 26rem),
+    linear-gradient(135deg, rgba(0, 0, 0, 0.52), rgba(0, 18, 8, 0.9)),
+    url('/assets/Backgrounds/Background_Green.webp'),
+    linear-gradient(135deg, #020503 0%, #07120c 52%, #000000 100%);
+  background-attachment: fixed;
+  background-position: center;
+  background-size: cover;
+  color: #f5f7ff;
+  margin: 0;
+  min-height: 100vh;
+}
+
+.eyebrow {
+  color: #7cff9f;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.panel {
+  background: rgba(4, 15, 9, 0.82);
+  border: 1px solid rgba(124, 255, 159, 0.2);
+  border-radius: 24px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.34);
+  padding: 1.25rem;
+}
+
+.grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.empty-state {
+  border: 1px dashed rgba(124, 255, 159, 0.36);
+  border-radius: 20px;
+  color: #cfe9d6;
+  padding: 2rem;
+  text-align: center;
+}
