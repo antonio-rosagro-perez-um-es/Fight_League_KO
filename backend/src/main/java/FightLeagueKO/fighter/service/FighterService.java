@@ -1,5 +1,10 @@
 package FightLeagueKO.fighter.service;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -8,7 +13,9 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import FightLeagueKO.fighter.dto.FighterBannerDTO;
 import FightLeagueKO.fighter.dto.FighterDTO;
@@ -27,8 +34,9 @@ public class FighterService implements IFighterService {
 
     private FighterRepository fighterRepository;
     private FighterMapper fighterMapper;
+    @Value("${app.assets.fighters-path:../assets/fighters}")
+    private String fighterAssetsPath = "../assets/fighters";
 
-    @Autowired
     public FighterService(FighterRepository fighterRepository, FighterMapper fighterMapper) {
         this.fighterRepository = fighterRepository;
         this.fighterMapper = fighterMapper;
@@ -150,6 +158,61 @@ public class FighterService implements IFighterService {
 
         Fighter saved = fighterRepository.save(fighter);
         return fighterMapper.toFighterDTO(saved);
+    }
+
+    @Override
+    public void uploadFighterMedia(UUID fighterId, MultipartFile portrait, MultipartFile banner, MultipartFile icon) {
+        Fighter fighter = fighterRepository.findById(fighterId)
+                .orElseThrow(() -> new EntityNotFoundException("Fighter not found with id:" + fighterId));
+
+        if (portrait == null && banner == null && icon == null) {
+            throw new IllegalArgumentException("At least one fighter media file is required");
+        }
+
+        String slug = fighter.getSlug();
+        if (slug == null || slug.isBlank()) {
+            throw new IllegalArgumentException("Fighter slug could not be null or empty");
+        }
+
+        Path assetsPath = Path.of(fighterAssetsPath).toAbsolutePath().normalize();
+        Path fighterDirectory = assetsPath.resolve(slug).normalize();
+        if (!fighterDirectory.startsWith(assetsPath)) {
+            throw new IllegalArgumentException("Invalid fighter slug");
+        }
+
+        try {
+            Files.createDirectories(fighterDirectory);
+            saveMediaFile(portrait, fighterDirectory, slug, "portrait");
+            saveMediaFile(banner, fighterDirectory, slug, "banner");
+            saveMediaFile(icon, fighterDirectory, slug, "icon");
+        } catch (IOException ex) {
+            throw new IllegalStateException("Could not store fighter media", ex);
+        }
+    }
+
+    private void saveMediaFile(MultipartFile file, Path fighterDirectory, String slug, String type) throws IOException {
+        if (file == null) {
+            return;
+        }
+
+        if (file.isEmpty()) {
+            throw new IllegalArgumentException("Fighter " + type + " media file could not be empty");
+        }
+
+        String originalFilename = Optional.ofNullable(file.getOriginalFilename()).orElse("").toLowerCase();
+        String contentType = Optional.ofNullable(file.getContentType()).orElse("");
+        if (!originalFilename.endsWith(".webp") || !contentType.equalsIgnoreCase("image/webp")) {
+            throw new IllegalArgumentException("Fighter " + type + " media file must be a .webp image");
+        }
+
+        Path destination = fighterDirectory.resolve(slug + "_" + type + ".webp").normalize();
+        if (!destination.startsWith(fighterDirectory)) {
+            throw new IllegalArgumentException("Invalid fighter media destination");
+        }
+
+        try (InputStream inputStream = file.getInputStream()) {
+            Files.copy(inputStream, destination, StandardCopyOption.REPLACE_EXISTING);
+        }
     }
 
     @Override

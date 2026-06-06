@@ -49,6 +49,16 @@ export class ApiService {
     return this.http.post<Fighter>('/api/fighters', fighter);
   }
 
+  uploadFighterMedia(id: string, files: Partial<Record<'portrait' | 'banner' | 'icon', File>>) {
+    const formData = new FormData();
+    Object.entries(files).forEach(([type, file]) => {
+      if (file) {
+        formData.append(type, file);
+      }
+    });
+    return this.http.post<void>(`/api/fighters/${id}/media`, formData);
+  }
+
   updateFighter(id: string, fighter: Partial<FighterWrite>) {
     return this.http.patch<void>(`/api/fighters/${id}`, fighter);
   }

@@ -1,7 +1,7 @@
 import { AsyncPipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { BehaviorSubject, forkJoin, switchMap } from 'rxjs';
+import { BehaviorSubject, forkJoin, of, switchMap } from 'rxjs';
 
 import { ApiService } from '../core/api.service';
 import { Fighter, FighterWrite } from '../core/api.models';
@@ -51,6 +51,12 @@ import { ConfirmDialogComponent } from '../shared/confirm-dialog.component';
               <label>Mobility <input formControlName="mobility" type="number"></label>
               <label>Ease of use <input formControlName="easyOfUse" type="number"></label>
             </div>
+            <div class="media-grid full">
+              <label>Portrait media (.webp) <input type="file" accept=".webp,image/webp" (change)="selectMedia($event, 'portrait')"></label>
+              <label>Banner media (.webp) <input type="file" accept=".webp,image/webp" (change)="selectMedia($event, 'banner')"></label>
+              <label>Icon media (.webp) <input type="file" accept=".webp,image/webp" (change)="selectMedia($event, 'icon')"></label>
+            </div>
+            <p class="hint full">Files are stored as <strong>slug/slug_portrait.webp</strong>, <strong>slug/slug_banner.webp</strong>, and <strong>slug/slug_icon.webp</strong>.</p>
             @if (error) { <p class="error full">{{ error }}</p> }
             <button type="submit" [disabled]="form.invalid">Save</button>
           </form>
@@ -151,9 +157,12 @@ import { ConfirmDialogComponent } from '../shared/confirm-dialog.component';
     form { display: grid; gap: .85rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
     label { color: #c8d3ed; display: grid; gap: .35rem; }
     input, textarea { background: rgba(255,255,255,.09); border: 1px solid rgba(255,255,255,.18); border-radius: 12px; color: white; padding: .75rem; }
+    input[type="file"] { cursor: pointer; }
     textarea { min-height: 120px; resize: vertical; }
     .full { grid-column: 1 / -1; }
-    .stat-grid { display: grid; gap: .85rem; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .stat-grid, .media-grid { display: grid; gap: .85rem; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .hint { color: #9fb0d3; font-size: .85rem; margin: -.2rem 0 .2rem; }
+    .hint strong { color: #dfe8ff; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-weight: 500; }
     .table-wrap { overflow-x: auto; }
     table { border-collapse: collapse; min-width: 1220px; width: 100%; }
     th, td { border-bottom: 1px solid rgba(255,255,255,.1); padding: .8rem; text-align: left; }
@@ -169,7 +178,7 @@ import { ConfirmDialogComponent } from '../shared/confirm-dialog.component';
     dt { color: #7cff9f; font-size: .75rem; text-transform: uppercase; }
     dd { margin: .2rem 0 0; }
     .error { color: #ff8a8a; }
-    @media (max-width: 760px) { form, .stat-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 760px) { form, .stat-grid, .media-grid { grid-template-columns: 1fr; } }
   `]
 })
 export class AdminFightersComponent {
@@ -183,6 +192,7 @@ export class AdminFightersComponent {
   selectedFighter: Fighter | null = null;
   error = '';
   confirmDelete: { title: string; message: string; action: () => void } | null = null;
+  readonly selectedMedia: Partial<Record<'portrait' | 'banner' | 'icon', File>> = {};
 
   readonly form = this.fb.nonNullable.group({
     name: ['', Validators.required],
@@ -252,6 +262,7 @@ export class AdminFightersComponent {
   startCreate(): void {
     this.editingId = null;
     this.error = '';
+    this.clearMedia();
     this.form.reset({ health: 0, range: 0, power: 0, vitality: 0, mobility: 0, easyOfUse: 0 });
     this.showForm = true;
   }
@@ -259,6 +270,7 @@ export class AdminFightersComponent {
   startEdit(fighter: Fighter): void {
     this.editingId = fighter.id;
     this.error = '';
+    this.clearMedia();
     this.form.setValue({
       name: fighter.name,
       description: fighter.description,
@@ -281,6 +293,26 @@ export class AdminFightersComponent {
   cancelEdit(): void {
     this.showForm = false;
     this.editingId = null;
+    this.clearMedia();
+  }
+
+  selectMedia(event: Event, type: 'portrait' | 'banner' | 'icon'): void {
+    this.error = '';
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    delete this.selectedMedia[type];
+
+    if (!file) {
+      return;
+    }
+
+    if (!file.name.toLowerCase().endsWith('.webp') || file.type !== 'image/webp') {
+      input.value = '';
+      this.error = `${type} media must be a .webp image`;
+      return;
+    }
+
+    this.selectedMedia[type] = file;
   }
 
   save(): void {
@@ -288,21 +320,38 @@ export class AdminFightersComponent {
     const fighter = this.form.getRawValue() satisfies FighterWrite;
     if (this.editingId) {
       this.api.updateFighter(this.editingId, fighter).subscribe({
-        next: () => this.afterSave(),
+        next: () => this.uploadMediaAfterSave(this.editingId!),
         error: (err: { error?: { error?: string } }) => this.error = err.error?.error || 'Could not save fighter',
       });
       return;
     }
 
     this.api.createFighter(fighter).subscribe({
-      next: () => this.afterSave(),
+      next: (created) => this.uploadMediaAfterSave(created.id),
       error: (err: { error?: { error?: string } }) => this.error = err.error?.error || 'Could not save fighter',
+    });
+  }
+
+  private uploadMediaAfterSave(id: string): void {
+    const upload$ = Object.keys(this.selectedMedia).length
+      ? this.api.uploadFighterMedia(id, this.selectedMedia)
+      : of(undefined);
+
+    upload$.subscribe({
+      next: () => this.afterSave(),
+      error: (err: { error?: { error?: string } }) => this.error = err.error?.error || 'Could not upload fighter media',
     });
   }
 
   private afterSave(): void {
     this.cancelEdit();
     this.refresh$.next();
+  }
+
+  private clearMedia(): void {
+    delete this.selectedMedia.portrait;
+    delete this.selectedMedia.banner;
+    delete this.selectedMedia.icon;
   }
 
   requestDeactivate(id: string, name: string): void {
