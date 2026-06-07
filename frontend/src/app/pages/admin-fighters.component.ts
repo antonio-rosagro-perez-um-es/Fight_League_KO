@@ -152,7 +152,7 @@ import { ConfirmDialogComponent } from '../shared/confirm-dialog.component';
     .bulk-bar { align-items: center; background: rgba(32,217,100,.12); border-radius: 999px; display: flex; gap: .75rem; margin-bottom: .75rem; padding: .55rem 1rem; }
     .bulk-bar span { font-weight: 700; }
     .modal-overlay { align-items: center; background: rgba(0,0,0,.55); bottom: 0; display: flex; inset: 0; justify-content: center; position: fixed; z-index: 100; }
-    .modal-content { background: #06120a; border: 1px solid rgba(255,255,255,.12); border-radius: 18px; max-height: 80vh; max-width: 720px; overflow-y: auto; padding: 1.5rem; width: 92vw; }
+    .modal-content { background: #06120a; border: 1px solid rgba(255,255,255,.12); border-radius: 18px; max-height: 80vh; max-width: 980px; overflow-y: auto; padding: 1.5rem; width: min(96vw, 980px); }
     .editor-heading { align-items: center; display: flex; justify-content: space-between; margin-bottom: .5rem; }
     form { display: grid; gap: .85rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
     label { color: #c8d3ed; display: grid; gap: .35rem; }
@@ -160,7 +160,8 @@ import { ConfirmDialogComponent } from '../shared/confirm-dialog.component';
     input[type="file"] { cursor: pointer; }
     textarea { min-height: 120px; resize: vertical; }
     .full { grid-column: 1 / -1; }
-    .stat-grid, .media-grid { display: grid; gap: .85rem; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .stat-grid { display: grid; gap: .85rem; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .media-grid { display: grid; gap: .85rem; grid-template-columns: repeat(3, minmax(220px, 1fr)); }
     .hint { color: #9fb0d3; font-size: .85rem; margin: -.2rem 0 .2rem; }
     .hint strong { color: #dfe8ff; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-weight: 500; }
     .table-wrap { overflow-x: auto; }
