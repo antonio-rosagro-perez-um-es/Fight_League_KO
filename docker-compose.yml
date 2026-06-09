@@ -28,6 +28,9 @@ services:
       - .env
     environment:
       SPRING_PROFILES_ACTIVE: docker
+      APP_ASSETS_FIGHTERS_PATH: /app/assets/fighters
+    volumes:
+      - ./assets/fighters:/app/assets/fighters
     depends_on:
       postgres:
         condition: service_healthy
@@ -44,6 +47,8 @@ services:
       - backend
     ports:
       - "80:80"
+    volumes:
+      - ./assets/fighters:/usr/share/nginx/html/assets/fighters:ro
     networks:
       - fight-league-internal
 
