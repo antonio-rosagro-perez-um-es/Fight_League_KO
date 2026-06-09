@@ -140,6 +140,10 @@ public class FighterService implements IFighterService {
             throw new IllegalArgumentException("Fighter easyOfUse could not be null");
         }
 
+        if (fighterRepository.findBySlug(fighterDTO.slug()).isPresent())
+            throw new IllegalArgumentException("Fighter already exists");
+
+
         fighter.setName(fighterDTO.name());
         fighter.setDescription(fighterDTO.description());
         fighter.setRegion(fighterDTO.region());
