@@ -139,6 +139,10 @@ public class DatabaseSeeder implements CommandLineRunner {
                 "The Hand of Noxus brings absolute judgment to the battlefield. His massive axe cleaves through entire teams, and once he draws blood, there is no escape from his merciless combo.",
                 "Noxus", "Juggernaut", "The Hand of Noxus", "Strength, discipline, decisive victories",
                 "Weakness, treason, mercy without purpose", "darius", 8, 3, 9, 8, 3, 6));
+        seedFighter(fighter("Thresh",
+                "A sadistic jailer from the Shadow Isles, Thresh drags enemies into his grasp with spectral chains. His lantern, traps, and oppressive reach let him control space and punish every escape attempt.",
+                "Shadow Isles", "Controller", "The Chain Warden", "Trapping souls, cruel mind games, perfect captures",
+                "Mercy, escape, souls slipping away", "thresh", 5, 7, 6, 5, 4, 5));
     }
 
     private void seedFighter(Fighter fighter) {
