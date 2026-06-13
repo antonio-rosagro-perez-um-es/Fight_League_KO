@@ -39,7 +39,7 @@ import { ConfirmDialogComponent } from '../shared/confirm-dialog.component';
             @for (tournament of owned; track tournament.id) {
               <button type="button" class="owned-card" (click)="openOwnerModal(tournament)">
                 <strong>{{ tournament.title }}</strong>
-                <span>{{ tournament.state }} · {{ tournament.playerCount }}/{{ tournament.maxPlayers }} players</span>
+                <span>Hosted by {{ tournament.ownerUsername }} · {{ tournament.state }} · {{ tournament.playerCount }}/{{ tournament.maxPlayers }} players</span>
               </button>
             } @empty {
               <div class="empty-state">Create your first tournament to unlock organizer controls.</div>
@@ -56,6 +56,7 @@ import { ConfirmDialogComponent } from '../shared/confirm-dialog.component';
             <div>
               <span class="state-pill">{{ tournament.state }}</span>
               <h2>{{ tournament.title }}</h2>
+              <p class="host-line">Hosted by {{ tournament.ownerUsername }}</p>
               <p>Starts {{ tournament.startDate | date:'mediumDate' }} · registration closes {{ tournament.inscriptionCloseDate | date:'mediumDate' }}</p>
             </div>
             <div class="slots">
@@ -173,6 +174,7 @@ import { ConfirmDialogComponent } from '../shared/confirm-dialog.component';
     .owned-card span { color: #c8d3ed; }
     .tournament-card { align-items: center; color: white; display: flex; gap: 1rem; justify-content: space-between; text-decoration: none; }
     .tournament-card p { color: #c8d3ed; margin: 0; }
+    .tournament-card .host-line { color: #7cff9f; font-weight: 800; margin-bottom: .35rem; }
     .slots { background: rgba(255, 70, 85, .18); border-radius: 18px; min-width: 110px; padding: 1rem; text-align: center; }
     .slots strong { display: block; font-size: 2rem; }
     .modal-overlay { align-items: center; background: rgba(0,0,0,.58); display: flex; inset: 0; justify-content: center; position: fixed; z-index: 100; }

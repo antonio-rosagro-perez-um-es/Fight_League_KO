@@ -130,6 +130,7 @@ export interface UserRanking {
 export interface TournamentView {
   id: string;
   ownerId: string;
+  ownerUsername: string;
   title: string;
   state: string;
   maxPlayers: number;
@@ -167,9 +168,22 @@ export interface RecentGame {
   user2Username: string;
   teamUser1Id?: string;
   teamUser2Id?: string;
+  teamUser1?: RecentGameTeam | null;
+  teamUser2?: RecentGameTeam | null;
   winnerId?: string;
   gameDate: string;
   wonByCurrentUser: boolean;
+}
+
+export interface RecentGameTeam {
+  id: string;
+  pointFighterId: string;
+  pointFighterName: string;
+  pointFighterSlug: string;
+  secondFighterId: string;
+  secondFighterName: string;
+  secondFighterSlug: string;
+  fuse: string;
 }
 
 export interface FighterStats {
