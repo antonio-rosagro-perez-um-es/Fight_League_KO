@@ -48,7 +48,6 @@ const NOTE_TOKENS: Record<string, string> = {
   delay: 'Delay',
   delayed: 'Delayed',
   microdash: 'Microdash',
-  dash: 'Dash',
   walk: 'Walk',
   assist: 'Assist',
   cancel: 'Cancel',
@@ -61,7 +60,7 @@ const SEPARATORS: Record<string, string> = {
   '/': 'or',
 };
 
-const TOKEN_PATTERN = /[jJ]\.|[1-9]?[lLmMhHtT](?:\(\d+\))?|[1-9]?[sS][12](?:\(\d+\))?|[1-9]|[A-Za-z]+|[>+,/()]|\S/g;
+const TOKEN_PATTERN = /[jJ]\.|[1-9]?[sS][12](?:\(\d+\))?|[1-9]?[lLmMhHtT](?:\(\d+\))?(?![A-Za-z])|[1-9]|[A-Za-z]+|[>+,/()]|\S/g;
 
 export function parseComboNotation(notation: string): NotationToken[] {
   return tokenizeNotation(notation).flatMap((token) => mapToken(token));
@@ -157,6 +156,16 @@ function mapExpandedToken(token: string): NotationToken[] {
 
   if (normalized === 'j.') {
     return mapExpandedToken('j');
+  }
+
+  if (normalized === 'dash') {
+    return [{
+      kind: 'direction',
+      label: 'Dash',
+      className: 'direction direction-cardinal',
+      aria: 'Dash forward',
+      glyph: controlGlyph('dash') ?? undefined,
+    }];
   }
 
   const note = NOTE_TOKENS[normalized];

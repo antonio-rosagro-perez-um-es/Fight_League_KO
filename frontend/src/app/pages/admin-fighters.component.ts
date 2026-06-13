@@ -31,7 +31,7 @@ import { ConfirmDialogComponent } from '../shared/confirm-dialog.component';
       <div class="modal-overlay" (click)="cancelEdit()">
         <div class="modal-content" (click)="$event.stopPropagation()">
           <div class="editor-heading">
-            <h2>{{ editingId ? 'Edit fighter' : 'Create fighter' }}</h2>
+            <h2>{{ formMode === 'view' ? 'View fighter' : editingId ? 'Edit fighter' : 'Create fighter' }}</h2>
             <button type="button" class="ghost" (click)="cancelEdit()">Close</button>
           </div>
           <form [formGroup]="form" (ngSubmit)="save()">
@@ -51,14 +51,18 @@ import { ConfirmDialogComponent } from '../shared/confirm-dialog.component';
               <label>Mobility <input formControlName="mobility" type="number"></label>
               <label>Ease of use <input formControlName="easyOfUse" type="number"></label>
             </div>
-            <div class="media-grid full">
-              <label>Portrait media (.webp) <input type="file" accept=".webp,image/webp" (change)="selectMedia($event, 'portrait')"></label>
-              <label>Banner media (.webp) <input type="file" accept=".webp,image/webp" (change)="selectMedia($event, 'banner')"></label>
-              <label>Icon media (.webp) <input type="file" accept=".webp,image/webp" (change)="selectMedia($event, 'icon')"></label>
-            </div>
-            <p class="hint full">Files are stored as <strong>slug/slug_portrait.webp</strong>, <strong>slug/slug_banner.webp</strong>, and <strong>slug/slug_icon.webp</strong>.</p>
+            @if (formMode !== 'view') {
+              <div class="media-grid full">
+                <label>Portrait media (.webp) <input type="file" accept=".webp,image/webp" (change)="selectMedia($event, 'portrait')"></label>
+                <label>Banner media (.webp) <input type="file" accept=".webp,image/webp" (change)="selectMedia($event, 'banner')"></label>
+                <label>Icon media (.webp) <input type="file" accept=".webp,image/webp" (change)="selectMedia($event, 'icon')"></label>
+              </div>
+              <p class="hint full">Files are stored as <strong>slug/slug_portrait.webp</strong>, <strong>slug/slug_banner.webp</strong>, and <strong>slug/slug_icon.webp</strong>.</p>
+            }
             @if (error) { <p class="error full">{{ error }}</p> }
-            <button type="submit" [disabled]="form.invalid">Save</button>
+            @if (formMode !== 'view') {
+              <button type="submit" [disabled]="form.invalid">Save</button>
+            }
           </form>
         </div>
       </div>
@@ -89,13 +93,13 @@ import { ConfirmDialogComponent } from '../shared/confirm-dialog.component';
                 <td>{{ fighter.deleted ? 'Yes' : 'No' }}</td>
                 <td>
                   <div class="row-actions">
+                    <button type="button" (click)="view(fighter)">View</button>
                     <button type="button" (click)="startEdit(fighter)">Edit</button>
                     @if (fighter.deleted) {
                       <button type="button" (click)="restore(fighter.id)">Restore</button>
                     } @else {
                       <button type="button" class="danger" (click)="requestDeactivate(fighter.id, fighter.name)">Delete</button>
                     }
-                    <button type="button" (click)="view(fighter)">View</button>
                   </div>
                 </td>
               </tr>
@@ -104,33 +108,6 @@ import { ConfirmDialogComponent } from '../shared/confirm-dialog.component';
         </table>
       }
     </section>
-
-    @if (selectedFighter) {
-      <section class="panel info-panel">
-        <h2>{{ selectedFighter.name }}</h2>
-        <p>{{ selectedFighter.description }}</p>
-        <dl>
-          <div><dt>ID</dt><dd>{{ selectedFighter.id }}</dd></div>
-          <div><dt>Slug</dt><dd>{{ selectedFighter.slug }}</dd></div>
-          <div><dt>Archetype</dt><dd>{{ selectedFighter.archetype }}</dd></div>
-          <div><dt>Region</dt><dd>{{ selectedFighter.region }}</dd></div>
-          <div><dt>Title</dt><dd>{{ selectedFighter.title }}</dd></div>
-          <div><dt>Likes</dt><dd>{{ selectedFighter.itLikes }}</dd></div>
-          <div><dt>Dislikes</dt><dd>{{ selectedFighter.itDislike }}</dd></div>
-          <div><dt>Health</dt><dd>{{ selectedFighter.health }}</dd></div>
-          <div><dt>Range</dt><dd>{{ selectedFighter.range }}</dd></div>
-          <div><dt>Power</dt><dd>{{ selectedFighter.power }}</dd></div>
-          <div><dt>Vitality</dt><dd>{{ selectedFighter.vitality }}</dd></div>
-          <div><dt>Mobility</dt><dd>{{ selectedFighter.mobility }}</dd></div>
-          <div><dt>Ease of use</dt><dd>{{ selectedFighter.easyOfUse }}</dd></div>
-          <div><dt>Played</dt><dd>{{ selectedFighter.playCounter }}</dd></div>
-          <div><dt>Wins</dt><dd>{{ selectedFighter.winCounter }}</dd></div>
-          <div><dt>Losses</dt><dd>{{ selectedFighter.loseCounter }}</dd></div>
-          <div><dt>Win rate</dt><dd>{{ selectedFighter.winRate }}%</dd></div>
-          <div><dt>Deleted</dt><dd>{{ selectedFighter.deleted ? 'Yes' : 'No' }}</dd></div>
-        </dl>
-      </section>
-    }
 
     @if (confirmDelete) {
       <app-confirm-dialog
@@ -174,10 +151,6 @@ import { ConfirmDialogComponent } from '../shared/confirm-dialog.component';
     .deleted { opacity: .55; }
     .selected { background: rgba(32,217,100,.08); }
     .row-actions { display: flex; flex-wrap: wrap; gap: .5rem; }
-    .info-panel { margin-top: 1rem; }
-    dl { display: grid; gap: .75rem; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
-    dt { color: #7cff9f; font-size: .75rem; text-transform: uppercase; }
-    dd { margin: .2rem 0 0; }
     .error { color: #ff8a8a; }
     @media (max-width: 760px) { form, .stat-grid, .media-grid { grid-template-columns: 1fr; } }
   `]
@@ -190,7 +163,7 @@ export class AdminFightersComponent {
   readonly selectedIds = new Set<string>();
   showForm = false;
   editingId: string | null = null;
-  selectedFighter: Fighter | null = null;
+  formMode: 'create' | 'edit' | 'view' = 'create';
   error = '';
   confirmDelete: { title: string; message: string; action: () => void } | null = null;
   readonly selectedMedia: Partial<Record<'portrait' | 'banner' | 'icon', File>> = {};
@@ -262,16 +235,20 @@ export class AdminFightersComponent {
 
   startCreate(): void {
     this.editingId = null;
+    this.formMode = 'create';
     this.error = '';
     this.clearMedia();
+    this.form.enable();
     this.form.reset({ health: 0, range: 0, power: 0, vitality: 0, mobility: 0, easyOfUse: 0 });
     this.showForm = true;
   }
 
   startEdit(fighter: Fighter): void {
     this.editingId = fighter.id;
+    this.formMode = 'edit';
     this.error = '';
     this.clearMedia();
+    this.form.enable();
     this.form.setValue({
       name: fighter.name,
       description: fighter.description,
@@ -294,6 +271,8 @@ export class AdminFightersComponent {
   cancelEdit(): void {
     this.showForm = false;
     this.editingId = null;
+    this.formMode = 'create';
+    this.form.enable();
     this.clearMedia();
   }
 
@@ -382,6 +361,27 @@ export class AdminFightersComponent {
   }
 
   view(fighter: Fighter): void {
-    this.selectedFighter = fighter;
+    this.editingId = fighter.id;
+    this.formMode = 'view';
+    this.error = '';
+    this.clearMedia();
+    this.form.setValue({
+      name: fighter.name,
+      description: fighter.description,
+      region: fighter.region,
+      archetype: fighter.archetype,
+      title: fighter.title,
+      itLikes: fighter.itLikes,
+      itDislike: fighter.itDislike,
+      slug: fighter.slug,
+      health: fighter.health,
+      range: fighter.range,
+      power: fighter.power,
+      vitality: fighter.vitality,
+      mobility: fighter.mobility,
+      easyOfUse: fighter.easyOfUse,
+    });
+    this.form.disable();
+    this.showForm = true;
   }
 }
