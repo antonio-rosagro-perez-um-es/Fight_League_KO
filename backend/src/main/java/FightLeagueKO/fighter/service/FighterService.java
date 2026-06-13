@@ -344,7 +344,7 @@ public class FighterService implements IFighterService {
         long allFightersPlayRate = fighterRepository.getAllFightersPlayRate();
         return fighters.stream()
                 .sorted((a, b) -> Double.compare(b.getWinRate(), a.getWinRate()))
-                .limit(10)
+                .limit(12)
                 .map(fighter -> {
                     double playRate = allFightersPlayRate > 0
                             ? fighter.getPlayCounter() * 100.0 / allFightersPlayRate
