@@ -1,4 +1,4 @@
-import { Component, computed, input, output, signal } from '@angular/core';
+import { Component, HostListener, computed, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 export type AssetSelectOption = {
@@ -12,7 +12,7 @@ export type AssetSelectOption = {
   imports: [FormsModule],
   template: `
     <div class="asset-select">
-      <button type="button" class="select-trigger" (click)="toggle()">
+      <button type="button" class="select-trigger" (click)="$event.stopPropagation(); toggle()">
         @if (selectedOption()?.icon; as icon) {
           <img [src]="icon" [alt]="selectedOption()?.label || placeholder()" (error)="hideBrokenIcon($event)">
         }
@@ -20,7 +20,7 @@ export type AssetSelectOption = {
       </button>
 
       @if (open()) {
-        <div class="select-menu">
+        <div class="select-menu" (click)="$event.stopPropagation()">
           <input type="search" [(ngModel)]="query" [placeholder]="searchPlaceholder()">
           <div class="option-list">
             @if (allowEmpty()) {
@@ -56,6 +56,10 @@ export type AssetSelectOption = {
   `]
 })
 export class SearchableAssetSelectComponent {
+  private static nextId = 0;
+  private static openSelectId = signal<number | null>(null);
+  private readonly selectId = SearchableAssetSelectComponent.nextId++;
+
   readonly options = input<AssetSelectOption[]>([]);
   readonly value = input<string>('');
   readonly placeholder = input('Choose option');
@@ -64,7 +68,7 @@ export class SearchableAssetSelectComponent {
   readonly emptyLabel = input('None');
   readonly valueChange = output<string>();
 
-  readonly open = signal(false);
+  readonly open = computed(() => SearchableAssetSelectComponent.openSelectId() === this.selectId);
   query = '';
 
   readonly selectedOption = computed(() => this.options().find((option) => option.value === this.value()));
@@ -77,13 +81,20 @@ export class SearchableAssetSelectComponent {
   });
 
   toggle(): void {
-    this.open.update((open) => !open);
+    SearchableAssetSelectComponent.openSelectId.set(this.open() ? null : this.selectId);
   }
 
   choose(value: string): void {
     this.valueChange.emit(value);
-    this.open.set(false);
+    SearchableAssetSelectComponent.openSelectId.set(null);
     this.query = '';
+  }
+
+  @HostListener('document:click')
+  close(): void {
+    if (this.open()) {
+      SearchableAssetSelectComponent.openSelectId.set(null);
+    }
   }
 
   hideBrokenIcon(event: Event): void {

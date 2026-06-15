@@ -1,15 +1,59 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: fight_league_db
+    container_name: fight-league-postgres
+    restart: unless-stopped
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: fight_league_db
-    ports:
-      - "5432:5432"
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5432:5432"
+    networks:
+      - fight-league-internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+    container_name: fight-league-backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      APP_ASSETS_FIGHTERS_PATH: /app/assets/fighters
+    volumes:
+      - ./assets/fighters:/app/assets/fighters
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - fight-league-internal
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: fight-league-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+    volumes:
+      - ./assets/fighters:/usr/share/nginx/html/assets/fighters:ro
+    networks:
+      - fight-league-internal
 
 volumes:
   postgres_data:
+
+networks:
+  fight-league-internal:

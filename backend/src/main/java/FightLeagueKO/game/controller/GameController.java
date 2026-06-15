@@ -17,12 +17,17 @@ import org.springframework.web.bind.annotation.RestController;
 
 import FightLeagueKO.game.dto.CreateGameDTO;
 import FightLeagueKO.game.dto.RecentGameDTO;
+import FightLeagueKO.game.dto.RecentGameDTO.RecentGameTeamDTO;
 import FightLeagueKO.game.dto.SetTeamsDTO;
 import FightLeagueKO.game.dto.UpdateGameDTO;
 import FightLeagueKO.game.model.Game;
 import FightLeagueKO.game.service.GameService;
 import FightLeagueKO.game.service.IGameService;
+import FightLeagueKO.fighter.model.Fighter;
+import FightLeagueKO.fighter.service.FighterService;
 import FightLeagueKO.security.CurrentUserService;
+import FightLeagueKO.team.model.Team;
+import FightLeagueKO.team.service.TeamService;
 import FightLeagueKO.tournament.model.Tournament;
 import FightLeagueKO.user.service.UserService;
 
@@ -33,12 +38,17 @@ public class GameController {
     private IGameService gameService;
     private CurrentUserService currentUserService;
     private UserService userService;
+    private TeamService teamService;
+    private FighterService fighterService;
 
     @Autowired
-    public GameController(GameService gameService, CurrentUserService currentUserService, UserService userService) {
+    public GameController(GameService gameService, CurrentUserService currentUserService, UserService userService,
+            TeamService teamService, FighterService fighterService) {
         this.gameService = gameService;
         this.currentUserService = currentUserService;
         this.userService = userService;
+        this.teamService = teamService;
+        this.fighterService = fighterService;
     }
 
     @GetMapping("/me/recent")
@@ -111,9 +121,30 @@ public class GameController {
                 userService.findUserEntityById(game.getUser2Id()).getUsername(),
                 game.getTeamUser1Id(),
                 game.getTeamUser2Id(),
+                toRecentGameTeamDTO(game.getTeamUser1Id()),
+                toRecentGameTeamDTO(game.getTeamUser2Id()),
                 game.getWinnerId(),
                 game.getGameDate(),
                 currentUserId.equals(game.getWinnerId()));
+    }
+
+    private RecentGameTeamDTO toRecentGameTeamDTO(UUID teamId) {
+        if (teamId == null) {
+            return null;
+        }
+
+        Team team = teamService.getTeamById(teamId);
+        Fighter pointFighter = fighterService.getFighterById(team.getPointFighterId());
+        Fighter secondFighter = fighterService.getFighterById(team.getSecondFighterId());
+        return new RecentGameTeamDTO(
+                team.getId(),
+                pointFighter.getId(),
+                pointFighter.getName(),
+                pointFighter.getSlug(),
+                secondFighter.getId(),
+                secondFighter.getName(),
+                secondFighter.getSlug(),
+                team.getFuse().name());
     }
 
 }

@@ -1,15 +1,16 @@
-import { AsyncPipe } from '@angular/common';
+import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 
 import { ApiService } from '../core/api.service';
+import { RecentGameTeam } from '../core/api.models';
 import { AuthService } from '../core/auth.service';
-import { FighterAssetType, fighterAsset, fighterPlaceholder } from '../shared/asset-paths';
+import { FighterAssetType, fighterAsset, fighterPlaceholder, fuseAsset } from '../shared/asset-paths';
 
 @Component({
   selector: 'app-home',
-  imports: [AsyncPipe, RouterLink],
+  imports: [AsyncPipe, NgTemplateOutlet, RouterLink],
   template: `
     <section class="hero panel">
       <div>
@@ -56,9 +57,15 @@ import { FighterAssetType, fighterAsset, fighterPlaceholder } from '../shared/as
               @for (game of games; track game.id) {
                 <article class="match" [class.win]="game.wonByCurrentUser" [class.loss]="!game.wonByCurrentUser && game.winnerId">
                   <span class="match-avatar material-symbols-outlined">account_circle</span>
-                  <strong>{{ game.user1Username }}</strong>
+                  <strong class="player-name left">{{ game.user1Username }}</strong>
+                  <div class="team-icons left-team">
+                    <ng-container [ngTemplateOutlet]="teamIcons" [ngTemplateOutletContext]="{ team: game.teamUser1 }" />
+                  </div>
                   <span class="vs-badge">vs</span>
-                  <strong>{{ game.user2Username }}</strong>
+                  <div class="team-icons right-team">
+                    <ng-container [ngTemplateOutlet]="teamIcons" [ngTemplateOutletContext]="{ team: game.teamUser2 }" />
+                  </div>
+                  <strong class="player-name right">{{ game.user2Username }}</strong>
                   <span class="match-avatar material-symbols-outlined">account_circle</span>
                   <small>{{ game.tournamentTitle || 'Friendly game' }} · {{ game.gameDate }}</small>
                 </article>
@@ -87,6 +94,16 @@ import { FighterAssetType, fighterAsset, fighterPlaceholder } from '../shared/as
         </div>
       </section>
     }
+
+    <ng-template #teamIcons let-team="team">
+      @if (team) {
+        <img [src]="fighterAsset(team.pointFighterSlug, 'icon')" [alt]="team.pointFighterName">
+        <img [src]="fighterAsset(team.secondFighterSlug, 'icon')" [alt]="team.secondFighterName">
+        <img class="fuse-icon" [src]="fuseAsset(team.fuse)" [alt]="team.fuse">
+      } @else {
+        <span class="team-placeholder">Team pending</span>
+      }
+    </ng-template>
   `,
   styles: [`
     .hero { align-items: center; background: radial-gradient(circle at 88% 20%, rgba(32,217,100,.28), transparent 32%), linear-gradient(135deg, rgba(0,0,0,.42), rgba(0,28,12,.78)), url('/assets/Backgrounds/Background_Green.webp') center/cover; border: 1px solid rgba(124,255,159,.22); display: flex; gap: 2rem; justify-content: space-between; margin-bottom: .9rem; margin-left: 50%; max-width: 1800px; padding: 1.45rem 2rem; transform: translateX(-50%); width: min(96vw, 1800px); }
@@ -109,15 +126,22 @@ import { FighterAssetType, fighterAsset, fighterPlaceholder } from '../shared/as
     .fighter-card:hover img, .fighter-card:focus-visible img { filter: grayscale(0) brightness(1); transform: scale(1.08); }
     .fighter-card span { font-size: 1rem; font-weight: 900; letter-spacing: .08em; padding: .85rem 1rem 1rem; position: relative; text-align: center; text-transform: uppercase; width: 100%; z-index: 2; }
     .match-list { display: grid; gap: .75rem; margin-top: .75rem; }
-    .match { align-items: center; border-radius: 18px; display: grid; gap: .6rem; grid-template-columns: auto 1fr auto 1fr auto; padding: .85rem 1rem; }
+    .match { align-items: center; border-radius: 18px; display: grid; gap: .6rem; grid-template-columns: auto minmax(110px, 1fr) auto auto auto minmax(110px, 1fr) auto; padding: .85rem 1rem; }
     .match small { grid-column: 1 / -1; opacity: .75; }
     .match-avatar { font-size: 1.6rem; }
+    .player-name.right { text-align: right; }
+    .team-icons { align-items: center; display: flex; gap: .35rem; }
+    .left-team { justify-content: flex-end; }
+    .right-team { justify-content: flex-start; }
+    .team-icons img { background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.16); border-radius: 999px; height: 2rem; object-fit: cover; width: 2rem; }
+    .team-icons .fuse-icon { background: #f4fff8; object-fit: contain; padding: .18rem; }
+    .team-placeholder { color: #c8d3ed; font-size: .72rem; font-weight: 800; opacity: .75; text-transform: uppercase; white-space: nowrap; }
     .vs-badge { background: rgba(255,255,255,.09); border-radius: 999px; font-size: .75rem; font-weight: 800; padding: .25rem .55rem; text-transform: uppercase; }
     .win { background: rgba(96, 255, 162, .16); }
     .loss { background: rgba(255, 96, 96, .16); }
     @media (max-width: 1280px) { .hero, .fighter-showcase { width: min(98vw, 1280px); } }
     @media (max-width: 1100px) { .fighter-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-    @media (max-width: 720px) { .hero { padding: 1.15rem 1.25rem; } .fighter-grid { column-gap: .55rem; grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: .75rem; } .fighter-card { clip-path: polygon(9% 0, 100% 0, 91% 100%, 0 100%); } }
+    @media (max-width: 720px) { .hero { padding: 1.15rem 1.25rem; } .fighter-grid { column-gap: .55rem; grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: .75rem; } .fighter-card { clip-path: polygon(9% 0, 100% 0, 91% 100%, 0 100%); } .match { grid-template-columns: auto 1fr auto; } .team-icons, .vs-badge { grid-column: 1 / -1; justify-content: center; } .player-name.right { text-align: left; } }
   `]
 })
 export class HomeComponent {
@@ -128,6 +152,7 @@ export class HomeComponent {
   );
   readonly recentGames$ = this.api.getRecentGames();
   readonly fighterAsset = fighterAsset;
+  readonly fuseAsset = fuseAsset;
 
   setImageFallback(event: Event, slug: string, type: FighterAssetType): void {
     const image = event.target as HTMLImageElement;
