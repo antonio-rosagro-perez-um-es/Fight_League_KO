@@ -3,6 +3,8 @@ package FightLeagueKO.fighter.service;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import FightLeagueKO.fighter.dto.CreateFighterDTO;
 import FightLeagueKO.fighter.dto.FighterBannerDTO;
 import FightLeagueKO.fighter.dto.FighterDTO;
@@ -21,6 +23,8 @@ public interface IFighterService {
     FighterDTO getFighterDTOById(UUID fighterId);
 
     FighterDTO createFighter(CreateFighterDTO fighterDTO);
+
+    void uploadFighterMedia(UUID fighterId, MultipartFile portrait, MultipartFile banner, MultipartFile icon);
 
     void updateFighter (UUID fighterId, FighterUpdateDTO fighterDTO);
 

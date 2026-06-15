@@ -9,6 +9,7 @@ import { FighterBanner, TournamentGame } from '../core/api.models';
 import { AuthService } from '../core/auth.service';
 import { fighterAsset, fuseAsset } from '../shared/asset-paths';
 import { AssetSelectOption, SearchableAssetSelectComponent } from '../shared/searchable-asset-select.component';
+import { ConfirmDialogComponent } from '../shared/confirm-dialog.component';
 
 type TeamDraft = {
   pointFighterId: string;
@@ -18,13 +19,14 @@ type TeamDraft = {
 
 @Component({
   selector: 'app-tournament-detail',
-  imports: [AsyncPipe, DatePipe, FormsModule, NgTemplateOutlet, RouterLink, SearchableAssetSelectComponent],
+  imports: [AsyncPipe, DatePipe, FormsModule, NgTemplateOutlet, RouterLink, SearchableAssetSelectComponent, ConfirmDialogComponent],
   template: `
     @if (view$ | async; as view) {
       <section class="hero panel">
         <div>
           <p class="eyebrow">{{ view.state }}</p>
           <h1>{{ view.title }}</h1>
+          <p class="host-line">Organizer: {{ view.ownerUsername }}</p>
           <p>Registration closes {{ view.inscriptionCloseDate | date:'mediumDate' }}. Tournament starts {{ view.startDate | date:'mediumDate' }}.</p>
           <p>{{ view.playerCount }}/{{ view.maxPlayers }} players registered.</p>
         </div>
@@ -53,8 +55,9 @@ type TeamDraft = {
             @if (actionError) { <p class="error">{{ actionError }}</p> }
           </div>
           <div class="owner-actions">
+            <button type="button" (click)="openExpandedBracket()">Open expanded bracket</button>
             <button type="button" (click)="closeRegistrations(view.id)" [disabled]="view.state !== 'REGISTRATION'">Close registrations</button>
-            <button type="button" (click)="generateMatchups(view.id)" [disabled]="view.state !== 'WAITING_START' && view.state !== 'IN_PROGRESS'">Generate next round</button>
+            <button type="button" class="danger" (click)="requestCancelTournament(view.id, view.title)">Cancel tournament</button>
           </div>
         </section>
       }
@@ -152,13 +155,23 @@ type TeamDraft = {
                       <ng-container *ngTemplateOutlet="teamFields; context: { draft: team2Draft, fighters: fighters }" />
                     </div>
                   </div>
-                  <button type="button" (click)="assignTeams(selectedGame.id)" [disabled]="!teamDraftValid(team1Draft) || !teamDraftValid(team2Draft)">Save teams</button>
+                  <button type="button" class="save-teams" (click)="assignTeams(selectedGame.id)" [disabled]="!teamDraftValid(team1Draft) || !teamDraftValid(team2Draft)">Save teams</button>
                 </section>
               }
             }
           </div>
         </div>
       }
+    }
+
+    @if (confirmCancel) {
+      <app-confirm-dialog
+        [title]="confirmCancel.title"
+        [message]="confirmCancel.message"
+        confirmLabel="Cancel tournament"
+        (confirmed)="confirmCancelAction()"
+        (cancelled)="cancelTournamentDelete()"
+      />
     }
 
     <ng-template #teamFields let-draft="draft" let-fighters="fighters">
@@ -194,6 +207,7 @@ type TeamDraft = {
   styles: [`
     .hero { align-items: center; display: grid; gap: 2rem; grid-template-columns: 1fr 220px; margin-bottom: 1rem; }
     h1 { font-size: clamp(2rem, 6vw, 4rem); margin: .4rem 0 1rem; text-transform: uppercase; }
+    .host-line { color: #7cff9f; font-weight: 850; margin-top: -0.35rem; }
     h2 { margin: 0; }
     .join-card { background: linear-gradient(135deg, rgba(0,0,0,.5), rgba(0,34,14,.74)), url('/assets/Backgrounds/Background_Green.webp') center/cover; border: 1px solid rgba(124,255,159,.22); border-radius: 22px; display: grid; gap: .65rem; padding: 1.25rem; text-align: center; }
     .join-card strong { font-size: 3rem; }
@@ -203,12 +217,13 @@ type TeamDraft = {
     .owner-note { color: #7cff9f; font-weight: 700; }
     .owner-panel { align-items: center; display: flex; gap: 1rem; justify-content: space-between; margin-bottom: 1rem; }
     .owner-actions, .winner-actions { display: flex; flex-wrap: wrap; gap: .5rem; }
-    .columns { display: grid; gap: 1rem; grid-template-columns: minmax(0, 1.4fr) minmax(280px, .6fr); }
+    .danger { background: #c7343f; }
+    .columns { display: grid; gap: 1rem; grid-template-columns: minmax(0, 2fr) minmax(280px, .55fr); margin-left: calc(50% - 46vw); margin-right: calc(50% - 46vw); }
     .panel-heading { align-items: center; display: flex; justify-content: space-between; margin-bottom: 1rem; }
     .panel-heading span { color: #c8d3ed; font-size: .9rem; }
     .bracket-scroll { overflow-x: auto; padding-bottom: .5rem; }
     .bracket-grid { align-items: start; display: flex; gap: 1rem; min-width: max-content; }
-    .round-column { display: grid; gap: .85rem; min-width: 230px; }
+    .round-column { display: grid; gap: .85rem; min-width: 270px; }
     .round-column h3 { color: #7cff9f; font-size: .85rem; letter-spacing: .08em; margin: 0; text-transform: uppercase; }
     .match-card { background: linear-gradient(150deg, rgba(0,0,0,.58), rgba(10,36,18,.76)), url('/assets/Backgrounds/Background_Green.webp') center/cover; border: 1px solid rgba(255,255,255,.12); border-radius: 16px; display: grid; gap: .45rem; min-height: 150px; padding: 1rem; position: relative; text-align: left; }
     .match-card::after { background: linear-gradient(180deg, rgba(124,255,159,.5), transparent); bottom: -1rem; content: ''; position: absolute; right: -0.55rem; top: 50%; width: 1px; }
@@ -231,10 +246,11 @@ type TeamDraft = {
     .winner-box { background: rgba(120,255,176,.1); border: 1px solid rgba(120,255,176,.18); border-radius: 18px; display: grid; gap: .25rem; margin-bottom: 1rem; padding: 1rem; }
     .winner-box span { color: #c8d3ed; }
     .team-editor { border-top: 1px solid rgba(255,255,255,.1); margin-top: 1rem; padding-top: 1rem; }
+    .save-teams { min-height: 2.75rem; padding: .55rem 1rem; }
     .team-grid { display: grid; gap: 1rem; grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 1rem 0; }
     label { color: #c8d3ed; display: grid; gap: .35rem; margin-bottom: .65rem; }
     .error { color: #ff8a8a; }
-    @media (max-width: 820px) { .hero, .columns, .team-grid { grid-template-columns: 1fr; } .owner-panel, .panel-heading { align-items: stretch; flex-direction: column; } }
+    @media (max-width: 820px) { .hero, .columns, .team-grid { grid-template-columns: 1fr; } .columns { margin-left: 0; margin-right: 0; } .owner-panel, .panel-heading { align-items: stretch; flex-direction: column; } }
   `]
 })
 export class TournamentDetailComponent {
@@ -251,6 +267,7 @@ export class TournamentDetailComponent {
   }));
   readonly fighters$ = this.api.getFighterBanners();
   actionError = '';
+  confirmCancel: { title: string; message: string; action: () => void } | null = null;
   selectedGame: TournamentGame | null = null;
   team1Draft: TeamDraft = this.emptyTeamDraft();
   team2Draft: TeamDraft = this.emptyTeamDraft();
@@ -279,6 +296,32 @@ export class TournamentDetailComponent {
 
   generateMatchups(id: string): void {
     this.runAction(() => this.api.generateTournamentMatchups(id));
+  }
+
+  requestCancelTournament(id: string, title: string): void {
+    this.confirmCancel = {
+      title: `Cancel tournament ${title}?`,
+      message: 'This tournament will be deactivated and removed from normal lists.',
+      action: () => this.deleteTournament(id),
+    };
+  }
+
+  confirmCancelAction(): void {
+    const action = this.confirmCancel?.action;
+    this.confirmCancel = null;
+    action?.();
+  }
+
+  cancelTournamentDelete(): void {
+    this.confirmCancel = null;
+  }
+
+  private deleteTournament(id: string): void {
+    this.runAction(() => this.api.deleteTournament(id));
+  }
+
+  openExpandedBracket(): void {
+    document.querySelector('.bracket-panel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   setWinner(gameId: string, userId: string): void {

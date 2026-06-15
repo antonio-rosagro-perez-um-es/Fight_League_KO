@@ -435,6 +435,7 @@ public class TournamentService implements ITournamentService {
         return new TournamentViewDTO(
                 tournament.getId(),
                 tournament.getUserOwnerId(),
+                userService.findUserEntityById(tournament.getUserOwnerId()).getUsername(),
                 tournament.getTitle(),
                 tournament.getTournamentState(),
                 tournament.getMaxPlayers(),

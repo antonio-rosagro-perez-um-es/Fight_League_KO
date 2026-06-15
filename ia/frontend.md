@@ -4,11 +4,11 @@ Frontend development uses Angular 19, Material Symbols for icons, and TypeScript
 
 The application is a platform where users can view official fighter combos from 2XKO, organize community tournaments, and save, publish, and share combos. The required views are described in the following sections.
 
-> **Project context:** See `AGENTS.md` for the overall architecture, `ia/spring-security.md` for role permissions, and root `pending.md` for missing asset tracking. The frontend is already scaffolded: 21 page components exist under `frontend/src/app/pages/`, with routing, core services (`api.service.ts`, `auth.service.ts`), and the shared `combo-notation.component.ts`.
+> **Project context:** See `AGENTS.md` for the overall architecture and `ia/spring-security.md` for role permissions. The frontend is already scaffolded under `frontend/src/app/`, with routing, core services (`api.service.ts`, `auth.service.ts`), and shared UI such as `combo-notation.component.ts`.
 
 Use the `frontend/` folder for development. Use `npx autoskills` to install the necessary skills.
 
-Store multimedia content using a maintainable file structure so it can be reused later. If multimedia content cannot be obtained, leave the intended paths in the implementation and document every missing asset, pending operation, or broken link in `pending.md`.
+Store multimedia content using a maintainable file structure so it can be reused later. If multimedia content cannot be obtained, leave the intended paths in the implementation and document the missing asset in the relevant task or project note requested by the user. There is no maintained root pending tracker at this time.
 
 Create commits during development only when useful for saving coherent progress. Use concise, descriptive commit messages such as `add`, `create`, `fix`, or `refactor` followed by the affected feature.
 
@@ -186,7 +186,11 @@ Show a read-only admin statistics dashboard using the existing ranking/stat endp
 2. The global fighters with the best win rate.
 3. The global teams with the best win rate.
 
-Use a style inspired by <https://2xkombo.gg/characters>. Show the top 10 entries in each section.
+Use a style inspired by <https://2xkombo.gg/characters>. The Statistics page uses a widened responsive layout for both registered and unregistered users. For registered users, the personal statistics strip should fit on one desktop row without overflowing, including ranking points.
+
+The global fighter section shows the top 12 fighters. On desktop, display exactly four fighter cards per row, with responsive fallbacks for tablet and mobile. Each fighter card uses the fighter portrait asset as a full-card blurred background. The ranking position and fighter name are positioned at the top of the card. Win rate is the primary highlighted metric and should be larger than the other text, using a greenish-yellow color. Also display times played, wins, and losses with readable label/counter typography.
+
+The global team section remains a top ranking list using the team ranking endpoint. Fuse icons in team cards should use a white background for contrast.
 
 **Backend:** `GET /fighters/ranking` returns `List<FighterStatsDTO>` (includes `winRate`). `GET /teams/ranking` returns `List<TeamStatsDTO>`.
 
@@ -305,7 +309,7 @@ Use the same admin table layout as Fighters. See `ComboController.java`. Delete 
 
 This view is inspired by <https://2xkombo.gg/> but uses the search and filter endpoints from `ComboController.java`.
 
-**Creating a combo:** By default, a new combo is created as private. Only public combos appear in the community view. Next to the upload combo button, add a toggle button for viewing private combos owned by the current user. The same button toggles back to public combos. In private view, users can perform allowed actions on their own combos: edit, delete, and change visibility. Delete actions use a red destructive style and must open a confirmation floating modal before calling the backend.
+**Creating a combo:** By default, a new combo is created as private. Combo creation is available only from `My Combos`; the public community view is for browsing, filtering, voting, and opening combo media. The header toggle switches between public community combos and private/owned combos. In `My Combos`, users can create combos and perform allowed actions on their own combos: edit, delete, and change visibility. Delete actions use a red destructive style and must open a confirmation floating modal before calling the backend.
 
 **Combo creation fields:**
 
@@ -322,15 +326,17 @@ This view is inspired by <https://2xkombo.gg/> but uses the search and filter en
 
 The fighter and fuse fields are searchable asset dropdowns populated with predefined names and IDs matching what the backend expects. Fighter options use `assets/fighters/{slug}/{slug}_icon.webp`; fuse options use `assets/fuses/` icons.
 
-**Filtering and pagination:** Users can apply filters as dropdown menus in the view. See `POST /combos/search` via `ComboFiltersDTO`. Community combo search uses backend pagination with a default page size of 10 combos and frontend previous/next pagination controls.
+**Filtering and pagination:** Users can apply filters as dropdown menus in the view. See `POST /combos/search` via `ComboFiltersDTO`. Community combo search uses backend pagination with a default page size of 10 combos and frontend previous/next pagination controls. Sorting options are `Latest` and `Most liked`; there is no default sort button in the UI.
 
 **Voting:** Users can like or dislike combos. See `PATCH /combos/{comboId}/vote?voteType=LIKE|DISLIKE` and `PATCH /combos/{comboId}/unvote`.
 
-**Notation rendering and validation:** Any displayed combo should be translated from text notation to control glyph images from `assets/controls/` when available. Notation blocks default to image notation and include a per-block toggle to show the original text notation. Combo create/edit forms include a `?` helper tooltip explaining accepted syntax. Strict validation accepts numpad directions `1`-`9`, attacks `L`, `M`, `H`, `T`, `S1`, `S2`, repeat counts such as `5H(2)`, air notation such as `j.M` and `j.2HH`, modifiers `air`, `jump`, `jc`, `dash`, `microdash`, `walk`, `hold`, `delay`, `delayed`, `assist`, and `cancel`, plus separators `>` for next, `+` for together, comma for pause, and `/` for alternative. Direction word aliases, motion notation such as `236H`, and free-text move names are rejected in create/edit forms; existing invalid saved notation displays as invalid text chips instead of breaking the page.
+**Media:** Community combo cards use a compact card/list layout. Each card includes a `Media` button beside the damage badge. Pressing it opens a media-only modal. YouTube URLs embed when possible; non-embeddable URLs fall back to an external `Open media` link.
+
+**Notation rendering and validation:** Any displayed combo should be translated from text notation to control glyph images from `assets/controls/` when available. Notation blocks default to image notation and include a per-block toggle to show the original text notation. Combo create/edit forms include a `?` helper tooltip explaining accepted syntax. Strict validation accepts numpad directions `1`-`9`, attacks `L`, `M`, `H`, `T`, `S1`, `S2`, repeat counts such as `5H(2)`, air notation such as `j.M` and `j.2HH`, modifiers `air`, `jump`, `jc`, `dash`, `microdash`, `walk`, `hold`, `delay`, `delayed`, `assist`, and `cancel`, plus separators `>` for next, `+` for together, comma for pause, and `/` for alternative. The `dash` modifier renders as the forward-advance glyph at `assets/controls/Glyph-forward_forward.svg` instead of a text label. Direction word aliases, motion notation such as `236H`, and free-text move names are rejected in create/edit forms; existing invalid saved notation displays as invalid text chips instead of breaking the page.
 
 ![alt text](img/image_2.png)
 
-**Frontend:** `community-combos.component.ts` handles the list, create, and edit views. `combo-notation.component.ts` handles text-to-image notation rendering. Fighter image asset paths follow `assets/fighters/{slug}/{slug}_portrait.webp` (see `pending.md` for missing or misnamed assets).
+**Frontend:** `community-combos.component.ts` handles the public list, `My Combos`, create/edit modal, media-only modal, voting, filtering, and visibility actions. `combo-notation.component.ts` handles text-to-image notation rendering. Fighter image asset paths follow `assets/fighters/{slug}/{slug}_portrait.webp`.
 
 **Combo endpoints reference:**
 
@@ -396,12 +402,12 @@ assets/fighters/akali/akali_banner.webp
 assets/fighters/akali/akali_icon.webp
 ```
 
-If an asset is missing or cannot be obtained, keep the expected path in the implementation and document the missing file in root `pending.md`.
+If an asset is missing or cannot be obtained, keep the expected path in the implementation and document the missing file in the relevant task or project note requested by the user.
 
 Fuse icons are also stored under the root `assets/` folder and are served through the same Angular asset pipeline. Use the naming convention from `FuseType` display names, such as `assets/fuses/Double_Down.svg`, `assets/fuses/2X_Assist.svg`, `assets/fuses/Freestyle.svg`, `assets/fuses/Juggernaut.svg`, and `assets/fuses/Sidekick.svg`.
 
 Background images are stored under `assets/Backgrounds/` and are served through the same Angular asset pipeline. Prefer the `.webp` versions for UI backgrounds. The current visual scheme uses `Background_Green.webp` as the main app/home/combo background treatment, with `Background_Blue.webp` and `Background_Purple.webp` used selectively for tournament surfaces and modals.
 
-### Remaining Media UI Work
+### Media UI State
 
-Admin fighter management still needs dedicated media update controls for banner, portrait, and icon assets. Track this in root `pending.md` until the upload/replacement workflow is implemented.
+Admin fighter management supports create/edit/view modal workflows and media upload fields for portrait, banner, and icon assets.

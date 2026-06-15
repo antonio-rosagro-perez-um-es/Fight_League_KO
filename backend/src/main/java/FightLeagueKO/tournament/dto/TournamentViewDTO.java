@@ -8,6 +8,7 @@ import FightLeagueKO.tournament.enums.TournamentStates;
 public record TournamentViewDTO(
     UUID id,
     UUID ownerId,
+    String ownerUsername,
     String title,
     TournamentStates state,
     int maxPlayers,

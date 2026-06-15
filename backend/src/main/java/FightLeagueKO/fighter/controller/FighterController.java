@@ -12,8 +12,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import FightLeagueKO.fighter.dto.FighterBannerDTO;
 import FightLeagueKO.fighter.dto.FighterDTO;
@@ -55,6 +57,16 @@ public class FighterController {
         FighterDTO created = fightersService.createFighter(fighterDTO);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    }
+
+    @PostMapping(value = "/{id}/media", consumes = "multipart/form-data")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void uploadFighterMedia(
+            @PathVariable UUID id,
+            @RequestParam(value = "portrait", required = false) MultipartFile portrait,
+            @RequestParam(value = "banner", required = false) MultipartFile banner,
+            @RequestParam(value = "icon", required = false) MultipartFile icon) {
+        fightersService.uploadFighterMedia(id, portrait, banner, icon);
     }
 
     @PatchMapping("/{id}")

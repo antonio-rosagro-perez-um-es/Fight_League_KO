@@ -1,6 +1,7 @@
 import { AsyncPipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { RouterLink } from '@angular/router';
 import { BehaviorSubject, combineLatest, map, shareReplay, switchMap } from 'rxjs';
 
@@ -27,9 +28,11 @@ import { AssetSelectOption, SearchableAssetSelectComponent } from '../shared/sea
     } @else {
       <p class="eyebrow">Lab notes</p>
       <div class="page-heading">
-        <h1>Community Combos</h1>
+        <h1>{{ viewMode === 'my-combos' ? 'My Combos' : 'Community Combos' }}</h1>
         <div class="page-actions">
-          <button type="button" (click)="startCreate()">Create combo</button>
+          @if (viewMode === 'my-combos') {
+            <button type="button" (click)="startCreate()">Create combo</button>
+          }
           <button type="button" class="view-toggle" [class.active]="viewMode === 'my-combos'" (click)="toggleViewMode()">
             {{ viewMode === 'my-combos' ? 'Community combos' : 'My combos' }}
           </button>
@@ -68,7 +71,6 @@ import { AssetSelectOption, SearchableAssetSelectComponent } from '../shared/sea
         <div class="filter-buttons">
           <button type="button" [class.active]="sortMode === 'latest'" (click)="setSort('latest')">Latest</button>
           <button type="button" [class.active]="sortMode === 'popular'" (click)="setSort('popular')">Most liked</button>
-          <button type="button" [class.active]="sortMode === 'default'" (click)="setSort('default')">Default</button>
         </div>
       </section>
 
@@ -83,7 +85,10 @@ import { AssetSelectOption, SearchableAssetSelectComponent } from '../shared/sea
                     <h2>{{ combo.title }}</h2>
                     <span>{{ combo.pointFighterName }} @if (combo.secondFighterName) { / {{ combo.secondFighterName }} }</span>
                   </div>
-                  <div class="damage">{{ combo.damage }} dmg</div>
+                  <div class="combo-side-actions">
+                    <button type="button" class="media-button" (click)="openMedia(combo)">Media</button>
+                    <div class="damage">{{ combo.damage }} dmg</div>
+                  </div>
                 </div>
                 <app-combo-notation [notation]="combo.textNotation" />
                 <p>{{ combo.description }}</p>
@@ -129,7 +134,8 @@ import { AssetSelectOption, SearchableAssetSelectComponent } from '../shared/sea
             </div>
             <form [formGroup]="form" (ngSubmit)="saveCombo()">
             <label>Title <input formControlName="title"></label>
-            <label>Point fighter
+            <div class="field-block">
+              <span>Point fighter</span>
               @if (fighters$ | async; as fighters) {
                 <app-searchable-asset-select
                   [options]="fighterOptions(fighters)"
@@ -139,8 +145,9 @@ import { AssetSelectOption, SearchableAssetSelectComponent } from '../shared/sea
                   (valueChange)="form.controls.pointFighter.setValue($event); form.controls.pointFighter.markAsTouched()"
                 />
               }
-            </label>
-            <label>Second fighter
+            </div>
+            <div class="field-block">
+              <span>Second fighter</span>
               @if (fighters$ | async; as fighters) {
                 <app-searchable-asset-select
                   [options]="fighterOptions(fighters)"
@@ -152,23 +159,25 @@ import { AssetSelectOption, SearchableAssetSelectComponent } from '../shared/sea
                   (valueChange)="form.controls.secondFighter.setValue($event); form.controls.secondFighter.markAsTouched()"
                 />
               }
-            </label>
-            <label>
+            </div>
+            <div class="field-block">
               <span class="label-with-help">
-                Notation
-                <button type="button" class="help-trigger" aria-label="Show combo notation help">?</button>
-                <span class="notation-help" role="tooltip">
-                  <strong>Combo notation help</strong>
-                  <span>Use numpad directions: 7 8 9 / 4 5 6 / 1 2 3.</span>
-                  <span>Attacks: L, M, H, T, S1, S2.</span>
-                  <span>Examples: 5L &gt; 5M &gt; 2H &gt; j.S2, 5H(2), j.2HH.</span>
-                  <span>Modifiers: air, jump, jc, dash, microdash, walk, hold, delay, delayed, assist, cancel.</span>
-                  <span>Separators: &gt; = next, + = together, comma = pause, / = alternative.</span>
-                  <span>Not allowed: left/right/dl/dr, 236H, Super, free text.</span>
+                <span>Notation</span>
+                <span class="help-area">
+                  <button type="button" class="help-trigger" aria-label="Show combo notation help">?</button>
+                  <span class="notation-help" role="tooltip">
+                    <strong>Combo notation help</strong>
+                    <span>Use numpad directions: 7 8 9 / 4 5 6 / 1 2 3.</span>
+                    <span>Attacks: L, M, H, T, S1, S2.</span>
+                    <span>Examples: 5L &gt; 5M &gt; 2H &gt; j.S2, 5H(2), j.2HH.</span>
+                    <span>Modifiers: air, jump, jc, dash, microdash, walk, hold, delay, delayed, assist, cancel.</span>
+                    <span>Separators: &gt; = next, + = together, comma = pause, / = alternative.</span>
+                    <span>Not allowed: left/right/dl/dr, 236H, Super, free text.</span>
+                  </span>
                 </span>
               </span>
               <input formControlName="textNotation" placeholder="5L > 5M > 2H > j.S2">
-            </label>
+            </div>
             @if (notationErrors.length) {
               <p class="field-error">{{ notationErrors[0] }}</p>
             }
@@ -181,7 +190,8 @@ import { AssetSelectOption, SearchableAssetSelectComponent } from '../shared/sea
                   <option value="ADVANCED">Advanced</option>
                 </select>
               </label>
-              <label>Fuse
+              <div class="field-block">
+                <span>Fuse</span>
                 <app-searchable-asset-select
                   [options]="fuseOptions"
                   [value]="form.controls.fuse.value || ''"
@@ -189,7 +199,7 @@ import { AssetSelectOption, SearchableAssetSelectComponent } from '../shared/sea
                   searchPlaceholder="Search fuses"
                   (valueChange)="form.controls.fuse.setValue($event); form.controls.fuse.markAsTouched()"
                 />
-              </label>
+              </div>
               <label>Meter <input formControlName="metercost" type="number" min="0"></label>
               <label>Damage <input formControlName="damage" type="number" min="0"></label>
             </div>
@@ -197,6 +207,29 @@ import { AssetSelectOption, SearchableAssetSelectComponent } from '../shared/sea
             @if (error) { <p class="error">{{ error }}</p> }
             <button type="submit" [disabled]="form.invalid">{{ editingId ? 'Save combo' : 'Publish private combo' }}</button>
           </form>
+          </div>
+        </div>
+      }
+
+      @if (mediaCombo) {
+        <div class="modal-overlay" (click)="closeMedia()">
+          <div class="media-modal-content" (click)="$event.stopPropagation()">
+            <div class="media-modal-heading">
+              <h2>{{ mediaCombo.title }} media</h2>
+              <button type="button" class="ghost" (click)="closeMedia()">Close</button>
+            </div>
+            <div class="combo-video-card">
+              @if (youtubeEmbedUrl(mediaCombo.mediaUrl); as videoUrl) {
+                <iframe [src]="videoUrl" title="Community combo video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+              } @else {
+                <div class="media-fallback">
+                  <span>No embeddable YouTube preview available.</span>
+                  @if (mediaCombo.mediaUrl) {
+                    <a [href]="mediaCombo.mediaUrl" target="_blank" rel="noopener">Open media</a>
+                  }
+                </div>
+              }
+            </div>
           </div>
         </div>
       }
@@ -215,18 +248,23 @@ import { AssetSelectOption, SearchableAssetSelectComponent } from '../shared/sea
   styles: [`
     .page-heading { align-items: center; display: flex; gap: 1rem; justify-content: space-between; margin-bottom: 1.5rem; }
     h1 { font-size: clamp(2rem, 6vw, 4rem); margin: .4rem 0 0; text-transform: uppercase; }
-    .page-actions { display: flex; flex-wrap: wrap; gap: .6rem; justify-content: flex-end; }
+    .page-actions { align-items: center; display: flex; flex-direction: row; flex-wrap: wrap; gap: .6rem; justify-content: flex-end; }
+    .page-actions button { white-space: nowrap; }
     .filters { display: flex; flex-direction: column; gap: .7rem; margin-bottom: 1rem; }
     .filter-group { display: flex; flex-wrap: wrap; gap: .7rem; }
     .filter-group select { background: rgba(255,255,255,.09); border: 1px solid rgba(255,255,255,.18); border-radius: 999px; color: white; cursor: pointer; padding: .55rem .85rem; }
     .filter-group option { color: #001f0b; }
     .filter-buttons { display: flex; flex-wrap: wrap; gap: .5rem; }
-    .view-toggle.active { background: rgba(255,255,255,.22); color: #fff; }
+    .page-actions button:not(.view-toggle) { background: linear-gradient(135deg, #d8ff65, #20d964); border-color: rgba(216,255,101,.72); box-shadow: 0 8px 20px rgba(143,220,46,.22); color: #102006; font-weight: 950; }
+    .view-toggle { background: linear-gradient(135deg, #c7f443, #8fdc2e); border-color: rgba(216,255,101,.72); box-shadow: 0 8px 20px rgba(143,220,46,.22); color: #102006; font-weight: 950; }
+    .view-toggle.active { background: #35f28f; border-color: rgba(124,255,159,.82); color: #06120a; }
+    .page-actions button:hover, .page-actions button:focus-visible { filter: brightness(1.08); outline: none; transform: translateY(-1px); }
     .layout { display: grid; gap: 1rem; }
     form { display: grid; gap: .85rem; }
     .form-heading { align-items: center; display: flex; gap: 1rem; justify-content: space-between; }
-    label { color: #c8d3ed; display: grid; gap: .35rem; }
-    .label-with-help { align-items: center; display: inline-flex; gap: .4rem; position: relative; width: fit-content; }
+    label, .field-block { color: #c8d3ed; display: grid; gap: .35rem; }
+    .label-with-help { align-items: center; display: inline-flex; gap: .4rem; width: fit-content; }
+    .help-area { display: inline-flex; position: relative; }
     .help-trigger { align-items: center; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.24); border-radius: 999px; color: #7cff9f; display: inline-flex; font-size: .72rem; font-weight: 950; height: 1.25rem; justify-content: center; line-height: 1; padding: 0; width: 1.25rem; }
     .notation-help { background: #001f0b; border: 1px solid rgba(124,255,159,.55); border-radius: 12px; box-shadow: 0 18px 45px rgba(0,0,0,.4); color: #eef2ff; display: grid; font-size: .78rem; gap: .35rem; left: 100%; line-height: 1.35; margin-left: .55rem; max-width: min(340px, 78vw); opacity: 0; padding: .8rem; pointer-events: none; position: absolute; top: 50%; transform: translateY(-50%); transition: opacity .15s ease; width: max-content; z-index: 5; }
     .notation-help strong { color: #7cff9f; }
@@ -243,7 +281,13 @@ import { AssetSelectOption, SearchableAssetSelectComponent } from '../shared/sea
     .combo-card { background: linear-gradient(135deg, rgba(0,0,0,.64), rgba(0,29,12,.82)), url('/assets/Backgrounds/Background_Green.webp') center/cover; display: grid; gap: 1rem; }
     .combo-header { align-items: start; display: flex; gap: 1rem; justify-content: space-between; }
     .combo-header h2 { margin: .2rem 0; }
+    .combo-side-actions { align-items: center; display: flex; flex-wrap: wrap; gap: .55rem; justify-content: flex-end; }
+    .media-button { background: rgba(255,255,255,.12); border-color: rgba(124,255,159,.3); color: #7cff9f; font-weight: 850; }
     .damage { background: rgba(124,255,159,.16); border-radius: 16px; color: #7cff9f; font-weight: 900; padding: .8rem; white-space: nowrap; }
+    .combo-video-card { aspect-ratio: 16 / 9; background: #050814; border: 1px solid rgba(255,255,255,.12); border-radius: 18px; overflow: hidden; }
+    .combo-video-card iframe { border: 0; display: block; height: 100%; width: 100%; }
+    .media-fallback { align-items: center; color: #c8d3ed; display: grid; gap: .75rem; height: 100%; justify-items: center; padding: 1rem; text-align: center; }
+    .media-fallback a { background: #20d964; border-radius: 999px; color: white; font-weight: 800; padding: .65rem .9rem; text-decoration: none; }
     .actions { display: flex; flex-wrap: wrap; gap: .6rem; }
     .pagination { align-items: center; display: flex; flex-wrap: wrap; gap: .75rem; justify-content: center; }
     .pagination span { color: #cfe9d6; font-weight: 700; }
@@ -252,12 +296,17 @@ import { AssetSelectOption, SearchableAssetSelectComponent } from '../shared/sea
     .empty-state a { color: #7cff9f; display: inline-block; margin: .75rem .4rem 0; }
     .modal-overlay { align-items: center; background: rgba(0,0,0,.62); display: flex; inset: 0; justify-content: center; position: fixed; z-index: 100; }
     .modal-content { background: #06120a; border: 1px solid rgba(255,255,255,.12); border-radius: 20px; max-height: 86vh; max-width: 760px; overflow-y: auto; padding: 1.35rem; width: 92vw; }
+    .media-modal-content { background: #06120a; border: 1px solid rgba(255,255,255,.12); border-radius: 20px; max-width: 960px; padding: 1rem; width: 92vw; }
+    .media-modal-heading { align-items: center; display: flex; gap: 1rem; justify-content: space-between; margin-bottom: .85rem; }
+    .media-modal-heading h2 { margin: 0; }
     @media (max-width: 920px) { .page-heading { align-items: stretch; flex-direction: column; } .page-actions { justify-content: flex-start; } .notation-help { left: 0; margin-left: 0; top: 100%; transform: translateY(.45rem); } }
+    @media (max-width: 560px) { .combo-header { align-items: stretch; flex-direction: column; } .combo-side-actions { justify-content: flex-start; } .two-col { grid-template-columns: 1fr; } }
   `]
 })
 export class CommunityCombosComponent {
   private readonly api = inject(ApiService);
   private readonly fb = inject(FormBuilder);
+  private readonly sanitizer = inject(DomSanitizer);
   readonly auth = inject(AuthService);
   readonly fighters$ = this.api.getFighterBanners();
   readonly fuseOptions = ['DOUBLE_DOWN', 'FREESTYLE', 'TWO_X_ASSIST', 'JUGGERNAUT', 'SIDEKICK'].map((fuse) => ({
@@ -272,7 +321,8 @@ export class CommunityCombosComponent {
   readonly viewMode$ = new BehaviorSubject<'public' | 'my-combos'>('public');
   viewMode: 'public' | 'my-combos' = 'public';
 
-  sortMode: 'latest' | 'popular' | 'default' = 'latest';
+  sortMode: 'latest' | 'popular' = 'latest';
+  mediaCombo: Combo | null = null;
   editingId: string | null = null;
   error = '';
   showFormModal = false;
@@ -321,7 +371,7 @@ export class CommunityCombosComponent {
     this.filters$.next({ ...current, [key]: value || null });
   }
 
-  setSort(sort: 'latest' | 'popular' | 'default'): void {
+  setSort(sort: 'latest' | 'popular'): void {
     this.sortMode = sort;
     const current = this.filters$.value;
     this.publicPage$.next(0);
@@ -476,6 +526,19 @@ export class CommunityCombosComponent {
     });
   }
 
+  openMedia(combo: Combo): void {
+    this.mediaCombo = combo;
+  }
+
+  closeMedia(): void {
+    this.mediaCombo = null;
+  }
+
+  youtubeEmbedUrl(mediaUrl: string): SafeResourceUrl | null {
+    const videoId = this.youtubeVideoId(mediaUrl);
+    return videoId ? this.sanitizer.bypassSecurityTrustResourceUrl(`https://www.youtube.com/embed/${videoId}`) : null;
+  }
+
   fighterOptions(fighters: FighterBanner[]): AssetSelectOption[] {
     return fighters.map((fighter) => ({
       value: fighter.id,
@@ -491,5 +554,34 @@ export class CommunityCombosComponent {
       .map((part) => part === 'x' ? 'X' : part.charAt(0).toUpperCase() + part.slice(1))
       .join(' ')
       .replace('Two X Assist', '2X Assist');
+  }
+
+  private youtubeVideoId(mediaUrl: string): string | null {
+    if (!mediaUrl) {
+      return null;
+    }
+
+    try {
+      const url = new URL(mediaUrl);
+      const host = url.hostname.replace(/^www\./, '');
+      if (host === 'youtu.be') {
+        return this.cleanYoutubeId(url.pathname.slice(1));
+      }
+      if (host === 'youtube.com' || host === 'm.youtube.com') {
+        if (url.pathname.startsWith('/embed/')) {
+          return this.cleanYoutubeId(url.pathname.split('/')[2]);
+        }
+        return this.cleanYoutubeId(url.searchParams.get('v') || '');
+      }
+    } catch {
+      return null;
+    }
+
+    return null;
+  }
+
+  private cleanYoutubeId(value: string): string | null {
+    const id = value.split(/[?&#/]/)[0];
+    return /^[\w-]{11}$/.test(id) ? id : null;
   }
 }

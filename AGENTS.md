@@ -86,9 +86,17 @@ Angular frontend is scaffolded and implemented under `frontend/`.
 - Community combo CRUD, filters, visibility, voting, searchable fighter/fuse asset dropdowns, and control glyph notation rendering
 - Admin management for combos, users, games, teams, and tournaments
 
-### Pending Frontend Work
+### Current Frontend State
 
-Root `pending.md` is the canonical tracker for missing media assets, features limited by missing media, and partial frontend features. Keep detailed pending lists there instead of duplicating them in this file.
+- Community combos use a card/list layout with filters, `Latest` and `Most liked` sorting, voting, owner edit/delete actions, and private/public visibility toggles.
+- Community combo creation is available only from `My Combos`; public community browsing is for discovery, voting, and filtering.
+- Community combo cards include a `Media` button that opens a media-only modal. YouTube URLs embed when possible and other URLs fall back to an external media link.
+- Combo notation rendering supports control glyphs and validates note tokens such as `hold` without splitting them into attack inputs.
+- Admin fighter management uses a shared create/edit/view modal, with view mode rendered read-only.
+- Admin combo creation/editing uses a modal form.
+- Registered-user home recent matches display assigned team fighter icons and fuse icons when team data is available.
+- Tournament list and detail views display the tournament owner username.
+- There is no maintained root pending tracker at this time. Document future pending work in the relevant task or project note requested by the user.
 
 ## Tech Stack
 

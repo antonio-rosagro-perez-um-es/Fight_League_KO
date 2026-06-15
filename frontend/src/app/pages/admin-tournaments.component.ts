@@ -63,8 +63,8 @@ import { ConfirmDialogComponent } from '../shared/confirm-dialog.component';
                 <td>
                   <div class="row-actions">
                     <button type="button" (click)="startEdit(tournament)" [disabled]="tournament.state !== 'REGISTRATION'">Edit</button>
-                    <button type="button" (click)="closeRegistrations(tournament.id)" [disabled]="tournament.state !== 'REGISTRATION'">Close</button>
                     <button type="button" (click)="generate(tournament.id)" [disabled]="tournament.state !== 'WAITING_START' && tournament.state !== 'IN_PROGRESS'">Generate</button>
+                    <button type="button" (click)="closeRegistrations(tournament.id)" [disabled]="tournament.state !== 'REGISTRATION'">Close</button>
                     @if (tournament.deleted) {
                       <button type="button" (click)="restore(tournament.id)">Restore</button>
                     } @else {
