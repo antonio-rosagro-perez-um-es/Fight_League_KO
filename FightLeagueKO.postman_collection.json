@@ -1,0 +1,213 @@
+{
+	"info": {
+		"_postman_id": "e33459c7-9ee7-4938-8d1a-c6c9a5214adf",
+		"name": "FightLeagueKO",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "35057696",
+		"_collection_link": "https://arso11.postman.co/workspace/ArSo-Workspace~55d4a145-b69f-4f78-b5fa-b17a2aed0a07/collection/35057696-e33459c7-9ee7-4938-8d1a-c6c9a5214adf?action=share&source=collection_link&creator=35057696"
+	},
+	"item": [
+		{
+			"name": "Character",
+			"item": [
+				{
+					"name": "checkHealth",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/characters/health",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"characters",
+								"health"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getCharacterById",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/characters/81f7bdad-5b13-4031-b9cb-cf542930ae8a",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"characters",
+								"81f7bdad-5b13-4031-b9cb-cf542930ae8a"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAllCharacters",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/characters/all",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"characters",
+								"all"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "createCharacter",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Ryu Kazama\",\n    \"description\": \"A disciplined martial artist seeking redemption.\",\n    \"region\": \"Japan\",\n    \"archetype\": \"Shoto\",\n    \"title\": \"The Last Dragon\",\n    \"itLikes\": \"Training in the mountains\",\n    \"itDislike\": \"Dishonor\",\n    \"slug\": \"ryu-kazama\",\n    \"health\": 90,\n    \"range\": 60,\n    \"power\": 85,\n    \"vitality\": 80,\n    \"mobility\": 70,\n    \"easyOfUse\": 75\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/characters",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"characters"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deactivateCharacter",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/characters/81f7bdad-5b13-4031-b9cb-cf542930ae8a/deactivate",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"characters",
+								"81f7bdad-5b13-4031-b9cb-cf542930ae8a",
+								"deactivate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "modifyCharacter",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Akali\",\n    \"archetype\": \"rushdown\",\n    \"description\": \"aalsdkflasdjfkljasdklfjaklsdjflkasjdfkljaskldfj\",\n    \"health\": 900\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/characters/81f7bdad-5b13-4031-b9cb-cf542930ae8a",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"characters",
+								"81f7bdad-5b13-4031-b9cb-cf542930ae8a"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "restoreCharacter",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/characters/81f7bdad-5b13-4031-b9cb-cf542930ae8a/restore",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"characters",
+								"81f7bdad-5b13-4031-b9cb-cf542930ae8a",
+								"restore"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

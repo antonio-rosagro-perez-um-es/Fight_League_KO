@@ -47,6 +47,7 @@ const NOTE_TOKENS: Record<string, string> = {
   hold: 'Hold',
   delay: 'Delay',
   delayed: 'Delayed',
+  dash: 'Dash',
   microdash: 'Microdash',
   walk: 'Walk',
   assist: 'Assist',
